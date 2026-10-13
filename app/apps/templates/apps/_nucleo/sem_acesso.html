@@ -1,0 +1,12 @@
+{% extends 'apps/_nucleo/base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block classe_conteudo %}sem-menu{% endblock %}
+{% block conteudo %}
+<div class="centro" style="padding-top:48px">
+  <span class="selo">{{ ui.ic('Lock', 'ic-lg') }}</span>
+  <h1 class="mt-4">Você ainda não tem o {{ app.nome }}</h1>
+  <p class="suave mt-3">Este email não tem acesso a este app. Se você comprou com outro email, saia e entre com ele.</p>
+  <button type="button" class="botao mt-8" data-sair>Entrar com outro email</button>
+  <p class="suave mt-6">Precisa de ajuda? Escreva para <a href="mailto:{{ app.email_suporte }}">{{ app.email_suporte }}</a></p>
+</div>
+{% endblock %}

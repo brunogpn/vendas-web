@@ -1,0 +1,1280 @@
+# Receitas do ebook "Fatias de Bolo" (parte 2).
+
+@ prestigio-cremoso | Fatia Prestígio Cremoso | fatias | 53
+desc: Uma das combinações mais clássicas e vendidas: chocolate e coco, com ótima margem de lucro.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Alta margem de lucro; Clássico das feiras
+dif: fácil
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio prestígio
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 ml de leite de coco [leite-coco 100]
+- 100 g de coco ralado [coco 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 200 g de chocolate meio amargo [choc-meio 200]
+- 200 g de creme de leite [creme-leite 200]
+## Calda
+- 200 ml de leite [leite 200]
+- 50 ml de leite de coco [leite-coco 50]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Coco ralado [~coco 30]
+- Raspas de chocolate
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Recheio prestígio
+* Em uma panela, coloque o leite condensado, a manteiga, o leite de coco e o coco ralado.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do recheio prestígio.
+* Repita as camadas.
+* Cubra com a ganache.
+* Finalize com coco ralado.
+* Decore com raspas de chocolate.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Recheio prestígio + Ganache
+> Premium: Massa black + Recheio prestígio + Ganache meio amarga
+> Vitrine: Massa chiffon de chocolate + Recheio prestígio + Ganache + Coco em flocos
+
+@ olho-de-sogra | Fatia Olho de Sogra com Doce de Leite | fatias | 56
+desc: Coco cremoso, ameixa e doce de leite: uma fatia rica e tradicional, para quem gosta de sabores clássicos.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Clássico reinventado; Alta margem de lucro; Sabor afetivo
+dif: média
+## Massa de baunilha
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Cocada cremosa
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 ml de leite de coco [leite-coco 100]
+- 100 g de coco ralado [coco 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Creme de ameixa
+- 200 g de ameixas sem caroço [ameixa 200]
+- 250 ml de água
+- 50 g de açúcar [acucar 50]
+## Recheio de doce de leite
+- 650 g de doce de leite [doce-leite 650]
+- 140 g de creme de leite [creme-leite 140]
+- 1 pitada de sal [sal 1]
+## Calda
+- 200 ml de leite [leite 200]
+- 50 ml de leite de coco [leite-coco 50]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Cocada cremosa
+* Em uma panela, coloque o leite condensado, a manteiga, o leite de coco e o coco ralado.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Creme de ameixa
+* Coloque as ameixas, a água e o açúcar em uma panela.
+* Cozinhe até as ameixas ficarem macias.
+* Bata rapidamente no liquidificador ou processe só um pouco.
+* Deixe esfriar.
+### Recheio de doce de leite
+* Misture o doce de leite com o creme de leite.
+* Acrescente a pitada de sal.
+* Reserve.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada de cocada cremosa.
+* Espalhe uma camada fina de creme de ameixa.
+* Coloque uma camada de doce de leite.
+* Repita as camadas.
+* Finalize com doce de leite.
+* Decore com coco ralado e ameixas picadas.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de baunilha + Cocada cremosa + Creme de ameixa + Doce de leite
+> Premium: Massa chiffon de baunilha + Cocada cremosa + Creme de ameixa + Doce de leite + Coco em flocos
+> Vitrine: Massa chiffon de baunilha + Cocada cremosa + Creme de ameixa + Doce de leite + Ameixas para decorar
+
+@ prestigio-com-brigadeiro | Fatia Prestígio com Brigadeiro | fatias | 59
+desc: O recheio cremoso de coco junto com o brigadeiro gourmet: rica, equilibrada e muito vendável.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Alta margem de lucro; Clássico das feiras
+dif: fácil
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio prestígio
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 ml de leite de coco [leite-coco 100]
+- 100 g de coco ralado [coco 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Brigadeiro gourmet
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate meio amargo [choc-meio 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Calda
+- 200 ml de leite [leite 200]
+- 50 ml de leite de coco [leite-coco 50]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Coco ralado [~coco 30]
+- Brigadeiro para decorar
+- Raspas de chocolate
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Recheio prestígio
+* Em uma panela, coloque o leite condensado, a manteiga, o leite de coco e o coco ralado.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Brigadeiro gourmet
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no brigadeiro.
+* Deixe esfriar completamente.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada de recheio prestígio.
+* Faça uma camada fina de brigadeiro.
+* Repita as camadas.
+* Finalize com brigadeiro.
+* Decore com coco ralado e raspas de chocolate.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Recheio prestígio + Brigadeiro gourmet
+> Premium: Massa black + Recheio prestígio + Brigadeiro meio amargo
+> Vitrine: Massa chiffon de chocolate + Recheio prestígio + Brigadeiro gourmet + Coco em flocos + Raspas de chocolate
+
+@ tiramisu | Fatia Tiramisù | fatias | 62
+desc: Inspirada na sobremesa italiana: café, creme e cacau. Elegante e diferente das opções tradicionais.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Linha premium; Sabor internacional; Alto valor percebido
+dif: média
+## Massa de café
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de café solúvel [cafe-soluvel 10]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme tiramisù
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 250 g de cream cheese ou mascarpone [cream-cheese 250]
+- 100 g de chocolate branco [choc-branco 100]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+- 1 pitada de sal [sal 1]
+## Calda de café
+- 200 ml de café forte sem açúcar [~cafe-soluvel 4]
+- 2 colheres (sopa) de açúcar [acucar 25]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Finalização
+- Cacau em pó 100% [~cacau 15]
+- Raspas de chocolate meio amargo (opcional)
+### Massa de café
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Dissolva o café no leite morno antes de adicionar.
+* Acrescente a farinha peneirada.
+* Misture até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme tiramisù
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Misture com o leite condensado.
+* Acrescente o cream cheese ou mascarpone.
+* Adicione o creme de leite.
+* Acrescente a baunilha e a pitada de sal.
+* Misture até obter um creme uniforme.
+* Leve à geladeira por cerca de 1 hora antes de montar.
+### Calda
+* Misture todos os ingredientes.
+* Reserve.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça bem com a calda de café.
+* Faça uma camada do creme tiramisù.
+* Repita as camadas.
+* Finalize com creme.
+* Polvilhe cacau em pó por toda a superfície.
+* Se quiser, acrescente raspas de chocolate.
+* Leve para gelar por pelo menos 6 horas antes de cortar.
+> Tradicional: Massa de café + Creme tiramisù + Cacau
+> Premium: Massa de café + Creme tiramisù + Cacau 100% + Raspas de chocolate meio amargo
+> Vitrine: Massa de café + Creme tiramisù + Cacau + Decoração de chocolate
+
+@ maracuja-com-chocolate | Fatia Maracujá com Chocolate | fatias | 65
+desc: O azedinho do maracujá com a intensidade do chocolate: equilibrada, refrescante e agrada muita gente.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Excelente equilíbrio de sabor; Clássico das feiras
+dif: fácil
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme de maracujá
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 150 g de polpa de maracujá concentrada [maracuja 150]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache de chocolate
+- 250 g de chocolate meio amargo [choc-meio 250]
+- 200 g de creme de leite [creme-leite 200]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Polpa de maracujá [~maracuja 30]
+- Sementes de maracujá para decorar
+- Raspas de chocolate (opcional)
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme de maracujá
+* Em uma panela, coloque o leite condensado, a manteiga e a polpa de maracujá.
+* Misture bem.
+* Acrescente o creme de leite.
+* Leve ao fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda chocolatuda.
+* Faça uma camada generosa do creme de maracujá.
+* Repita as camadas.
+* Cubra com a ganache.
+* Finalize com fios de polpa de maracujá.
+* Decore com sementes de maracujá.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Creme de maracujá + Ganache
+> Premium: Massa black + Creme de maracujá + Ganache meio amarga
+> Vitrine: Massa chiffon de chocolate + Creme de maracujá + Ganache + Polpa de maracujá
+
+@ ouro-branco | Fatia Bombom Ouro Branco | fatias | 68
+desc: Inspirada num dos bombons mais amados do Brasil: massa de chocolate, creme de chocolate branco e crocância.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira.
+selos: Fatia de vitrine; Inspirada em bombom
+dif: média
+obs: O ebook não informa a validade desta fatia. Usamos a das fatias parecidas: até 5 dias na geladeira.
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme ouro branco
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 150 g de chocolate branco [choc-branco 150]
+- 50 g de leite em pó [leite-po 50]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Crocante
+- 120 g de wafer triturado [wafer 120]
+- 80 g de chocolate branco derretido [choc-branco 80]
+## Ganache
+- 250 g de chocolate ao leite [choc-leite 250]
+- 200 g de creme de leite [creme-leite 200]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Bombons Ouro Branco picados
+- Raspas de chocolate branco
+- Farelo de wafer
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme ouro branco
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente o leite em pó.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Crocante
+* Misture o wafer triturado com o chocolate branco derretido.
+* Leve à geladeira até firmar.
+* Quebre em pedacinhos.
+### Ganache
+* Derreta o chocolate ao leite picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda chocolatuda.
+* Faça uma camada generosa do creme ouro branco.
+* Distribua parte do crocante.
+* Repita as camadas.
+* Cubra com a ganache.
+* Finalize com farelo de wafer.
+* Decore com pedaços de bombom Ouro Branco.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Creme ouro branco + Crocante + Ganache
+> Premium: Massa black + Creme ouro branco + Crocante + Ganache meio amarga
+> Vitrine: Massa black + Creme ouro branco + Crocante + Ganache + Bombom Ouro Branco
+
+@ prestigio-coco-queimado | Fatia Prestígio com Coco Queimado | fatias | 71
+desc: Uma versão mais intensa do prestígio: o aroma do coco tostado com o chocolate é muito valorizado pelos clientes.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Alta margem de lucro; Clássico reinventado
+dif: média
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio de coco queimado
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 ml de leite de coco [leite-coco 100]
+- 120 g de coco ralado em flocos [coco 120]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Brigadeiro meio amargo
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate meio amargo [choc-meio 120]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 50 ml de leite de coco [leite-coco 50]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Coco queimado em flocos [~coco 40]
+- Raspas de chocolate meio amargo
+### Coco queimado
+* Coloque o coco ralado em uma frigideira ou assadeira.
+* Leve ao fogo baixo ou ao forno.
+* Mexa sempre até ficar bem dourado.
+* Reserve para esfriar.
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Recheio de coco queimado
+* Em uma panela, coloque o leite condensado, a manteiga e o leite de coco.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar, acrescente o coco queimado.
+* Adicione a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Brigadeiro meio amargo
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Deixe esfriar completamente.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do recheio de coco queimado.
+* Faça uma camada fina de brigadeiro meio amargo.
+* Repita as camadas.
+* Finalize com brigadeiro.
+* Cubra com coco queimado.
+* Acrescente raspas de chocolate.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Coco queimado + Brigadeiro
+> Premium: Massa black + Coco queimado + Brigadeiro meio amargo
+> Vitrine: Massa black + Coco queimado + Brigadeiro meio amargo + Coco queimado em flocos
+
+@ marta-rocha | Fatia Marta Rocha | fatias | 74
+desc: Um clássico da confeitaria brasileira: creme de ovos, nozes, ameixas e chantininho. Sofisticada e perfeita para ocasiões especiais.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Clássico da confeitaria brasileira; Fatia premium; Alto valor percebido
+dif: difícil
+obs: O ebook não diz o tempo de forno da massa. Usamos o da mesma massa nas outras fatias do ebook: cerca de 40 minutos, até o palito sair limpo.
+## Massa de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Creme de nozes
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de nozes trituradas [nozes 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Creme de ameixa
+- 250 g de ameixas sem caroço [ameixa 250]
+- 300 ml de água
+- 50 g de açúcar [acucar 50]
+## Creme de ovos
+- 4 gemas peneiradas [ovo 4]
+- 395 g de leite condensado [leite-cond 395]
+- 200 ml de leite integral [leite 200]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Chantininho
+- 400 ml de creme para chantilly gelado [chantilly 400]
+- 6 colheres (sopa) de leite em pó [leite-po 42]
+- 3 colheres (sopa) de leite condensado [leite-cond 60]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos (tempo sugerido pelo app).
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme de nozes
+* Em uma panela, coloque o leite condensado e a manteiga.
+* Acrescente o creme de leite.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente as nozes trituradas.
+* Adicione a pitada de sal.
+* Deixe esfriar completamente.
+### Creme de ameixa
+* Cozinhe as ameixas com a água e o açúcar.
+* Quando estiverem macias, processe só um pouco.
+* Deixe esfriar.
+### Creme de ovos
+* Misture todos os ingredientes.
+* Leve ao fogo baixo, mexendo sempre.
+* Cozinhe por cerca de 10 minutos, sem deixar ferver, até engrossar e cobrir as costas da colher.
+* Deixe esfriar completamente.
+### Chantininho
+* Bata o chantilly até ganhar volume.
+* Acrescente o leite em pó.
+* Adicione o leite condensado.
+* Bata até ficar firme.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada do creme de nozes.
+* Acrescente uma camada fina de creme de ameixa.
+* Coloque outra camada de massa.
+* Faça uma camada do creme de ovos.
+* Acrescente chantininho.
+* Repita as camadas.
+* Finalize com chantininho.
+* Decore com nozes e fios de creme de ovos.
+* Leve para gelar por pelo menos 6 horas antes de cortar.
+> Tradicional: Massa de baunilha + Creme de nozes + Creme de ameixa + Creme de ovos
+> Premium: Massa chiffon de baunilha + Creme de nozes + Creme de ameixa + Chantininho
+> Vitrine: Massa chiffon de baunilha + Creme de nozes + Creme de ameixa + Creme de ovos + Nozes para decorar
+
+@ pavlova-de-morango | Fatia Pavlova de Morango | fatias | 77
+desc: Inspirada na sobremesa australiana: massa leve, merengue crocante, creme suave e morangos frescos.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 3 dias na geladeira. Não é recomendado congelar.
+selos: Fatia premium; Alto valor percebido
+dif: difícil
+## Massa chiffon de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 180 ml de leite integral [leite 180]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Merengue suíço
+- 120 g de claras (cerca de 4 ovos) [ovo 4]
+- 240 g de açúcar refinado [acucar 240]
+- 1 colher (chá) de suco de limão [~limao 0.1]
+## Creme pavlova
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 200 ml de creme para chantilly, batido [chantilly 200]
+- 1 pitada de sal [sal 1]
+## Recheio
+- 300 g de morangos frescos picados [morango 300]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro e volumoso.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture delicadamente.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Merengue suíço
+* Misture as claras e o açúcar.
+* Leve ao banho-maria, mexendo sem parar por cerca de 4 minutos, até o açúcar dissolver por completo.
+* Bata na batedeira até esfriar e formar picos firmes (cerca de 10 minutos).
+* Espalhe numa assadeira forrada com papel manteiga.
+* Asse a 100 °C por cerca de 1 hora e 30 minutos.
+* Deixe esfriar e quebre em pedaços.
+### Creme pavlova
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Misture com o leite condensado.
+* Acrescente o creme de leite.
+* Depois de esfriar, incorpore delicadamente o chantilly batido.
+* Acrescente a pitada de sal.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme pavlova.
+* Distribua morangos picados.
+* Acrescente pedaços de merengue.
+* Repita as camadas.
+* Finalize com creme.
+* Decore com morangos frescos e pedaços de merengue.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa chiffon de baunilha + Creme pavlova + Morangos + Merengue
+> Premium: Massa chiffon de baunilha + Creme pavlova + Morangos frescos + Merengue suíço
+> Vitrine: Massa chiffon de baunilha + Creme pavlova + Morangos frescos + Merengue + Morangos inteiros
+
+@ pistache-com-maracuja | Fatia Pistache com Maracujá | fatias | 80
+desc: A cremosidade do pistache com o frescor do maracujá. Elegante, refrescante e de alto valor.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias sem a decoração final.
+selos: Linha premium; Alto valor percebido
+dif: média
+## Massa chiffon de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 180 ml de leite integral [leite 180]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Creme de pistache
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 80 g de pasta de pistache [pasta-pistache 80]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Geleia de maracujá
+- 200 g de polpa de maracujá [maracuja 200]
+- 80 g de açúcar [acucar 80]
+- Suco de 1/2 limão [limao 0.5]
+## Ganache branca
+- 200 g de chocolate branco [choc-branco 200]
+- 100 g de creme de leite [creme-leite 100]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Finalização
+- Pistache triturado
+- Polpa de maracujá ou chantininho
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro e volumoso.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture delicadamente.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme de pistache
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente a pasta de pistache.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Geleia de maracujá
+* Em uma panela, coloque a polpa de maracujá, o açúcar e o limão.
+* Cozinhe em fogo baixo até ficar com consistência de geleia.
+* Deixe esfriar completamente.
+### Ganache branca
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme de pistache.
+* Espalhe uma camada fina de geleia de maracujá.
+* Repita as camadas.
+* Cubra com a ganache branca.
+* Finalize com pistache triturado.
+* Decore com fios de geleia de maracujá.
+* Leve para gelar por pelo menos 6 horas antes de cortar.
+> Tradicional: Massa chiffon de baunilha + Creme de pistache + Geleia de maracujá
+> Premium: Massa chiffon de baunilha + Creme de pistache + Geleia de maracujá + Ganache branca
+> Vitrine: Massa chiffon de baunilha + Creme de pistache + Geleia de maracujá + Ganache branca + Pistache triturado
+
+@ limao-frutas-vermelhas | Fatia Limão com Frutas Vermelhas | fatias | 83
+desc: Leve e refrescante: a acidez do limão com a doçura das frutas vermelhas.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Linha premium; Alto valor percebido
+dif: média
+## Massa branca de iogurte
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 170 g de iogurte natural [iogurte 170]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de baunilha (opcional) [baunilha 5]
+## Creme de limão
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 ml de suco de limão [limao 3]
+- Raspas de 2 limões
+- 100 g de chocolate branco [choc-branco 100]
+- 1 pitada de sal [sal 1]
+## Geleia de frutas vermelhas
+- 300 g de frutas vermelhas [frutas-vermelhas 300]
+- 80 g de açúcar [acucar 80]
+- Suco de 1/2 limão [limao 0.5]
+## Chantininho de limão
+- 300 ml de creme para chantilly gelado [chantilly 300]
+- 4 colheres (sopa) de leite em pó [leite-po 28]
+- Raspas de 1 limão
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o iogurte.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme de limão
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Misture com o leite condensado.
+* Acrescente o creme de leite.
+* Adicione o suco e as raspas de limão.
+* Acrescente a pitada de sal.
+* Misture até obter um creme uniforme.
+* Leve à geladeira por 30 minutos antes de montar.
+### Geleia de frutas vermelhas
+* Em uma panela, coloque as frutas, o açúcar e o limão.
+* Cozinhe em fogo baixo até ficar com consistência de geleia.
+* Deixe esfriar completamente.
+### Chantininho de limão
+* Bata o chantilly até ganhar volume.
+* Acrescente o leite em pó.
+* Adicione as raspas de limão.
+* Bata até ficar firme.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça levemente com a calda.
+* Faça uma camada generosa do creme de limão.
+* Espalhe uma camada fina da geleia de frutas vermelhas.
+* Repita as camadas.
+* Cubra com o chantininho de limão.
+* Finalize com a geleia de frutas vermelhas.
+* Decore com raspas de limão e frutas vermelhas.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa branca de iogurte + Creme de limão + Geleia de frutas vermelhas
+> Premium: Massa chiffon de baunilha + Creme de limão + Geleia de frutas vermelhas + Chantininho de limão
+> Vitrine: Massa chiffon de baunilha + Creme de limão + Geleia de frutas vermelhas + Chantininho + Frutas vermelhas frescas
+
+@ cheesecake-doce-de-leite | Fatia Cheesecake com Doce de Leite | fatias | 86
+desc: A leve acidez do cheesecake com a cremosidade do doce de leite. Sofisticada e equilibrada.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Linha premium; Alto valor percebido
+dif: fácil
+## Massa branca de iogurte
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 170 g de iogurte natural [iogurte 170]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha (opcional) [baunilha 5]
+## Creme cheesecake
+- 300 g de cream cheese [cream-cheese 300]
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- Suco de 1/2 limão [limao 0.5]
+- 1 colher (chá) de baunilha [baunilha 5]
+- 1 pitada de sal [sal 1]
+## Recheio de doce de leite
+- 650 g de doce de leite [doce-leite 650]
+- 140 g de creme de leite [creme-leite 140]
+- 1 pitada de sal [sal 1]
+## Chantininho
+- 300 ml de creme para chantilly gelado [chantilly 300]
+- 4 colheres (sopa) de leite em pó [leite-po 28]
+- 2 colheres (sopa) de leite condensado [leite-cond 40]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Doce de leite para fios decorativos [~doce-leite 50]
+- Nozes picadas (opcional)
+- Farofa de biscoito amanteigado (opcional)
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o iogurte.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme cheesecake
+* Bata o cream cheese até ficar cremoso.
+* Acrescente o leite condensado.
+* Adicione o creme de leite.
+* Acrescente o limão, a baunilha e a pitada de sal.
+* Misture até obter um creme uniforme.
+* Leve à geladeira por pelo menos 2 horas, até firmar, antes de montar.
+### Recheio de doce de leite
+* Misture o doce de leite com o creme de leite.
+* Acrescente a pitada de sal.
+* Reserve.
+### Chantininho
+* Bata o chantilly até ganhar volume.
+* Acrescente o leite em pó.
+* Adicione o leite condensado.
+* Bata até ficar firme.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça levemente com a calda.
+* Faça uma camada do creme cheesecake.
+* Espalhe uma camada fina de doce de leite.
+* Repita as camadas.
+* Cubra com o chantininho.
+* Finalize com fios de doce de leite.
+* Decore com nozes picadas ou farofa de biscoito.
+* Leve para gelar por pelo menos 6 horas antes de cortar.
+> Tradicional: Massa branca de iogurte + Creme cheesecake + Doce de leite
+> Premium: Massa branca de iogurte + Creme cheesecake + Doce de leite + Chantininho
+> Vitrine: Massa chiffon de baunilha + Creme cheesecake + Doce de leite + Chantininho + Nozes picadas
+
+@ caramelo-salgado-crocante | Fatia Chocolate com Caramelo Salgado e Crocante | fatias | 89
+desc: Chocolate, caramelo salgado e crocância: o contraste entre doce, salgado e crocante deixa a fatia especial.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Linha gourmet; Alto valor percebido
+dif: difícil
+## Massa black
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 180 g de farinha de trigo [farinha 180]
+- 60 g de chocolate em pó 50% [choc-po 60]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Brigadeiro meio amargo
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate meio amargo [choc-meio 120]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Caramelo salgado
+- 200 g de açúcar [acucar 200]
+- 100 g de creme de leite [creme-leite 100]
+- 50 g de manteiga sem sal [manteiga 50]
+- 3 g de flor de sal [flor-sal 3]
+## Crocante
+- 150 g de castanha-de-caju picada ou amendoim torrado [amendoim 150]
+- 80 g de açúcar [acucar 80]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Fios de caramelo salgado
+- Crocante triturado
+- Flor de sal (opcional)
+### Massa black
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Brigadeiro meio amargo
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Deixe esfriar completamente.
+### Caramelo salgado
+* Em fogo baixo, derreta o açúcar sem mexer, só girando a panela, até virar um caramelo dourado. Cuidado: caramelo quente queima a pele.
+* Acrescente com cuidado o creme de leite aquecido.
+* Misture até ficar uniforme.
+* Acrescente a manteiga.
+* Finalize com a flor de sal.
+* Deixe esfriar até ficar cremoso.
+### Crocante
+* Em fogo baixo, derreta o açúcar sem mexer, só girando a panela, até virar um caramelo dourado. Cuidado: caramelo quente queima a pele.
+* Acrescente a castanha ou o amendoim.
+* Espalhe numa superfície untada.
+* Deixe esfriar completamente.
+* Quebre em pedacinhos.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda chocolatuda.
+* Faça uma camada generosa de brigadeiro.
+* Acrescente fios de caramelo salgado.
+* Polvilhe parte do crocante.
+* Repita as camadas.
+* Finalize com brigadeiro.
+* Decore com caramelo salgado.
+* Finalize com crocante e uma pitadinha de flor de sal.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa black + Brigadeiro meio amargo + Caramelo salgado + Crocante
+> Premium: Massa black + Brigadeiro belga + Caramelo salgado + Crocante de castanhas
+> Vitrine: Massa black + Brigadeiro meio amargo + Caramelo salgado + Crocante + Flor de sal
+
+@ trufa-ninho-morango | Fatia Trufa de Ninho com Morango | fatias | 92
+desc: Inspirada nas trufas de Ninho com morango: creme de leite em pó, morangos frescos e casquinha de chocolate branco.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de colocar os morangos.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+## Massa chiffon de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 180 ml de leite integral [leite 180]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Creme trufado de Ninho
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de leite em pó [leite-po 120]
+- 100 g de chocolate branco [choc-branco 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Recheio
+- 300 g de morangos frescos picados [morango 300]
+## Ganache branca
+- 200 g de chocolate branco [choc-branco 200]
+- 100 g de creme de leite [creme-leite 100]
+## Casquinha trufada
+- 150 g de chocolate branco fracionado ou nobre [choc-branco 150]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Finalização
+- Leite em pó para polvilhar [~leite-po 20]
+- Morangos frescos [~morango 100]
+- Raspas de chocolate branco
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro e volumoso.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture delicadamente.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme trufado de Ninho
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Acrescente o creme de leite.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente o leite em pó.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache branca
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Casquinha trufada
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Espalhe uma camada fina sobre papel manteiga ou acetato.
+* Deixe endurecer.
+* Quebre em lascas para decorar.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme trufado de Ninho.
+* Distribua parte dos morangos picados.
+* Repita as camadas.
+* Cubra com a ganache branca.
+* Polvilhe leite em pó.
+* Decore com morangos frescos.
+* Finalize com lascas da casquinha trufada.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa chiffon de baunilha + Creme trufado de Ninho + Morangos frescos
+> Premium: Massa chiffon de baunilha + Creme trufado de Ninho + Morangos + Ganache branca
+> Vitrine: Massa chiffon de baunilha + Creme trufado de Ninho + Morangos frescos + Ganache branca + Casquinha trufada
+
+@ chocolate-crocante-amendoim | Fatia Chocolate com Crocante de Amendoim | fatias | 95
+desc: Cremosidade e crocância: o sabor marcante do amendoim com chocolate agrada todas as idades.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Alta margem de lucro; Sabor que agrada todas as idades
+dif: fácil
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Brigadeiro cremoso
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate meio amargo [choc-meio 120]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Crocante de amendoim
+- 200 g de amendoim torrado sem pele [amendoim 200]
+- 120 g de açúcar [acucar 120]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 250 g de chocolate meio amargo [choc-meio 250]
+- 200 g de creme de leite [creme-leite 200]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- Crocante de amendoim triturado
+- Paçoca esfarelada (opcional)
+- Raspas de chocolate
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Brigadeiro cremoso
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate.
+* Acrescente o creme de leite.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no brigadeiro.
+* Deixe esfriar completamente.
+### Crocante de amendoim
+* Em fogo baixo, derreta o açúcar sem mexer, só girando a panela, até virar um caramelo dourado. Cuidado: caramelo quente queima a pele.
+* Acrescente o amendoim torrado.
+* Misture rapidamente.
+* Espalhe sobre papel manteiga ou superfície untada.
+* Deixe esfriar completamente.
+* Quebre em pedacinhos.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda chocolatuda.
+* Faça uma camada generosa de brigadeiro.
+* Distribua parte do crocante de amendoim.
+* Repita as camadas.
+* Cubra com a ganache.
+* Finalize com crocante triturado.
+* Decore com paçoca esfarelada e raspas de chocolate.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Brigadeiro cremoso + Crocante de amendoim
+> Premium: Massa black + Brigadeiro meio amargo + Crocante de amendoim + Ganache
+> Vitrine: Massa black + Brigadeiro cremoso + Crocante de amendoim + Ganache + Paçoca esfarelada
+
+# ---------------------------------------------------------------------------
+# Fatias escritas pelo app (não estão no ebook), a partir de receitas tradicionais.
+# ---------------------------------------------------------------------------
+
+@ fatia-brigadeiro | Fatia de Brigadeiro | fatias
+desc: A campeã de vendas: massa de chocolate fofinha e muito brigadeiro cremoso. Tenha sempre na vitrine.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Campeã de vendas
+dif: fácil
+obs: Esta fatia não está no ebook. O app escreveu a receita no mesmo formato das outras, com base em receitas tradicionais de bolo de brigadeiro.
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Brigadeiro (recheio e cobertura)
+- 790 g de leite condensado (2 caixas) [leite-cond 790]
+- 400 g de creme de leite (2 caixas) [creme-leite 400]
+- 80 g de chocolate em pó 50% [choc-po 80]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+## Finalização
+- 150 g de granulado de chocolate [granulado 150]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos, até o palito sair limpo.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Brigadeiro
+* Em uma panela, coloque o leite condensado, o creme de leite, o chocolate em pó e a manteiga.
+* Cozinhe em fogo médio, mexendo sempre, por cerca de 15 a 20 minutos.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo e acrescente a pitada de sal.
+* Cubra com plástico filme encostando no brigadeiro.
+* Deixe esfriar completamente.
+### Calda
+* Misture todos os ingredientes.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa de brigadeiro.
+* Repita as camadas.
+* Cubra o bolo todo com o brigadeiro que sobrou.
+* Cubra com o granulado, apertando de leve para grudar.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Brigadeiro + Granulado
+> Premium: Massa de chocolate + Brigadeiro + Ganache meio amarga + Granulado
+> Vitrine: Massa black + Brigadeiro + Ganache meio amarga + Granulado belga
+
+@ fatia-cenoura-chocolate | Fatia de Cenoura com Chocolate | fatias
+desc: Sabor de infância que todo mundo ama: bolo de cenoura fofinho, recheio de brigadeiro e a cobertura de chocolate de sempre.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Sabor de infância
+dif: fácil
+obs: Esta fatia não está no ebook. O app escreveu a receita no mesmo formato das outras, com base na receita tradicional de bolo de cenoura com cobertura de chocolate.
+## Massa de cenoura
+- 3 cenouras médias raladas [cenoura 3]
+- 4 ovos [ovo 4]
+- 1/2 xícara de óleo [oleo 120]
+- 2 xícaras de açúcar [acucar 360]
+- 2 e 1/2 xícaras de farinha de trigo [farinha 300]
+- 1 colher (sopa) de fermento em pó [fermento 14]
+## Recheio de brigadeiro
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Cobertura de chocolate
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 3 colheres (sopa) de chocolate em pó [choc-po 21]
+- 1 xícara de açúcar [acucar 180]
+- 1 xícara de leite [leite 240]
+### Massa
+* No liquidificador, bata a cenoura, os ovos e o óleo.
+* Acrescente o açúcar e bata por 5 minutos.
+* Passe para uma tigela e misture a farinha.
+* Por último, misture o fermento com uma colher, devagar.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por 40 a 50 minutos, até o palito sair limpo.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Recheio de brigadeiro
+* Em uma panela, coloque o leite condensado, o creme de leite, o chocolate em pó e a manteiga.
+* Cozinhe em fogo médio, mexendo sempre, por cerca de 10 a 15 minutos.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo e acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Cobertura
+* Em uma panela, misture a manteiga, o chocolate em pó, o açúcar e o leite.
+* Leve ao fogo médio, mexendo sempre, até engrossar e ficar cremosa (cerca de 10 minutos).
+* Use ainda morna.
+### Montagem
+* Coloque a primeira camada de massa.
+* Faça uma camada de recheio de brigadeiro.
+* Repita as camadas.
+* Despeje a cobertura morna por cima, deixando escorrer pelas laterais.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de cenoura + Cobertura de chocolate
+> Premium: Massa de cenoura + Recheio de brigadeiro + Cobertura de chocolate
+> Vitrine: Massa de cenoura + Recheio de brigadeiro + Cobertura de chocolate + Granulado

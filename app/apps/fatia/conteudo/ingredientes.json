@@ -1,0 +1,419 @@
+{
+  "grupos": [
+    "Básicos",
+    "Laticínios",
+    "Chocolates",
+    "Frutas",
+    "Especiais"
+  ],
+  "ingredientes": [
+    {
+      "id": "ovo",
+      "nome": "Ovos",
+      "unidade": "un",
+      "embalagem": 12,
+      "rotuloEmbalagem": "dúzia (12 ovos)",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "acucar",
+      "nome": "Açúcar",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "pacote de 1 kg",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "farinha",
+      "nome": "Farinha de trigo",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "pacote de 1 kg",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "oleo",
+      "nome": "Óleo",
+      "unidade": "ml",
+      "embalagem": 900,
+      "rotuloEmbalagem": "garrafa de 900 ml",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "fermento",
+      "nome": "Fermento químico",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pote de 100 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "sal",
+      "nome": "Sal",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "pacote de 1 kg",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "amido",
+      "nome": "Amido de milho",
+      "unidade": "g",
+      "embalagem": 500,
+      "rotuloEmbalagem": "caixa de 500 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "acucar-conf",
+      "nome": "Açúcar de confeiteiro",
+      "unidade": "g",
+      "embalagem": 500,
+      "rotuloEmbalagem": "pacote de 500 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "baunilha",
+      "nome": "Essência ou pasta de baunilha",
+      "unidade": "ml",
+      "embalagem": 30,
+      "rotuloEmbalagem": "vidro de 30 ml",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "cafe-soluvel",
+      "nome": "Café solúvel",
+      "unidade": "g",
+      "embalagem": 50,
+      "rotuloEmbalagem": "vidro de 50 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "corante",
+      "nome": "Corante em gel",
+      "unidade": "g",
+      "embalagem": 25,
+      "rotuloEmbalagem": "pote de 25 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "gelatina",
+      "nome": "Gelatina de morango",
+      "unidade": "g",
+      "embalagem": 25,
+      "rotuloEmbalagem": "caixinha de 25 g",
+      "grupo": "Básicos"
+    },
+    {
+      "id": "flor-sal",
+      "nome": "Flor de sal",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pote de 100 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "leite",
+      "nome": "Leite",
+      "unidade": "ml",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "caixa de 1 litro",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "leite-cond",
+      "nome": "Leite condensado",
+      "unidade": "g",
+      "embalagem": 395,
+      "rotuloEmbalagem": "lata ou caixa de 395 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "creme-leite",
+      "nome": "Creme de leite",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "caixinha de 200 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "manteiga",
+      "nome": "Manteiga",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "pote de 200 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "leite-po",
+      "nome": "Leite em pó",
+      "unidade": "g",
+      "embalagem": 380,
+      "rotuloEmbalagem": "lata de 380 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "doce-leite",
+      "nome": "Doce de leite",
+      "unidade": "g",
+      "embalagem": 400,
+      "rotuloEmbalagem": "pote de 400 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "cream-cheese",
+      "nome": "Cream cheese",
+      "unidade": "g",
+      "embalagem": 150,
+      "rotuloEmbalagem": "pote de 150 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "iogurte",
+      "nome": "Iogurte natural",
+      "unidade": "g",
+      "embalagem": 170,
+      "rotuloEmbalagem": "pote de 170 g",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "chantilly",
+      "nome": "Chantilly",
+      "unidade": "ml",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "caixa de 1 litro",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "leite-coco",
+      "nome": "Leite de coco",
+      "unidade": "ml",
+      "embalagem": 200,
+      "rotuloEmbalagem": "vidro de 200 ml",
+      "grupo": "Laticínios"
+    },
+    {
+      "id": "choc-po",
+      "nome": "Chocolate em pó 50%",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "pacote de 200 g",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "cacau",
+      "nome": "Cacau em pó 100%",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "pacote de 200 g",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "choc-meio",
+      "nome": "Chocolate meio amargo",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "barra de 1 kg",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "choc-leite",
+      "nome": "Chocolate ao leite",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "barra de 1 kg",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "choc-branco",
+      "nome": "Chocolate branco",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "barra de 1 kg",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "granulado",
+      "nome": "Granulado de chocolate",
+      "unidade": "g",
+      "embalagem": 150,
+      "rotuloEmbalagem": "pacote de 150 g",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "creme-avela",
+      "nome": "Nutella ou creme de avelã",
+      "unidade": "g",
+      "embalagem": 350,
+      "rotuloEmbalagem": "pote de 350 g",
+      "grupo": "Chocolates"
+    },
+    {
+      "id": "morango",
+      "nome": "Morango",
+      "unidade": "g",
+      "embalagem": 250,
+      "rotuloEmbalagem": "bandeja de 250 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "frutas-vermelhas",
+      "nome": "Frutas vermelhas",
+      "unidade": "g",
+      "embalagem": 300,
+      "rotuloEmbalagem": "pacote de 300 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "uva",
+      "nome": "Uva verde sem semente",
+      "unidade": "g",
+      "embalagem": 500,
+      "rotuloEmbalagem": "bandeja de 500 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "abacaxi",
+      "nome": "Abacaxi",
+      "unidade": "un",
+      "embalagem": 1,
+      "rotuloEmbalagem": "1 abacaxi",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "banana",
+      "nome": "Banana",
+      "unidade": "un",
+      "embalagem": 6,
+      "rotuloEmbalagem": "penca com 6",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "limao",
+      "nome": "Limão",
+      "unidade": "un",
+      "embalagem": 1,
+      "rotuloEmbalagem": "1 limão",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "maracuja",
+      "nome": "Polpa de maracujá",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pacote de 100 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "cenoura",
+      "nome": "Cenoura",
+      "unidade": "un",
+      "embalagem": 1,
+      "rotuloEmbalagem": "1 cenoura",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "goiaba",
+      "nome": "Goiaba vermelha",
+      "unidade": "g",
+      "embalagem": 1000,
+      "rotuloEmbalagem": "1 kg",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "ameixa",
+      "nome": "Ameixa seca sem caroço",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "pacote de 200 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "damasco",
+      "nome": "Damasco seco",
+      "unidade": "g",
+      "embalagem": 200,
+      "rotuloEmbalagem": "pacote de 200 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "coco",
+      "nome": "Coco ralado",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pacote de 100 g",
+      "grupo": "Frutas"
+    },
+    {
+      "id": "pasta-pistache",
+      "nome": "Pasta de pistache",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pote de 100 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "creme-biscoff",
+      "nome": "Creme Biscoff",
+      "unidade": "g",
+      "embalagem": 400,
+      "rotuloEmbalagem": "pote de 400 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "biscoito-biscoff",
+      "nome": "Biscoito Biscoff",
+      "unidade": "g",
+      "embalagem": 250,
+      "rotuloEmbalagem": "pacote de 250 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "oreo",
+      "nome": "Biscoito Oreo",
+      "unidade": "g",
+      "embalagem": 90,
+      "rotuloEmbalagem": "pacote de 90 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "wafer",
+      "nome": "Biscoito wafer",
+      "unidade": "g",
+      "embalagem": 115,
+      "rotuloEmbalagem": "pacote de 115 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "avela",
+      "nome": "Avelã",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pacote de 100 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "nozes",
+      "nome": "Nozes",
+      "unidade": "g",
+      "embalagem": 100,
+      "rotuloEmbalagem": "pacote de 100 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "amendoim",
+      "nome": "Amendoim ou castanha",
+      "unidade": "g",
+      "embalagem": 500,
+      "rotuloEmbalagem": "pacote de 500 g",
+      "grupo": "Especiais"
+    },
+    {
+      "id": "pacoca",
+      "nome": "Paçoca",
+      "unidade": "g",
+      "embalagem": 400,
+      "rotuloEmbalagem": "pote de 400 g",
+      "grupo": "Especiais"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Mais opções · {{ app.nome }}{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Mais opções') }}
+{% for grupo, itens in [
+  ('Ferramentas', [('/lista', 'ShoppingCart', 'Lista de compras', 'Monte a lista pelas receitas'),
+                   ('/precos', 'Tag', 'Meus preços', 'Preços dos ingredientes'),
+                   ('/calculadora', 'Calculator', 'Calculadora de preço', 'Quanto cobrar por fatia')]),
+  ('Minha conta', [('/ebooks', 'Books', 'Meus e-books', 'Ler e baixar os livros'),
+                   ('/medalhas', 'Medal', 'Minhas medalhas', 'Suas conquistas'),
+                   ('/perfil', 'UserCircle', 'Meus dados e meta', 'Nome, meta e dias de venda'),
+                   ('/acesso', 'Key', 'Meu acesso', 'Validade e renovação')])
+] %}
+<section class="mt-8">
+  <h2 class="suave" style="font-family:var(--fonte);font-size:1.1rem;font-weight:500">{{ grupo }}</h2>
+  <ul class="cartao lista-linhas mt-2" style="padding:0;overflow:hidden">
+    {% for href, icone, titulo, texto in itens %}
+    <li><a class="item-nav" href="{{ P }}{{ href }}"><span class="ic-lado">{{ ui.ic(icone, 'ic-lg') }}</span>
+      <span class="cresce"><span class="titulo-fonte negrito grande" style="display:block;line-height:1.2">{{ titulo }}</span><span class="suave pequeno">{{ texto }}</span></span>
+      <span class="suave">›</span></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+
+<section class="mt-10" style="border-top:1px solid var(--linha);padding-top:32px">
+  <h2>Precisa de ajuda?</h2>
+  <p class="suave mt-1">Escreva para nós. Respondemos por email.</p>
+  <a class="botao-sec mt-4" href="mailto:{{ app.email_suporte }}?subject={{ ('Ajuda no ' ~ app.nome)|urlencode }}&body={{ ('Meu email de cadastro: ' ~ cliente.email ~ '\n\n')|urlencode }}">{{ ui.ic('EnvelopeSimple') }} {{ app.email_suporte }}</a>
+  <button type="button" class="botao-texto mt-6" data-sair>{{ ui.ic('SignOut', 'ic-sm') }} Sair do app</button>
+</section>
+{% endblock %}

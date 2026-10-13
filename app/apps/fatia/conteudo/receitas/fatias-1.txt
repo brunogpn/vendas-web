@@ -1,0 +1,1144 @@
+# Receitas do ebook "Fatias de Bolo" (parte 1).
+# Formato: veja src/conteudo/receitas/LEIAME.md
+
+@ ninho-com-nutella | Fatia Ninho com Nutella | fatias | 5
+desc: Uma das combinações mais amadas da confeitaria brasileira: cremosa, de sabor marcante e apresentação elegante.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: fácil
+obs: A receita do chantininho está na Fatia Morango Nevado.
+obs: O ebook não traz o modo de preparo da massa. Os passos são os da mesma massa nas outras fatias do ebook.
+usa: calda-leite-ninho
+## Massa
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 200 ml de leite [leite 200]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio de Ninho
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de leite em pó [leite-po 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Recheio de Nutella
+- 350 g de Nutella [creme-avela 350]
+- 100 g de creme de leite [creme-leite 100]
+## Calda
+- Calda de Leite Ninho (veja a receita em Caldas)
+## Cobertura
+- Chantininho [~chantilly 200]
+- Leite em pó para finalizar [~leite-po 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada e o sal e misture até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+### Recheio de Ninho
+* Em uma panela, coloque o leite condensado, o creme de leite, o leite em pó e a manteiga.
+* Cozinhe em fogo médio, mexendo sem parar.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar, desligue.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Recheio de Nutella
+* Aqueça o creme de leite.
+* Despeje sobre a Nutella.
+* Misture até obter um creme liso.
+* Reserve.
+### Montagem
+* Corte a massa em 3 camadas.
+* Umedeça com a calda de Leite Ninho.
+* Faça uma camada de creme de Ninho.
+* Acrescente uma camada de Nutella.
+* Repita o processo.
+* Finalize com chantininho.
+* Polvilhe leite em pó.
+* Decore com fios de Nutella.
+> Tradicional: Massa + Creme de Ninho + Nutella
+> Premium: Massa + Creme de Ninho + Nutella + Chantininho
+> Vitrine: Massa + Creme de Ninho + Nutella + Chantininho + Leite em pó
+
+@ bombom-de-uva | Fatia Bombom de Uva | fatias | 8
+desc: Uma das receitas mais surpreendentes: brigadeiro cremoso com uvas frescas e ganache. Muito bonita e com ótima aceitação.
+rend: 1 bolo retangular de cerca de 30 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 3 dias na geladeira. Pode congelar por até 30 dias (sem a cobertura).
+selos: Alto apelo visual; Excelente aceitação
+dif: média
+obs: O ebook manda umedecer a massa com calda, mas não diz qual. Sugerimos a calda de leite usada nas outras fatias.
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 1 xícara de açúcar [acucar 180]
+- 1/2 xícara de óleo [oleo 120]
+- 1 xícara de leite integral [leite 240]
+- 1 e 1/2 xícara de farinha de trigo [farinha 180]
+- 1/2 xícara de cacau em pó ou chocolate 50% [choc-po 45]
+- 1 colher (sopa) de fermento químico em pó [fermento 14]
+## Recheio bombom de uva
+- 2 latas de leite condensado [leite-cond 790]
+- 2 caixinhas de creme de leite [creme-leite 400]
+- 1 colher (sopa) de manteiga sem sal [manteiga 15]
+- 500 g a 600 g de uvas verdes sem sementes [uva 550]
+## Ganache
+- 200 g de chocolate meio amargo ou ao leite [choc-meio 200]
+- 1 caixinha de creme de leite [creme-leite 200]
+## Calda (sugestão do app)
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos e o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o cacau peneirados.
+* Misture delicadamente até ficar uniforme.
+* Acrescente o fermento por último.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos, ou até o palito sair limpo.
+* Deixe esfriar completamente.
+### Recheio
+* Em uma panela de fundo grosso, coloque o leite condensado, o creme de leite e a manteiga.
+* Cozinhe em fogo médio, mexendo sem parar.
+* Cozinhe por cerca de 15 a 20 minutos, sem parar de mexer.
+* Quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar, desligue o fogo.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter um creme liso e brilhante.
+### Calda
+* Misture o leite com o leite condensado.
+### Montagem
+* Faça uma camada de massa.
+* Umedeça levemente com a calda.
+* Espalhe uma camada generosa do brigadeiro branco.
+* Distribua as uvas verdes.
+* Repita as camadas.
+* Finalize com a ganache.
+* Decore com uvas inteiras.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Brigadeiro branco + Uvas verdes
+> Premium: Massa de chocolate + Brigadeiro branco + Uvas verdes + Ganache
+> Vitrine: Massa de chocolate + Brigadeiro branco + Uvas verdes + Ganache + Uvas inteiras
+
+@ bolo-pudim | Bolo Pudim | fatias | 11
+desc: Duas sobremesas clássicas em uma só: camadas de bolo fofinho, recheios cremosos e mini pudins. Chama muita atenção na vitrine.
+rend: 1 forma de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 1 dia na geladeira.
+selos: Fatia de vitrine; Alto valor percebido
+dif: difícil
+obs: A receita do chantininho está na Fatia Morango Nevado.
+obs: O ebook não diz o tempo de forno da massa. Usamos o da mesma massa nas outras fatias do ebook: cerca de 40 minutos, até o palito sair limpo.
+## Massa de bolo
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 200 ml de leite [leite 200]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio de doce de leite
+- 650 g de doce de leite [doce-leite 650]
+- 140 g de creme de leite [creme-leite 140]
+- 1 pitada de sal [sal 1]
+## Recheio de brigadeiro branco
+- 395 g de leite condensado [leite-cond 395]
+- 100 g de creme de leite [creme-leite 100]
+- 100 g de chocolate branco [choc-branco 100]
+- 1 pitada de sal [sal 1]
+## Pudins (10 forminhas de 120 ml)
+- 560 ml de leite [leite 560]
+- 550 g de leite condensado [leite-cond 550]
+- 3 ovos inteiros [ovo 3]
+- 3 gemas [ovo 3]
+## Calda dos pudins
+- 140 g de açúcar [acucar 140]
+- 70 ml de água quente
+### Massa
+* Bata os ovos com o açúcar até obter uma mistura clara e levemente aerada.
+* Adicione o óleo e o leite.
+* Acrescente a farinha e o sal.
+* Misture até formar uma massa uniforme.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos (tempo sugerido pelo app).
+* Depois de frio, corte em 3 camadas.
+### Recheio de doce de leite
+* Misture o doce de leite com o creme de leite.
+* Acrescente a pitada de sal.
+* Reserve.
+### Brigadeiro branco
+* Em uma panela, coloque o leite condensado, o creme de leite e o chocolate branco.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Deixe esfriar.
+### Pudins
+* Misture todos os ingredientes.
+* Passe pela peneira.
+* Em fogo baixo, derreta o açúcar sem mexer até formar um caramelo dourado e acrescente a água quente com cuidado, mexendo até dissolver.
+* Distribua a calda nas forminhas.
+* Adicione a mistura do pudim.
+* Asse em banho-maria entre 160 °C e 170 °C por 40 a 50 minutos.
+* Leve para gelar antes de desenformar.
+### Montagem
+* Intercale massa e recheios.
+* Use cerca de 700 g de recheio por camada.
+* Finalize com chantininho.
+* Decore com os mini pudins.
+* Se quiser, finalize com calda de caramelo.
+> Tradicional: Massa de baunilha + Doce de leite + Pudim
+> Premium: Massa de baunilha + Doce de leite + Brigadeiro branco + Pudim
+> Vitrine: Massa de baunilha + Doce de leite + Brigadeiro branco + Pudim + Calda de caramelo
+
+@ sensacao | Fatia Sensação | fatias | 14
+desc: Chocolate e morango numa combinação clássica, bonita e muito fácil de vender. Está entre os sabores mais vendidos.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de colocar os morangos.
+selos: Fatia de vitrine; Sabor clássico e vendedor
+dif: fácil
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio sensação
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 150 g de geleia de morango [morango 150]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 200 g de chocolate meio amargo [choc-meio 200]
+- 200 g de creme de leite [creme-leite 200]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha (opcional) [baunilha 5]
+## Finalização
+- 200 g de morangos frescos picados [morango 200]
+- Morangos inteiros para decorar [~morango 100]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e bata novamente.
+* Adicione o leite.
+* Acrescente a farinha e o chocolate peneirados.
+* Misture só até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos, ou até passar no teste do palito.
+* Espere esfriar completamente.
+* Corte em 3 camadas.
+### Recheio sensação
+* Em uma panela, coloque o leite condensado, o creme de leite e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+* Misture a geleia de morango.
+* Reserve para a montagem.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Calda
+* Misture todos os ingredientes.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Espalhe uma camada generosa do recheio sensação.
+* Distribua parte dos morangos picados.
+* Repita as camadas.
+* Finalize com a ganache.
+* Decore com morangos frescos.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Recheio sensação + Morangos frescos + Ganache
+> Premium: Massa black + Recheio sensação + Morangos frescos + Ganache meio amarga
+> Vitrine: Massa chiffon de chocolate + Recheio sensação + Morangos frescos + Ganache + Morangos inteiros
+
+@ abacaxi-com-cocada | Fatia Abacaxi com Cocada Cremosa | fatias | 17
+desc: Coco e abacaxi trazem frescor e cremosidade. Agrada a muita gente e é uma das melhores opções para feira.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira.
+selos: Alta margem de lucro
+dif: fácil
+obs: O ebook não diz o tempo de forno da massa. Usamos o da mesma massa nas outras fatias do ebook: cerca de 40 minutos, até o palito sair limpo.
+## Massa de baunilha
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Recheio de abacaxi
+- 1 abacaxi grande picado em cubos [abacaxi 1]
+- 150 g de açúcar [acucar 150]
+- Suco de 1/2 limão [limao 0.5]
+## Cocada cremosa
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 ml de leite de coco [leite-coco 100]
+- 100 g de coco ralado [coco 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Calda
+- 200 ml de água
+- 100 ml da calda do cozimento do abacaxi
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha de trigo e misture.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos (tempo sugerido pelo app).
+* Espere esfriar completamente.
+* Corte em 3 camadas.
+### Recheio de abacaxi
+* Em uma panela, coloque o abacaxi picado, o açúcar e o suco de limão.
+* Cozinhe em fogo médio até reduzir o líquido.
+* Reserve e deixe esfriar.
+### Cocada cremosa
+* Em uma panela, coloque o leite condensado, o creme de leite, o leite de coco, a manteiga e o coco ralado.
+* Cozinhe em fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no recheio.
+* Deixe esfriar completamente.
+### Montagem
+* Coloque uma camada de massa.
+* Umedeça com a calda.
+* Espalhe uma camada de cocada cremosa.
+* Distribua parte do abacaxi cozido.
+* Repita as camadas.
+* Finalize com cocada cremosa.
+* Decore com coco ralado e pedacinhos de abacaxi.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de baunilha + Cocada cremosa + Abacaxi
+> Premium: Massa chiffon de baunilha + Cocada cremosa + Abacaxi + Coco queimado
+> Vitrine: Massa branca de iogurte + Cocada cremosa + Abacaxi + Lascas de coco
+
+@ ferrero-royale | Ferrero Royale | fatias | 20
+desc: Uma das fatias de maior valor percebido: visual sofisticado e sabor intenso de chocolate com avelã.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+obs: O ebook não diz o tempo de forno da massa. Usamos o da mesma massa nas outras fatias do ebook: cerca de 40 minutos, até o palito sair limpo.
+## Massa black
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 180 g de farinha de trigo [farinha 180]
+- 60 g de chocolate em pó 50% [choc-po 60]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme Ferrero
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate meio amargo [choc-meio 120]
+- 80 g de creme de avelã [creme-avela 80]
+- 50 g de avelã triturada [avela 50]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 200 g de chocolate meio amargo [choc-meio 200]
+- 200 g de creme de leite [creme-leite 200]
+## Crocante de avelã
+- 100 g de avelãs torradas e picadas [avela 100]
+- 50 g de açúcar [acucar 50]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó [choc-po 7]
+### Massa black
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos (tempo sugerido pelo app).
+* Depois de frio, corte em 3 camadas.
+### Creme Ferrero
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate.
+* Cozinhe em fogo médio, mexendo sempre.
+* Acrescente o creme de avelã.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar, desligue.
+* Acrescente o creme de leite.
+* Finalize com a pitada de sal.
+* Depois de esfriar, misture a avelã triturada.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até ficar uniforme.
+### Crocante
+* Em fogo baixo, derreta o açúcar sem mexer, só girando a panela, até virar um caramelo dourado. Cuidado: caramelo quente queima a pele.
+* Acrescente as avelãs.
+* Espalhe sobre uma superfície untada.
+* Depois de frio, quebre em pedacinhos.
+### Calda
+* Misture o leite com o chocolate em pó.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Ferrero.
+* Polvilhe parte do crocante de avelã.
+* Repita as camadas.
+* Cubra com ganache.
+* Finalize com crocante de avelã.
+* Decore com bombons Ferrero Rocher (opcional).
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa black + Creme Ferrero + Ganache + Crocante de avelã
+> Premium: Massa chiffon de chocolate + Creme Ferrero + Ganache meio amarga + Crocante de avelã
+> Vitrine: Massa black + Creme Ferrero + Ganache + Crocante + Ferrero Rocher
+
+@ kinder-bueno | Fatia Kinder Bueno | fatias | 23
+desc: Um dos sabores mais desejados hoje em dia. O nome é conhecido e passa a ideia de produto especial, o que facilita a venda.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme Bueno
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate branco [choc-branco 120]
+- 80 g de creme de avelã [creme-avela 80]
+- 50 g de leite em pó [leite-po 50]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 200 g de chocolate ao leite [choc-leite 200]
+- 200 g de creme de leite [creme-leite 200]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha (opcional) [baunilha 5]
+## Finalização
+- Kinder Bueno picado
+- Creme de avelã para decorar [~creme-avela 30]
+- Raspas de chocolate branco (opcional)
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Bueno
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente o creme de avelã.
+* Adicione o leite em pó.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Bueno.
+* Repita as camadas.
+* Finalize com a ganache.
+* Decore com pedaços de Kinder Bueno.
+* Faça fios de creme de avelã sobre a cobertura.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Creme Bueno + Ganache ao leite
+> Premium: Massa black + Creme Bueno + Ganache meio amarga + Crocante de avelã
+> Vitrine: Massa chiffon de chocolate + Creme Bueno + Ganache + Kinder Bueno picado
+
+@ bueno-crocante | Fatia Bueno Crocante | fatias | 26
+desc: O recheio bem cremoso contrasta com a crocância das avelãs. Ótima para vitrine e venda por fatia.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+obs: O ebook não diz o tempo de forno da massa. Usamos o da mesma massa nas outras fatias do ebook: cerca de 40 minutos, até o palito sair limpo.
+## Massa de chocolate
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 40 g de chocolate em pó 50% [choc-po 40]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme Bueno
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 120 g de chocolate branco [choc-branco 120]
+- 80 g de creme de avelã [creme-avela 80]
+- 50 g de leite em pó [leite-po 50]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Crocante de avelã
+- 150 g de avelãs torradas [avela 150]
+- 100 g de chocolate ao leite [choc-leite 100]
+- 50 g de chocolate meio amargo [choc-meio 50]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 200 g de chocolate ao leite [choc-leite 200]
+- 200 g de creme de leite [creme-leite 200]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos (tempo sugerido pelo app).
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Bueno
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente o creme de avelã.
+* Adicione o leite em pó.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Crocante de avelã
+* Torre as avelãs.
+* Pique grosseiramente.
+* Derreta os chocolates picados no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Misture os chocolates com as avelãs.
+* Acrescente a pitada de sal.
+* Espalhe sobre papel manteiga.
+* Leve à geladeira até firmar.
+* Quebre em pedacinhos.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Bueno.
+* Polvilhe parte do crocante de avelã.
+* Repita as camadas.
+* Finalize com ganache.
+* Decore com pedaços do crocante.
+* Se quiser, finalize com Kinder Bueno picado.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Creme Bueno + Crocante de avelã
+> Premium: Massa black + Creme Bueno + Ganache meio amarga + Crocante de avelã
+> Vitrine: Massa chiffon de chocolate + Creme Bueno + Ganache + Kinder Bueno picado + Crocante de avelã
+
+@ pistache-com-morango | Fatia Pistache com Morango | fatias | 29
+desc: Aparência sofisticada, o sabor delicado do pistache e o frescor dos morangos. Excelente para vitrine.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de colocar os morangos.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+## Massa chiffon de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 180 ml de leite integral [leite 180]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha [baunilha 5]
+## Creme de pistache
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 80 g de pasta de pistache [pasta-pistache 80]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Morangos
+- 300 g de morangos frescos picados [morango 300]
+- Morangos inteiros para decorar [~morango 100]
+## Ganache branca
+- 200 g de chocolate branco [choc-branco 200]
+- 100 g de creme de leite [creme-leite 100]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro e volumoso.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture delicadamente.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Espere esfriar completamente.
+* Corte em 3 camadas.
+### Creme de pistache
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente a pasta de pistache.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache branca
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme de pistache.
+* Distribua parte dos morangos picados.
+* Repita as camadas.
+* Finalize com a ganache branca.
+* Decore com morangos inteiros.
+* Finalize com pistaches triturados.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa chiffon de baunilha + Creme de pistache + Morangos frescos
+> Premium: Massa chiffon de baunilha + Creme de pistache + Morangos frescos + Ganache branca
+> Vitrine: Massa chiffon de baunilha + Creme de pistache + Morangos frescos + Ganache branca + Pistache triturado
+
+@ matilda | Fatia Matilda | fatias | 32
+desc: Para quem ama chocolate: visual marcante, recheio farto e sabor intenso.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Chocolatuda premium
+dif: fácil
+## Massa de chocolate
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 240 ml de leite integral [leite 240]
+- 220 g de farinha de trigo [farinha 220]
+- 60 g de chocolate em pó 50% [choc-po 60]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme Matilda
+- 790 g de leite condensado (2 caixas) [leite-cond 790]
+- 400 g de creme de leite (2 caixas) [creme-leite 400]
+- 200 g de chocolate meio amargo [choc-meio 200]
+- 50 g de chocolate em pó 50% [choc-po 50]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache de cobertura
+- 300 g de chocolate meio amargo [choc-meio 300]
+- 200 g de creme de leite [creme-leite 200]
+## Calda chocolatuda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Matilda
+* Em uma panela, coloque o leite condensado, a manteiga, o chocolate em pó e o chocolate meio amargo.
+* Leve ao fogo médio, mexendo sempre.
+* Cozinhe por cerca de 15 a 20 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite.
+* Misture até ficar uniforme.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça bem com a calda chocolatuda.
+* Faça uma camada generosa do creme Matilda.
+* Repita as camadas.
+* Cubra completamente com a ganache.
+* Faça movimentos rústicos na cobertura.
+* Finalize com raspas ou pedaços de chocolate meio amargo.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de chocolate + Creme Matilda + Ganache
+> Premium: Massa black + Creme Matilda + Ganache meio amarga
+> Vitrine: Massa black + Creme Matilda + Ganache + Raspas de chocolate nobre
+
+@ oreo-black | Fatia Oreo Black Supreme | fatias | 35
+desc: Massa escura com recheio claro de Oreo: chama atenção na vitrine e agrada crianças e adultos.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: fácil
+## Massa black
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 180 g de farinha de trigo [farinha 180]
+- 60 g de chocolate em pó 50% [choc-po 60]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+## Creme Oreo
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 120 g de biscoito Oreo triturado [oreo 120]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache
+- 250 g de chocolate meio amargo [choc-meio 250]
+- 200 g de creme de leite [creme-leite 200]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (sopa) de chocolate em pó 50% [choc-po 7]
+## Finalização
+- Biscoitos Oreo triturados [~oreo 40]
+- Biscoitos Oreo inteiros ou cortados ao meio [~oreo 90]
+### Massa black
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Oreo
+* Em uma panela, coloque o leite condensado, a manteiga e o chocolate branco.
+* Leve ao fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite e a pitada de sal.
+* Misture até ficar uniforme.
+* Espere esfriar.
+* Adicione o Oreo triturado.
+* Misture delicadamente.
+### Ganache
+* Derreta o chocolate picado no micro-ondas, de 30 em 30 segundos, mexendo entre uma vez e outra.
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa e brilhante.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Oreo.
+* Repita as camadas.
+* Cubra com a ganache.
+* Finalize com Oreo triturado.
+* Decore com pedaços de Oreo.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa black + Creme Oreo + Ganache
+> Premium: Massa black + Creme Oreo + Ganache meio amarga + Oreo triturado
+> Vitrine: Massa black + Creme Oreo + Ganache + Oreo inteiro + Farelo de Oreo
+
+@ red-velvet | Fatia Red Velvet Premium | fatias | 38
+desc: Massa vermelha aveludada com creme de cream cheese. Elegante, delicada e muito desejada.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+## Massa red velvet
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 200 ml de leite integral [leite 200]
+- 180 g de farinha de trigo [farinha 180]
+- 30 g de chocolate em pó 50% [choc-po 30]
+- 9 g de corante em gel vermelho [corante 9]
+- 8 g de fermento químico [fermento 8]
+- 3 g de pasta de baunilha (opcional) [baunilha 3]
+- 1 pitada de sal [sal 1]
+## Creme de cream cheese
+- 300 g de cream cheese [cream-cheese 300]
+- 200 g de leite condensado [leite-cond 200]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de chocolate branco [choc-branco 100]
+- 1 colher (chá) de baunilha [baunilha 5]
+- 1 pitada de sal [sal 1]
+## Geleia de frutas vermelhas
+- 300 g de frutas vermelhas [frutas-vermelhas 300]
+- 80 g de açúcar [acucar 80]
+- Suco de 1/2 limão [limao 0.5]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+### Massa red velvet
+* Bata os ovos e o açúcar até formar um creme claro.
+* Acrescente o óleo e bata novamente.
+* Adicione o leite.
+* Acrescente a farinha e o chocolate peneirados.
+* Misture até incorporar.
+* Adicione o corante e a baunilha.
+* Finalize com o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme de cream cheese
+* Misture o cream cheese até ficar cremoso.
+* Acrescente o leite condensado.
+* Adicione o chocolate branco derretido.
+* Misture o creme de leite.
+* Acrescente a baunilha e a pitada de sal.
+* Leve à geladeira por pelo menos 2 horas, até firmar, antes de montar.
+### Geleia de frutas vermelhas
+* Coloque as frutas, o açúcar e o limão em uma panela.
+* Cozinhe em fogo baixo até obter uma geleia encorpada.
+* Deixe esfriar completamente.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada do creme de cream cheese.
+* Adicione uma camada fina de geleia de frutas vermelhas.
+* Repita as camadas.
+* Finalize com creme de cream cheese.
+* Decore com farelos da própria massa red velvet.
+* Finalize com frutas vermelhas frescas (opcional).
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa red velvet + Cream cheese
+> Premium: Massa red velvet + Cream cheese + Geleia de frutas vermelhas
+> Vitrine: Massa red velvet + Cream cheese + Geleia de frutas vermelhas + Frutas vermelhas frescas
+
+@ morango-nevado | Fatia Morango Nevado | fatias | 41
+desc: Delicada e cremosa: creme de Ninho com morangos frescos e cobertura leve. O branco com vermelho fica lindo na vitrine.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de colocar os morangos.
+selos: Fatia de vitrine; Alto potencial de venda
+dif: fácil
+## Massa de baunilha
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha (opcional) [baunilha 5]
+## Creme Ninho
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 100 g de leite em pó [leite-po 100]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Recheio
+- 300 g de morangos frescos picados [morango 300]
+## Chantininho
+- 200 ml de creme para chantilly bem gelado [chantilly 200]
+- 4 colheres (sopa) de leite em pó [leite-po 28]
+- 2 colheres (sopa) de leite condensado [leite-cond 40]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha (opcional) [baunilha 5]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Ninho
+* Em uma panela, coloque o leite condensado, o leite em pó e a manteiga.
+* Misture bem.
+* Acrescente o creme de leite.
+* Leve ao fogo médio, mexendo sempre.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Acrescente a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Chantininho
+* Bata o chantilly até começar a ganhar volume.
+* Acrescente o leite em pó.
+* Adicione o leite condensado.
+* Bata até ficar firme.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Ninho.
+* Distribua parte dos morangos picados.
+* Repita as camadas.
+* Cubra com o chantininho.
+* Polvilhe leite em pó.
+* Decore com morangos frescos.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de baunilha + Creme Ninho + Morangos frescos + Chantininho
+> Premium: Massa chiffon de baunilha + Creme Ninho + Morangos frescos + Chantininho + Leite Ninho polvilhado
+> Vitrine: Massa chiffon de baunilha + Creme Ninho + Morangos frescos + Chantininho + Morangos inteiros
+
+@ banoffee | Fatia Banoffee Imperial | fatias | 44
+desc: Banana caramelizada, doce de leite e chantininho. Cremosa, bonita e fácil de vender.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 4 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Alta margem de lucro; Fatia de vitrine
+dif: média
+## Massa chiffon de baunilha
+- 4 ovos [ovo 4]
+- 200 g de açúcar [acucar 200]
+- 120 ml de óleo [oleo 120]
+- 180 ml de leite integral [leite 180]
+- 240 g de farinha de trigo [farinha 240]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha (opcional) [baunilha 5]
+## Banana caramelizada
+- 4 bananas maduras cortadas em rodelas [banana 4]
+- 150 g de açúcar [acucar 150]
+- 30 g de manteiga [manteiga 30]
+- 1 pitada de canela (opcional)
+## Recheio de doce de leite
+- 650 g de doce de leite [doce-leite 650]
+- 140 g de creme de leite [creme-leite 140]
+- 1 pitada de sal [sal 1]
+## Chantininho
+- 400 ml de creme para chantilly bem gelado [chantilly 400]
+- 6 colheres (sopa) de leite em pó [leite-po 42]
+- 3 colheres (sopa) de leite condensado [leite-cond 60]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Finalização
+- Canela em pó (opcional)
+- Farofa de biscoito amanteigado (opcional)
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro e volumoso.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture delicadamente.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Banana caramelizada
+* Em fogo baixo, derreta o açúcar sem mexer, só girando a panela, até virar um caramelo dourado. Cuidado: caramelo quente queima a pele.
+* Acrescente a manteiga.
+* Adicione as bananas.
+* Cozinhe rapidamente até envolver todas as bananas no caramelo.
+* Reserve e deixe esfriar.
+### Recheio de doce de leite
+* Misture o doce de leite com o creme de leite.
+* Acrescente a pitada de sal.
+* Reserve.
+### Chantininho
+* Bata o chantilly até começar a ganhar volume.
+* Acrescente o leite em pó.
+* Adicione o leite condensado.
+* Bata até ficar firme.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada de doce de leite.
+* Distribua parte da banana caramelizada.
+* Repita as camadas.
+* Cubra com o chantininho.
+* Finalize com banana caramelizada.
+* Polvilhe canela ou farofa de biscoito.
+* Leve para gelar por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa chiffon de baunilha + Doce de leite + Banana caramelizada + Chantininho
+> Premium: Massa chiffon de baunilha + Doce de leite + Banana caramelizada + Chantininho + Canela
+> Vitrine: Massa chiffon de baunilha + Doce de leite + Banana caramelizada + Chantininho + Farofa de biscoito
+
+@ cheesecake-frutas-vermelhas | Cheesecake Frutas Vermelhas Imperial | fatias | 47
+desc: Creme cheesecake, frutas vermelhas e mousse de chocolate branco. Uma das receitas mais sofisticadas.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Não é recomendado congelar depois de montada.
+selos: Fatia de vitrine; Alto valor percebido
+dif: média
+## Massa branca de iogurte
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 170 g de iogurte natural [iogurte 170]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de baunilha (opcional) [baunilha 5]
+## Creme cheesecake
+- 300 g de cream cheese [cream-cheese 300]
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 1 colher (chá) de baunilha [baunilha 5]
+- Suco de 1/2 limão [limao 0.5]
+- 1 pitada de sal [sal 1]
+## Geleia de frutas vermelhas
+- 300 g de frutas vermelhas [frutas-vermelhas 300]
+- 80 g de açúcar [acucar 80]
+- Suco de 1/2 limão [limao 0.5]
+## Mousse de chocolate branco
+- 200 g de chocolate branco [choc-branco 200]
+- 200 g de creme de leite [creme-leite 200]
+- 200 ml de creme para chantilly, batido [chantilly 200]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o iogurte.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme cheesecake
+* Bata o cream cheese até ficar cremoso.
+* Acrescente o leite condensado.
+* Adicione o creme de leite.
+* Acrescente a baunilha, o limão e a pitada de sal.
+* Misture até ficar uniforme.
+* Leve à geladeira por pelo menos 2 horas, até firmar, antes de montar.
+### Geleia de frutas vermelhas
+* Coloque as frutas, o açúcar e o limão em uma panela.
+* Cozinhe em fogo baixo até obter uma geleia encorpada.
+* Deixe esfriar completamente.
+### Mousse de chocolate branco
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Misture com o creme de leite.
+* Deixe amornar.
+* Incorpore delicadamente o chantilly batido.
+* Leve à geladeira por pelo menos 2 horas, até firmar, antes de montar.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça levemente com a calda.
+* Faça uma camada do creme cheesecake.
+* Espalhe uma camada fina da geleia.
+* Repita as camadas.
+* Cubra com a mousse de chocolate branco.
+* Finalize com geleia de frutas vermelhas.
+* Decore com frutas vermelhas frescas.
+* Leve para gelar por pelo menos 6 horas.
+> Tradicional: Massa branca de iogurte + Creme cheesecake + Geleia de frutas vermelhas
+> Premium: Massa branca de iogurte + Creme cheesecake + Geleia de frutas vermelhas + Mousse de chocolate branco
+> Vitrine: Massa branca de iogurte + Creme cheesecake + Geleia de frutas vermelhas + Mousse de chocolate branco + Frutas vermelhas frescas
+
+@ biscoff-supreme | Fatia Biscoff Supreme | fatias | 50
+desc: Inspirada no famoso biscoito Biscoff. Creme caramelizado e massa macia, com sabor diferente que chama atenção.
+rend: 1 bolo de cerca de 30 x 10 x 10 cm · 15 a 20 fatias de feira
+fatias: 16
+val: Até 5 dias na geladeira. Pode congelar por até 30 dias.
+selos: Fatia de vitrine; Alto valor percebido
+dif: fácil
+## Massa de baunilha
+- 3 ovos [ovo 3]
+- 180 g de açúcar [acucar 180]
+- 120 ml de óleo [oleo 120]
+- 220 ml de leite integral [leite 220]
+- 220 g de farinha de trigo [farinha 220]
+- 10 g de fermento químico [fermento 10]
+- 1 pitada de sal [sal 1]
+- 1 colher (chá) de pasta de baunilha (opcional) [baunilha 5]
+## Creme Biscoff
+- 395 g de leite condensado [leite-cond 395]
+- 200 g de creme de leite [creme-leite 200]
+- 180 g de creme Biscoff [creme-biscoff 180]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 1 pitada de sal [sal 1]
+## Ganache branca
+- 200 g de chocolate branco [choc-branco 200]
+- 100 g de creme de leite [creme-leite 100]
+## Calda
+- 200 ml de leite integral [leite 200]
+- 1 colher (sopa) de leite condensado [leite-cond 20]
+- 1 colher (chá) de baunilha [baunilha 5]
+## Finalização
+- 100 g de biscoito Biscoff triturado [biscoito-biscoff 100]
+- Creme Biscoff para decorar [~creme-biscoff 30]
+### Massa
+* Bata os ovos com o açúcar até obter um creme claro.
+* Acrescente o óleo e o leite.
+* Adicione a farinha peneirada.
+* Misture até incorporar.
+* Acrescente o fermento.
+* Despeje em forma untada e enfarinhada.
+* Asse em forno preaquecido a 180 °C por cerca de 40 minutos.
+* Deixe esfriar completamente.
+* Corte em 3 camadas.
+### Creme Biscoff
+* Em uma panela, coloque o leite condensado e a manteiga.
+* Leve ao fogo médio, mexendo sempre.
+* Acrescente o creme Biscoff.
+* Cozinhe por cerca de 10 a 15 minutos, sem parar de mexer.
+* Está no ponto quando desgrudar do fundo da panela e, ao passar a espátula, abrir um caminho que demora a fechar.
+* Desligue o fogo.
+* Acrescente o creme de leite.
+* Finalize com a pitada de sal.
+* Cubra com plástico filme encostando no creme.
+* Deixe esfriar completamente.
+### Ganache branca
+* Derreta o chocolate branco picado no micro-ondas, de 20 em 20 segundos, mexendo entre uma vez e outra (chocolate branco queima fácil).
+* Acrescente o creme de leite.
+* Misture até obter uma ganache lisa.
+### Montagem
+* Coloque a primeira camada de massa.
+* Umedeça com a calda.
+* Faça uma camada generosa do creme Biscoff.
+* Repita as camadas.
+* Cubra com a ganache branca.
+* Finalize com biscoito Biscoff triturado.
+* Faça fios de creme Biscoff sobre a cobertura.
+* Leve à geladeira por pelo menos 4 horas antes de cortar.
+> Tradicional: Massa de baunilha + Creme Biscoff + Biscoff triturado
+> Premium: Massa chiffon de baunilha + Creme Biscoff + Ganache branca + Biscoff triturado
+> Vitrine: Massa chiffon de baunilha + Creme Biscoff + Ganache branca + Creme Biscoff + Biscoff triturado

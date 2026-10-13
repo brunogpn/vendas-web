@@ -1,0 +1,593 @@
+{
+  "fases": [
+    {
+      "numero": 1,
+      "nome": "Planejar",
+      "icone": "Notebook",
+      "medalha": "Planejamento feito"
+    },
+    {
+      "numero": 2,
+      "nome": "Produzir",
+      "icone": "ChefHat",
+      "medalha": "Mão na massa"
+    },
+    {
+      "numero": 3,
+      "nome": "Primeira venda",
+      "icone": "Coins",
+      "medalha": "Vendedora de verdade"
+    },
+    {
+      "numero": 4,
+      "nome": "Ganhar ritmo",
+      "icone": "TrendUp",
+      "medalha": "Pegando o ritmo"
+    },
+    {
+      "numero": 5,
+      "nome": "Crescer",
+      "icone": "Plant",
+      "medalha": "Negócio crescendo"
+    }
+  ],
+  "passos": [
+    {
+      "id": 1,
+      "fase": 1,
+      "icone": "Cake",
+      "titulo": "Escolha suas 3 primeiras fatias",
+      "tempo": "10 min",
+      "texto": [
+        "Para começar, não precisa ter muitos sabores. Três é o número ideal: você aprende rápido e não desperdiça ingredientes.",
+        "Abra as receitas e escolha 3 sabores que você gostaria de comer. Se estiver em dúvida, comece pelas fatias marcadas como fáceis."
+      ],
+      "link": {
+        "href": "/receitas",
+        "rotulo": "Ver as receitas"
+      },
+      "dica": "Sugestão para iniciantes: um sabor de chocolate, um de leite Ninho e um de fruta. Assim você agrada quase todo mundo."
+    },
+    {
+      "id": 2,
+      "fase": 1,
+      "icone": "CookingPot",
+      "titulo": "Confira seus utensílios",
+      "tempo": "5 min",
+      "texto": [
+        "Dê uma olhada na sua cozinha e marque o que você já tem. O que faltar, anote para comprar ou pedir emprestado."
+      ],
+      "checklist": [
+        "Batedeira (ou fouet e muita disposição)",
+        "Panela de fundo grosso",
+        "Forma de bolo (redonda ou retangular)",
+        "Espátula",
+        "Balança de cozinha",
+        "Embalagens individuais para fatias"
+      ],
+      "dica": "Não precisa ter tudo de primeira. Comece com o que tem e vá comprando com o dinheiro das vendas."
+    },
+    {
+      "id": 3,
+      "fase": 1,
+      "icone": "ShoppingCart",
+      "titulo": "Monte sua lista de compras",
+      "tempo": "5 min",
+      "texto": [
+        "O app monta a lista sozinho: é só escolher as receitas e quantos bolos quer fazer.",
+        "Para o primeiro teste, faça 1 bolo de cada sabor que você escolheu."
+      ],
+      "link": {
+        "href": "/lista",
+        "rotulo": "Abrir lista de compras"
+      }
+    },
+    {
+      "id": 4,
+      "fase": 1,
+      "icone": "MagnifyingGlass",
+      "titulo": "Compare preços em 3 mercados",
+      "tempo": "20 min",
+      "texto": [
+        "Com a lista na mão, veja o preço dos ingredientes em 3 mercados perto de casa. Pode ser indo lá, pelo encarte, pelo aplicativo do mercado ou por telefone.",
+        "Anote os preços mais baratos em \"Meus preços\". O app usa esses valores para calcular quanto custa cada fatia."
+      ],
+      "link": {
+        "href": "/precos",
+        "rotulo": "Anotar meus preços"
+      },
+      "dica": "Leite condensado e creme de leite costumam ter muita diferença de preço entre mercados. Vale a pena pesquisar!"
+    },
+    {
+      "id": 5,
+      "fase": 2,
+      "icone": "ShoppingBag",
+      "titulo": "Faça as compras",
+      "tempo": "1 hora",
+      "texto": [
+        "Vá ao mercado mais barato com a sua lista. Marque cada item na lista do app enquanto coloca no carrinho.",
+        "Não esqueça as embalagens para as fatias!"
+      ],
+      "link": {
+        "href": "/lista",
+        "rotulo": "Abrir lista de compras"
+      },
+      "dica": "Guarde a nota fiscal. No passo da primeira venda, você vai lançar esse gasto no controle de vendas."
+    },
+    {
+      "id": 6,
+      "fase": 2,
+      "icone": "Calculator",
+      "titulo": "Descubra o preço certo da sua fatia",
+      "tempo": "10 min",
+      "texto": [
+        "Muita gente perde dinheiro porque cobra no \"olhômetro\". Aqui não!",
+        "Abra a calculadora, escolha a receita e veja quanto custa cada fatia e por quanto vender para ter lucro."
+      ],
+      "link": {
+        "href": "/calculadora",
+        "rotulo": "Abrir calculadora"
+      }
+    },
+    {
+      "id": 35,
+      "fase": 2,
+      "icone": "HandSoap",
+      "titulo": "Capriche na higiene e nas etiquetas",
+      "tempo": "15 min",
+      "texto": [
+        "Antes de fazer o primeiro bolo, prepare a cozinha. Quem compra comida repara no cuidado de quem faz, e algumas feiras e pontos de venda exigem.",
+        "Cuide destes pontos em toda produção:"
+      ],
+      "checklist": [
+        "Cabelo preso e coberto (touca ou lenço)",
+        "Mãos lavadas, unhas curtas e sem anéis ou pulseiras",
+        "Avental limpo",
+        "Bancada e utensílios limpos antes de começar",
+        "Etiquetas prontas para colar em cada fatia: sabor, data em que fez e validade",
+        "Na etiqueta, avise se contém glúten, leite ou ovos"
+      ],
+      "dica": "Coloque também seu nome e telefone na etiqueta. Quem gostou sabe como pedir de novo!"
+    },
+    {
+      "id": 7,
+      "fase": 2,
+      "icone": "ChefHat",
+      "titulo": "Faça seu primeiro bolo",
+      "tempo": "2 a 3 horas",
+      "texto": [
+        "Chegou a hora! Escolha uma das suas receitas e siga o passo a passo com calma. Marque cada ingrediente conforme for usando.",
+        "Se não ficar perfeito, tudo bem: o primeiro é para aprender. Prove e veja o que pode melhorar."
+      ],
+      "link": {
+        "href": "/receitas",
+        "rotulo": "Abrir minhas receitas"
+      },
+      "dica": "Deixe o bolo esfriar bem antes de cortar. Bolo quente esfarela."
+    },
+    {
+      "id": 8,
+      "fase": 2,
+      "icone": "Package",
+      "titulo": "Corte e embale as fatias",
+      "tempo": "20 min",
+      "texto": [
+        "Corte fatias do mesmo tamanho, para nenhum cliente achar que a dele veio menor. Uma faca bem afiada, limpa a cada corte, deixa as camadas bonitas.",
+        "Coloque cada fatia na embalagem e, se puder, uma etiqueta com o sabor."
+      ],
+      "dica": "Embalagem caprichada vende mais, mesmo que seja simples."
+    },
+    {
+      "id": 9,
+      "fase": 2,
+      "icone": "Camera",
+      "titulo": "Tire 3 fotos e poste no status",
+      "tempo": "15 min",
+      "texto": [
+        "Foto bonita vende por você. Coloque a fatia perto de uma janela, com luz do dia, e evite o flash.",
+        "Tire várias fotos: de frente, mostrando as camadas, e meio de cima, inclinada. Use um fundo simples, como uma tábua de madeira ou um pano liso. Depois escolha as 3 melhores.",
+        "Agora é hora de usar as fotos:"
+      ],
+      "checklist": [
+        "Postei a melhor foto no status do WhatsApp, com a mensagem abaixo",
+        "Postei também no Instagram ou no Facebook (se eu uso)",
+        "Guardei as 3 fotos num álbum do celular chamado \"Fatias\""
+      ],
+      "mensagem": "Novidade! 🍰 Agora faço fatias de bolo caseiras. Essa é de [sabor]. Logo aviso os dias de venda. Quem quer provar?",
+      "dica": "Guarde bem as fotos: você vai usar nos próximos passos, para avisar seus contatos e para montar seu perfil de vendas. Se puder, grave também um vídeo curtinho cortando a fatia. Vídeo chama muita atenção!"
+    },
+    {
+      "id": 10,
+      "fase": 3,
+      "icone": "MapPin",
+      "titulo": "Escolha onde vender primeiro",
+      "tempo": "5 min",
+      "texto": [
+        "Para a primeira venda, comece perto: vizinhos, família, amigos, colegas de trabalho de alguém da casa, porta da escola ou da igreja.",
+        "A feira pode vir depois, quando você já tiver prática. Escolha um lugar e um dia para vender esta semana."
+      ],
+      "dica": "Vender para conhecidos primeiro dá segurança e já traz as primeiras opiniões."
+    },
+    {
+      "id": 11,
+      "fase": 3,
+      "icone": "ChatCircleText",
+      "titulo": "Avise 10 pessoas que você está vendendo",
+      "tempo": "15 min",
+      "texto": [
+        "Mande a mensagem abaixo, com uma das suas fotos, para 10 contatos do seu celular. Pode copiar e colar!"
+      ],
+      "mensagem": "Oi! Tudo bem? 😊 Comecei a fazer fatias de bolo caseiras e estão uma delícia! Esta semana tenho os sabores: [sabores]. Cada fatia sai por R$ [preço]. Quer que eu separe uma pra você? 🍰",
+      "dica": "Troque o que está entre colchetes pelos seus sabores e o seu preço."
+    },
+    {
+      "id": 12,
+      "fase": 3,
+      "icone": "Signpost",
+      "titulo": "Faça sua plaquinha de preços",
+      "tempo": "15 min",
+      "texto": [
+        "Uma plaquinha com os sabores e os preços ajuda o cliente a decidir rápido. Pode ser uma cartolina, um quadro pequeno ou até uma folha bem escrita.",
+        "Escreva com letra grande e, se quiser, desenhe ou cole a foto das fatias."
+      ]
+    },
+    {
+      "id": 36,
+      "fase": 3,
+      "icone": "QrCode",
+      "titulo": "Prepare o Pix para receber",
+      "tempo": "15 min",
+      "texto": [
+        "Hoje quase todo mundo paga com Pix. Deixe tudo pronto para receber rápido e sem erro."
+      ],
+      "checklist": [
+        "Tenho uma chave Pix (celular, email ou CPF) no aplicativo do meu banco",
+        "Gerei o QR code do Pix no aplicativo do banco (procure \"Receber\" ou \"Cobrar\")",
+        "Imprimi o QR code ou deixei salvo no celular para mostrar",
+        "Colei o QR code na plaquinha de preços"
+      ],
+      "dica": "Antes de entregar a fatia, confira no aplicativo do banco se o Pix caiu mesmo. Comprovante na tela do cliente pode ser falso."
+    },
+    {
+      "id": 13,
+      "fase": 3,
+      "icone": "Backpack",
+      "titulo": "Separe tudo para o dia da venda",
+      "tempo": "10 min",
+      "texto": [
+        "Na véspera, deixe tudo pronto para não esquecer nada:"
+      ],
+      "checklist": [
+        "Fatias embaladas e geladas",
+        "Caixa térmica ou bolsa térmica",
+        "Plaquinha de preços",
+        "Troco em moedas e notas pequenas",
+        "QR code do Pix (e maquininha carregada, se tiver)",
+        "Guardanapos e sacolinhas"
+      ]
+    },
+    {
+      "id": 14,
+      "fase": 3,
+      "icone": "Confetti",
+      "titulo": "Faça sua primeira venda!",
+      "tempo": "o tempo da venda",
+      "texto": [
+        "É hoje! Leve suas fatias, sorria e conte que é você quem faz. As pessoas adoram comprar de quem faz com carinho.",
+        "No fim do dia, abra \"Minhas vendas\" e lance quanto gastou, quantas fatias vendeu e quanto recebeu. Não esqueça de lançar o gasto das compras!"
+      ],
+      "link": {
+        "href": "/vendas",
+        "rotulo": "Lançar minhas vendas"
+      },
+      "dica": "Vendeu pouco? Normal no começo. O importante é ter começado!"
+    },
+    {
+      "id": 31,
+      "fase": 3,
+      "icone": "PiggyBank",
+      "titulo": "Separe o dinheiro das próximas compras",
+      "tempo": "10 min",
+      "texto": [
+        "Este é o erro que mais faz quem está começando desistir: vender, usar todo o dinheiro em casa e, na semana seguinte, não ter como comprar os ingredientes.",
+        "Por isso, todo dinheiro que entra vira duas partes. O dinheiro das compras paga os ingredientes e as embalagens da próxima produção. O seu lucro é o que sobra: esse é seu.",
+        "Depois de lançar cada venda, o app mostra quanto separar. Guarde esse valor à parte e use só para comprar ingredientes e embalagens."
+      ],
+      "checklist": [
+        "Escolhi onde guardar: um envelope, um cofrinho ou uma conta separada",
+        "Separei o dinheiro das compras da minha primeira venda",
+        "Combinei comigo mesma: esse dinheiro não é para as contas da casa"
+      ],
+      "link": {
+        "href": "/vendas",
+        "rotulo": "Ver quanto separar"
+      },
+      "dica": "No começo, tente guardar também uma parte do lucro para comprar o que falta: uma forma maior, uma caixa térmica, mais embalagens. É assim que o negócio cresce."
+    },
+    {
+      "id": 15,
+      "fase": 4,
+      "icone": "ChartBar",
+      "titulo": "Veja o que mais vendeu",
+      "tempo": "5 min",
+      "texto": [
+        "Pense na sua venda: qual sabor acabou primeiro? Qual sobrou? Qual o pessoal mais elogiou?",
+        "Na próxima vez, faça mais do que vendeu bem e menos do que sobrou."
+      ],
+      "link": {
+        "href": "/vendas",
+        "rotulo": "Ver minhas vendas"
+      }
+    },
+    {
+      "id": 38,
+      "fase": 4,
+      "icone": "Snowflake",
+      "titulo": "Cuide das fatias que sobraram",
+      "tempo": "5 min",
+      "texto": [
+        "Sobrou fatia? Guarde na geladeira assim que chegar em casa. Pelo ebook, fatias na geladeira duram de 3 a 5 dias, e congeladas até 30 dias.",
+        "Confira a data da etiqueta antes de vender de novo. Fatia que ficou muitas horas fora da geladeira, no calor, não volta para a venda.",
+        "Na dúvida, não venda: é melhor perder uma fatia do que perder um cliente."
+      ],
+      "dica": "Sobrou muito? Na próxima produção, faça menos daquele sabor. E uma promoção no fim do dia ajuda a não sobrar."
+    },
+    {
+      "id": 37,
+      "fase": 4,
+      "icone": "AddressBook",
+      "titulo": "Anote quem comprou de você",
+      "tempo": "15 min",
+      "texto": [
+        "Quem já comprou é quem mais compra de novo. Anote o nome, o telefone e o sabor preferido de cada cliente, num caderno ou no celular.",
+        "Depois, crie uma lista de transmissão no WhatsApp com esses clientes. Assim você manda o cardápio da semana para todos de uma vez, e cada um recebe como mensagem só dele."
+      ],
+      "checklist": [
+        "Anotei nome e telefone de quem comprou",
+        "Salvei os números na agenda do celular",
+        "Criei uma lista de transmissão no WhatsApp"
+      ],
+      "dica": "A lista de transmissão só chega para quem também salvou o seu número. Peça para o cliente salvar seu contato na hora da venda."
+    },
+    {
+      "id": 16,
+      "fase": 4,
+      "icone": "EnvelopeSimple",
+      "titulo": "Mande uma mensagem para quem comprou",
+      "tempo": "10 min",
+      "texto": [
+        "Mandar mensagem depois da venda faz o cliente lembrar de você e comprar de novo. Copie e envie:"
+      ],
+      "mensagem": "Oi! Espero que tenha gostado da fatia 💛 Se puder me contar o que achou, fico muito feliz! Esta semana vou ter de novo, quer que eu separe?"
+    },
+    {
+      "id": 17,
+      "fase": 4,
+      "icone": "Star",
+      "titulo": "Peça um depoimento e compartilhe",
+      "tempo": "10 min",
+      "texto": [
+        "Quando alguém elogiar, peça licença para tirar um print da mensagem e postar no seu status do WhatsApp ou nos stories.",
+        "Opinião de cliente feliz convence mais do que qualquer propaganda."
+      ]
+    },
+    {
+      "id": 18,
+      "fase": 4,
+      "icone": "Gift",
+      "titulo": "Crie seu primeiro combo",
+      "tempo": "10 min",
+      "texto": [
+        "Combo é juntar produtos com um precinho especial. Faz o cliente levar mais de uma coisa.",
+        "Exemplo: \"2 fatias por R$ 15\" ou \"fatia + suco por R$ 10\". Monte o seu e coloque na plaquinha."
+      ],
+      "dica": "Use a calculadora para garantir que o combo continua dando lucro."
+    },
+    {
+      "id": 19,
+      "fase": 4,
+      "icone": "Cookie",
+      "titulo": "Ofereça brigadeiro junto com a fatia",
+      "tempo": "30 min",
+      "texto": [
+        "Os brigadeiros sem fogo do seu bônus são rápidos e baratos de fazer. Eles são perfeitos para aumentar o valor de cada venda.",
+        "Na hora de vender, pergunte: \"Quer levar um brigadeiro para acompanhar?\". Muita gente aceita!"
+      ],
+      "link": {
+        "href": "/receitas?categoria=brigadeiros",
+        "rotulo": "Ver receitas de brigadeiro"
+      },
+      "dica": "Também dá para montar um combo: fatia + brigadeiro com um precinho especial."
+    },
+    {
+      "id": 20,
+      "fase": 4,
+      "icone": "CalendarDots",
+      "titulo": "Planeje sua semana",
+      "tempo": "10 min",
+      "texto": [
+        "Com uma rotina, você produz mais e se cansa menos. Um exemplo de semana:"
+      ],
+      "checklist": [
+        "Segunda: ver os pedidos e fazer as compras",
+        "Terça: preparar massas, recheios e caldas",
+        "Quarta: montar, embalar e fotografar",
+        "Quinta: divulgar e fechar pedidos",
+        "Sexta e sábado: vender e entregar",
+        "Domingo: descansar e ver o que deu certo"
+      ],
+      "dica": "Adapte aos dias em que você vende. O importante é ter um plano."
+    },
+    {
+      "id": 21,
+      "fase": 4,
+      "icone": "DeviceMobile",
+      "titulo": "Prepare seu perfil para vender",
+      "tempo": "15 min",
+      "texto": [
+        "Coloque uma foto bonita das suas fatias no perfil do WhatsApp (ou no Instagram, se você usa).",
+        "Na descrição, escreva o que você vende, onde e como pedir. Exemplo: \"Fatias de bolo caseiras 🍰 Entrego no bairro. Peça pelo WhatsApp!\""
+      ]
+    },
+    {
+      "id": 22,
+      "fase": 4,
+      "icone": "Target",
+      "titulo": "Segunda venda: tente bater a meta do dia",
+      "tempo": "o tempo da venda",
+      "texto": [
+        "Na tela inicial você vê quantas fatias precisa vender por dia para chegar à sua meta. Hoje, tente chegar nesse número!",
+        "No fim do dia, lance tudo em \"Minhas vendas\"."
+      ],
+      "link": {
+        "href": "/vendas",
+        "rotulo": "Lançar minhas vendas"
+      }
+    },
+    {
+      "id": 23,
+      "fase": 4,
+      "icone": "Sparkle",
+      "titulo": "Coloque um sabor gourmet no cardápio",
+      "tempo": "10 min",
+      "texto": [
+        "Fatias gourmet, como Ferrero, Kinder ou Pistache, podem ser vendidas mais caro. Escolha uma para fazer na próxima produção.",
+        "Use a calculadora para definir o preço."
+      ],
+      "link": {
+        "href": "/receitas",
+        "rotulo": "Ver receitas"
+      }
+    },
+    {
+      "id": 24,
+      "fase": 5,
+      "icone": "Ticket",
+      "titulo": "Crie um cartão fidelidade",
+      "tempo": "15 min",
+      "texto": [
+        "Um cartãozinho simples: a cada 5 fatias compradas, a 6ª é de graça. Pode ser um papel carimbado ou anotado.",
+        "Isso faz o cliente voltar sempre para comprar de você."
+      ]
+    },
+    {
+      "id": 25,
+      "fase": 5,
+      "icone": "Rainbow",
+      "titulo": "Lance o \"sabor da semana\"",
+      "tempo": "10 min",
+      "texto": [
+        "Toda semana, tenha um sabor diferente que só tem naquela semana. Isso cria curiosidade e faz o cliente querer provar antes que acabe.",
+        "Escolha o sabor desta semana e divulgue no status."
+      ]
+    },
+    {
+      "id": 26,
+      "fase": 5,
+      "icone": "Lightning",
+      "titulo": "Faça uma promoção relâmpago",
+      "tempo": "10 min",
+      "texto": [
+        "Promoção com hora para acabar faz as pessoas decidirem rápido. Copie e poste no status:"
+      ],
+      "mensagem": "Promoção relâmpago! ⚡ Só hoje, até as 18h: [promoção]. Corre que é por tempo limitado! 🍰",
+      "dica": "Ótima para vender as últimas fatias do dia e não sobrar nada."
+    },
+    {
+      "id": 27,
+      "fase": 5,
+      "icone": "HandHeart",
+      "titulo": "Surpreenda na embalagem",
+      "tempo": "15 min",
+      "texto": [
+        "Um bilhetinho escrito \"Feito com carinho 💛\" ou um adesivo com seu nome faz o cliente lembrar de você e indicar para outras pessoas."
+      ]
+    },
+    {
+      "id": 34,
+      "fase": 5,
+      "icone": "UsersThree",
+      "titulo": "Divulgue nos grupos do bairro",
+      "tempo": "10 min",
+      "texto": [
+        "Grupos de WhatsApp e Facebook do seu bairro, condomínio, igreja ou escola têm muita gente que mora perto de você.",
+        "Peça para entrar e, se o grupo permitir, poste uma foto das fatias com a mensagem abaixo."
+      ],
+      "mensagem": "Oi, vizinhos! 😊 Faço fatias de bolo caseiras aqui no bairro. Esta semana tenho: [sabores], R$ [preço] cada. Entrego perto ou você retira. É só me chamar no WhatsApp!",
+      "dica": "Respeite as regras do grupo: em alguns, só pode divulgar em certos dias."
+    },
+    {
+      "id": 28,
+      "fase": 5,
+      "icone": "Cake",
+      "titulo": "Ofereça encomendas",
+      "tempo": "10 min",
+      "texto": [
+        "Além das fatias, ofereça bolo inteiro para aniversários e festas. É uma venda maior de uma vez só.",
+        "Avise no status: \"Agora também aceito encomendas de bolo inteiro!\""
+      ]
+    },
+    {
+      "id": 32,
+      "fase": 5,
+      "icone": "Stack",
+      "titulo": "Produza mais de uma vez só",
+      "tempo": "15 min",
+      "texto": [
+        "Quando as vendas aumentarem, não faça um bolo de cada vez. Preparar massas, recheios e caldas para 2 ou 3 bolos de uma vez economiza gás, tempo e louça.",
+        "Na lista de compras, coloque 2 ou 3 receitas de cada sabor e veja quanto comprar.",
+        "Os ingredientes que você mais usa costumam sair mais baratos em embalagem grande ou no atacado."
+      ],
+      "link": {
+        "href": "/lista",
+        "rotulo": "Abrir lista de compras"
+      },
+      "dica": "Comprou mais barato? Atualize em \"Meus preços\". O custo da fatia cai e o seu lucro sobe."
+    },
+    {
+      "id": 33,
+      "fase": 5,
+      "icone": "Handshake",
+      "titulo": "Ofereça suas fatias para revender",
+      "tempo": "20 min",
+      "texto": [
+        "Padarias, cafeterias, lanchonetes e lojas do bairro podem vender as suas fatias. Você entrega, e elas vendem todos os dias, mesmo quando você não está lá.",
+        "Leve uma fatia para a pessoa provar e combine: quantas fatias por semana, o dia da entrega e o preço.",
+        "Quem revende paga menos que o seu preço de venda, porque também precisa ganhar. Use a calculadora para conferir que ainda sobra um bom lucro para você."
+      ],
+      "mensagem": "Olá! Eu faço fatias de bolo caseiras e trouxe uma para você provar. Você gostaria de vender aqui? Eu entrego toda [dia da semana], já embaladas e com etiqueta.",
+      "link": {
+        "href": "/calculadora",
+        "rotulo": "Abrir calculadora"
+      },
+      "dica": "Comece com poucas fatias por semana e aumente conforme forem vendendo."
+    },
+    {
+      "id": 29,
+      "fase": 5,
+      "icone": "Storefront",
+      "titulo": "Procure uma feira ou ponto fixo",
+      "tempo": "20 min",
+      "texto": [
+        "Com prática, é hora de pensar em vender em uma feira ou num ponto fixo.",
+        "Procure a prefeitura da sua cidade para saber o que é preciso para ter uma banca. Vale também pesquisar sobre o MEI, que é o registro de microempreendedora."
+      ]
+    },
+    {
+      "id": 30,
+      "fase": 5,
+      "icone": "Trophy",
+      "titulo": "Analise seu mês e comemore!",
+      "tempo": "15 min",
+      "texto": [
+        "Abra \"Minhas vendas\" e veja quanto você lucrou no mês. Compare com a sua meta.",
+        "Olhe também o dinheiro que você guardou para as compras. Se sobrou, pense no que comprar para produzir mais: uma forma maior, uma batedeira melhor, uma caixa térmica.",
+        "Ajuste sua meta para o próximo mês e comemore: você saiu do zero e montou o seu negócio."
+      ],
+      "link": {
+        "href": "/vendas",
+        "rotulo": "Ver minhas vendas"
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Sua trilha · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .fase-titulo { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 6px; border-bottom: 2px solid var(--tinta); }
+  .tempo-linha { position: relative; }
+  .tempo-linha li { position: relative; display: flex; gap: 14px; padding: 8px 0; }
+  .tempo-linha li:not(:last-child)::after { content: ''; position: absolute; left: 21px; top: 52px; bottom: -8px; width: 2px; background: var(--linha); }
+  .tempo-linha li.feito:not(:last-child)::after { background: var(--verde); }
+  .marcador { flex: none; width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--linha); color: var(--suave); background: var(--fundo); position: relative; z-index: 1; }
+  .feito .marcador { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .atual .marcador { background: var(--tomate); border-color: var(--tomate); color: #fff; box-shadow: 0 0 0 5px var(--tomate-claro); }
+  .passo-link { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; text-decoration: none; }
+  .bloqueado .passo-link { color: var(--suave); }
+  .atual .passo-titulo { font-weight: 700; font-family: var(--fonte-titulo); font-size: 1.1rem; }
+</style>
+{% endblock %}
+{% block conteudo %}
+<header class="cabecalho">
+  <h1>Sua trilha</h1>
+  <p class="suave mt-2 numeros">{{ p.total_feitas }} de {{ total_passos }} passos feitos</p>
+  <div class="mt-2">{{ ui.barra(p.total_feitas, total_passos) }}</div>
+</header>
+<p class="suave">As tarefas são rápidas. Faça no seu ritmo, e se quiser, várias no mesmo dia: quanto antes terminar, antes você começa a vender.</p>
+
+{% for f in fases %}
+<section class="mt-8">
+  <div class="fase-titulo">
+    <h2>{{ f.nome }}</h2>
+    {% if f.feitos == f.passos|length %}<span class="verde-txt negrito pequeno">{{ ui.ic('Check', 'ic-sm') }} Completa</span>{% else %}<span class="suave pequeno numeros">{{ f.feitos }} de {{ f.passos|length }}</span>{% endif %}
+  </div>
+  <ol class="tempo-linha mt-2">
+    {% for passo in f.passos %}
+    {% set feito = passo.id in p.feitas %}
+    {% set e_atual = passo.id == atual %}
+    <li class="{{ 'feito' if feito else ('atual' if e_atual else 'bloqueado') }}">
+      <span class="marcador">{% if feito %}{{ ui.ic('Check') }}{% elif e_atual %}{{ ui.ic(passo.icone, '', true) }}{% else %}{{ ui.ic('Lock', 'ic-sm') }}{% endif %}</span>
+      {% if feito or e_atual %}
+      <a class="passo-link" href="{{ P }}/tarefas/{{ passo.id }}">
+        <span><span class="passo-titulo">{{ passo.titulo }}</span><br><span class="suave pequeno">{% if feito %}Feito{% else %}Agora · {{ passo.tempo }}{% endif %}</span></span>
+        <span class="suave">›</span>
+      </a>
+      {% else %}
+      <div class="passo-link"><span><span class="passo-titulo">{{ passo.titulo }}</span><br><span class="suave pequeno">{{ passo.tempo }}</span></span></div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endfor %}
+{% endblock %}

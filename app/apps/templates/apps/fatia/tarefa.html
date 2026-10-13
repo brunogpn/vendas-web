@@ -1,0 +1,84 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}{{ passo.titulo }} · {{ app.nome }}{% endblock %}
+{% block conteudo %}
+{{ ui.voltar(P ~ '/tarefas', 'Trilha') }}
+<div class="linha mt-3">
+  <span class="selo">{{ ui.ic(passo.icone, 'ic-lg', true) }}</span>
+  <div><p class="suave pequeno">Passo {{ numero }}, fase {{ fase.nome }}</p><p class="suave pequeno">{{ ui.ic('Clock', 'ic-sm') }} {{ passo.tempo }}</p></div>
+</div>
+<h1 class="mt-4">{{ passo.titulo }}</h1>
+
+{% if not liberado and not feito %}
+<p class="caixa-areia mt-4">🔒 Termine o passo anterior para liberar este.</p>
+{% endif %}
+
+<div class="pilha mt-4">
+  {% for par in passo.texto %}<p>{{ par }}</p>{% endfor %}
+</div>
+
+{% if passo.checklist %}
+<ul class="pilha mt-6" style="--gap:8px" data-marcaveis="checklist-{{ passo.id }}">
+  {% for item in passo.checklist %}
+  <li><button type="button" class="marcavel" role="checkbox" aria-checked="false" data-id="{{ loop.index0 }}"><span class="caixinha">{{ ui.ic('Check') }}</span><span class="texto-item">{{ item }}</span></button></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if passo.mensagem %}
+<section class="cartao mt-6">
+  <p class="suave pequeno">{{ ui.ic('ChatCircleText', 'ic-sm') }} Mensagem pronta para enviar</p>
+  <p id="mensagem" class="mt-2" style="white-space:pre-line">{{ passo.mensagem }}</p>
+  <button type="button" class="botao-sec mt-4" data-copiar="mensagem">{{ ui.ic('Copy') }} Copiar mensagem</button>
+</section>
+{% endif %}
+
+{% if passo.dica %}
+<p class="dica mt-6">{{ ui.ic('Lightbulb', 'tomate-txt') }} <strong>Dica:</strong> {{ passo.dica }}</p>
+{% endif %}
+
+{% if link %}
+<a class="botao-sec mt-6" href="{{ link.href }}">{{ link.rotulo }} {{ ui.ic('ArrowRight', 'ic-sm') }}</a>
+{% endif %}
+
+<div class="mt-8 pilha" style="--gap:10px">
+  {% if feito %}
+  <p class="caixa-verde verde-txt negrito centro">{{ ui.ic('Check') }} Feita em {{ datas.curta(concluida_em) }}</p>
+  {% if proximo %}<a class="botao" href="{{ P }}/tarefas/{{ proximo }}">Próxima tarefa {{ ui.ic('ArrowRight', 'ic-sm') }}</a>{% endif %}
+  {% if pode_desfazer and ativa %}<button type="button" class="botao-texto" id="desfazer" style="justify-content:center">Marquei sem querer, desmarcar</button>{% endif %}
+  {% elif liberado %}
+  <button type="button" class="botao" id="concluir"{% if not ativa %} disabled{% endif %}>{{ ui.ic('Check') }} Terminei esta tarefa</button>
+  {% endif %}
+  {{ ui.erro('erro') }}
+</div>
+{% endblock %}
+{% block js %}
+<script>
+(function () {
+  var erro = document.getElementById('erro');
+  var concluir = document.getElementById('concluir');
+  var desfazer = document.getElementById('desfazer');
+  var proximo = {{ proximo|tojson }};
+  if (concluir) concluir.addEventListener('click', function () {
+    App.mostrarErro(erro, '');
+    App.ocupado(concluir, 'Salvando...', App.post(APP.prefixo + '/tarefas/{{ passo.id }}/concluir')).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erro, r.erro);
+      concluir.disabled = true;
+      App.comemorar({
+        titulo: 'Tarefa concluída!',
+        mensagem: {{ ultimo|tojson }} ? 'Você terminou a trilha inteira.' : 'Você está avançando. Vamos para a próxima?',
+        conquistas: r.conquistas,
+        onFechar: function () { window.location.href = APP.prefixo + (proximo ? '/tarefas/' + proximo : '/'); }
+      });
+    });
+  });
+  if (desfazer) desfazer.addEventListener('click', function () {
+    App.mostrarErro(erro, '');
+    App.ocupado(desfazer, 'Desmarcando...', App.post(APP.prefixo + '/tarefas/{{ passo.id }}/desfazer')).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erro, r.erro);
+      window.location.reload();
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Meu acesso · {{ app.nome }}{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Meu acesso', P ~ '/mais') }}
+{% if ativa %}
+<section class="caixa-areia">
+  <p class="suave">Seu acesso vale até</p>
+  <p class="valor-grande numeros mt-1" style="font-size:2.2rem">{{ datas.completa(expira_em) }}</p>
+  <p class="mt-2">{% if dias_licenca == 0 %}Vence hoje.{% else %}Faltam {{ dias_licenca }} {{ 'dia' if dias_licenca == 1 else 'dias' }}.{% endif %}</p>
+</section>
+{% else %}
+<section class="caixa-tomate">
+  <p class="negrito">Seu acesso venceu em {{ datas.completa(expira_em) }}</p>
+  <p class="mt-2">Fique tranquila: todo o seu progresso continua guardado. Renove para continuar de onde parou.</p>
+</section>
+{% endif %}
+
+{% if renovacoes %}
+{% set maior = renovacoes | map(attribute='dias') | max %}
+<h2 class="mt-8">{{ 'Renove antes e não perca nenhum dia' if ativa else 'Escolha como renovar' }}</h2>
+{% if ativa %}<p class="suave mt-1">Os dias novos somam a partir de {{ datas.completa(expira_em) }}, não de hoje.</p>{% endif %}
+<div class="pilha mt-4">
+  {% for o in renovacoes %}
+  {% set destaque = renovacoes|length > 1 and o.dias == maior %}
+  <section class="cartao" style="{{ 'border:2px solid var(--tinta)' if destaque }}">
+    {% if destaque %}<span class="pilula">Mais econômico</span>{% endif %}
+    <div class="linha-entre mt-2"><h3>{{ o.nome_venda }}</h3><p class="valor-grande numeros" style="font-size:1.9rem">{{ fmt.reais(o.preco_promocional) }}</p></div>
+    {% if o.meses > 1 %}<p class="suave mt-1">Sai por {{ fmt.reais(o.preco_promocional / o.meses) }} por mês.</p>{% endif %}
+    <a class="{{ 'botao' if destaque or renovacoes|length == 1 else 'botao-sec' }} mt-4" href="{{ ('/pay2/' ~ o.produto_id ~ '?ref=' ~ guid_estante) if guid_estante else ('/pay/' ~ o.produto_id) }}">Renovar {{ ui.ic('ArrowRight', 'ic-sm') }}</a>
+  </section>
+  {% endfor %}
+</div>
+<p class="suave mt-6">Use o mesmo email da sua conta ({{ cliente.email }}) na compra. Depois de pago, o acesso é liberado sozinho.</p>
+{% else %}
+<p class="mt-8">Para renovar, escreva para <a href="mailto:{{ app.email_suporte }}?subject={{ ('Renovar o ' ~ app.nome)|urlencode }}">{{ app.email_suporte }}</a> com o seu email de acesso ({{ cliente.email }}). A gente te ajuda.</p>
+{% endif %}
+<p class="suave mt-4">{{ ui.ic('EnvelopeSimple', 'ic-sm') }} Dúvidas? <a href="mailto:{{ app.email_suporte }}">{{ app.email_suporte }}</a></p>
+{% endblock %}

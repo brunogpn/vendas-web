@@ -1,0 +1,93 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Receitas · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .busca { position: relative; }
+  .busca .lupa { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--suave); }
+  .busca .campo { padding-left: 48px; padding-right: 52px; }
+  .busca .limpar { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--suave); }
+  .grade-receitas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+  .grade-receitas a { text-decoration: none; }
+  .grade-receitas .foto { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--raio); background: var(--areia); display: flex; align-items: center; justify-content: center; color: var(--suave); }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Receitas') }}
+<p class="suave">Tudo o que você precisa para fazer cada receita, numa página só.</p>
+
+<div class="busca mt-4">
+  <span class="lupa">{{ ui.ic('MagnifyingGlass') }}</span>
+  <input id="busca" class="campo" type="search" placeholder="Buscar pelo nome" aria-label="Buscar receita" value="{{ busca }}" autocomplete="off">
+  <button type="button" class="limpar" id="limpar" aria-label="Limpar a busca" hidden>{{ ui.ic('X') }}</button>
+</div>
+
+<div class="grade-2 mt-4" id="categorias">
+  {% for c in ['fatias', 'brigadeiros'] %}
+  <button type="button" class="opcao" data-categoria="{{ c }}" aria-pressed="false">{{ categorias[c].nome }} <span class="suave" style="font-weight:500">{{ contagem[c] }}</span></button>
+  {% endfor %}
+</div>
+
+<p class="suave mt-4" id="encontradas" hidden></p>
+<ul class="grade-receitas mt-4" id="lista">
+  {% for r in receitas %}
+  <li data-categoria="{{ r.categoria }}" data-busca="{{ r.busca }}">
+    <a href="{{ P }}/receitas/{{ r.id }}">
+      {% if r.imagem %}<img class="foto" src="{{ asset(r.imagem) }}" alt="" loading="lazy">{% else %}<span class="foto">{{ ui.ic(categorias[r.categoria].icone, 'ic-xl') }}</span>{% endif %}
+      <p class="negrito mt-2" style="line-height:1.25">{{ r.nome }}</p>
+      <p class="suave pequeno primeira-maiuscula"><span class="so-busca" hidden>{{ categorias[r.categoria].nome }}, </span>{{ r.dificuldade or '' }}</p>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+<div id="vazio" class="centro mt-8" hidden>
+  <p class="negrito">Nenhuma receita encontrada</p>
+  <p class="suave mt-2">Confira se o nome está escrito certo ou tente só uma palavra, como "ninho".</p>
+  <button type="button" class="botao-texto mt-2" id="limpar2">Limpar a busca</button>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+(function () {
+  var categoria = {{ categoria|tojson }};
+  var campo = document.getElementById('busca');
+  var itens = Array.prototype.slice.call(document.querySelectorAll('#lista > li'));
+  function atualizarUrl(termo) {
+    var q = new URLSearchParams();
+    if (categoria !== 'fatias') q.set('categoria', categoria);
+    if (termo) q.set('busca', termo);
+    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
+  }
+  function filtrar() {
+    var termo = App.semAcento(campo.value);
+    var n = 0;
+    itens.forEach(function (li) {
+      var mostra = termo ? li.getAttribute('data-busca').indexOf(termo) >= 0 : li.getAttribute('data-categoria') === categoria;
+      li.hidden = !mostra;
+      li.querySelector('.so-busca').hidden = !termo;
+      if (mostra) n++;
+    });
+    document.querySelectorAll('#categorias .opcao').forEach(function (b) {
+      b.setAttribute('aria-pressed', !termo && b.getAttribute('data-categoria') === categoria ? 'true' : 'false');
+    });
+    document.getElementById('limpar').hidden = !campo.value;
+    var enc = document.getElementById('encontradas');
+    enc.hidden = !termo || n === 0;
+    enc.textContent = n + ' ' + App.plural(n, 'receita encontrada', 'receitas encontradas');
+    document.getElementById('vazio').hidden = n > 0;
+    atualizarUrl(campo.value.trim());
+  }
+  function limpar() { campo.value = ''; filtrar(); campo.focus(); }
+  campo.addEventListener('input', filtrar);
+  document.getElementById('limpar').addEventListener('click', limpar);
+  document.getElementById('limpar2').addEventListener('click', limpar);
+  document.getElementById('categorias').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-categoria]'); if (!b) return;
+    categoria = b.getAttribute('data-categoria');
+    campo.value = '';
+    filtrar();
+  });
+  filtrar();
+})();
+</script>
+{% endblock %}

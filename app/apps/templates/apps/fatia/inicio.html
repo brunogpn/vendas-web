@@ -1,0 +1,97 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block css %}
+<style>
+  .carrossel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 4px 16px 8px; scrollbar-width: none; }
+  .carrossel::-webkit-scrollbar { display: none; }
+  .carrossel a { flex: none; width: 160px; scroll-snap-align: start; text-decoration: none; }
+  .carrossel img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--raio); background: var(--areia); }
+  .medalha-mini { width: 44px; height: 44px; border-radius: 999px; background: var(--tinta); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+  .medalha-mini.vazia { background: transparent; border: 2px dashed var(--linha); color: var(--suave); }
+</style>
+{% endblock %}
+{% block conteudo %}
+<header>
+  <p class="suave primeira-maiuscula">{{ datas.por_extenso(hoje) }}</p>
+  <h1 class="mt-1">Olá, {{ primeiro_nome or 'querida' }}</h1>
+</header>
+
+{% if dias_licenca is not none and dias_licenca <= 7 %}
+<a class="caixa-tomate linha-entre mt-4" style="text-decoration:none" href="{{ P }}/acesso">
+  <span class="medio">{% if dias_licenca < 0 %}Seu acesso venceu{% elif dias_licenca == 0 %}Seu acesso vence hoje{% else %}Seu acesso vence em {{ dias_licenca }} {{ 'dia' if dias_licenca == 1 else 'dias' }}{% endif %}</span>
+  <span class="negrito tomate-txt">Renovar ›</span>
+</a>
+{% endif %}
+
+<section class="cartao-escuro mt-6">
+  {% if p.proximo_passo %}
+  {% set passo = p.proximo_passo %}
+  <p class="suave">Sua próxima tarefa</p>
+  <div class="linha mt-3">
+    <span class="selo selo-tomate" style="width:52px;height:52px">{{ ui.ic(passo.icone, '', true) }}</span>
+    <div class="cresce">
+      <h2 style="font-size:1.25rem">{{ passo.titulo }}</h2>
+      <p class="suave pequeno mt-1">{{ ui.ic('Clock', 'ic-sm') }} {{ passo.tempo }}</p>
+    </div>
+  </div>
+  <a class="botao mt-4" href="{{ P }}/tarefas/{{ passo.id }}">Começar tarefa {{ ui.ic('ArrowRight', 'ic-sm') }}</a>
+  {% else %}
+  <div class="linha">
+    <span class="selo selo-tomate" style="width:52px;height:52px">{{ ui.ic('Trophy', '', true) }}</span>
+    <div><h2 style="font-size:1.25rem">Você concluiu a trilha toda</h2>
+      <p class="suave mt-1">Continue lançando suas vendas e batendo suas metas.</p></div>
+  </div>
+  {% endif %}
+  <div class="linha-entre mt-6 pequeno"><span class="suave">Sua trilha</span><span class="numeros">{{ p.total_feitas }} de {{ total_passos }} feitos</span></div>
+  <div class="mt-2">{{ ui.barra(p.total_feitas, total_passos, 'clara') }}</div>
+</section>
+
+<section class="cartao mt-4">
+  <div class="linha-entre">
+    <div><p class="suave pequeno">Seu nível</p><p class="titulo-fonte negrito grande">{{ ui.ic(p.nivel.icone, 'tomate-txt', true) }} {{ p.nivel.nome }}</p></div>
+    <p class="negrito numeros">{{ p.pontos }} pontos</p>
+  </div>
+  {% if p.proximo_nivel %}
+  <div class="mt-3">{{ ui.barra(p.pontos - p.nivel.min, p.proximo_nivel.min - p.nivel.min) }}</div>
+  <p class="suave pequeno mt-2">Faltam {{ p.proximo_nivel.min - p.pontos }} pontos para {{ p.proximo_nivel.nome }}.</p>
+  {% else %}
+  <p class="suave pequeno mt-2">Você chegou ao nível máximo.</p>
+  {% endif %}
+  {% if p.sequencia > 1 %}
+  <p class="mt-3">🔥 <strong>{{ p.sequencia }} dias seguidos</strong> usando o app</p>
+  {% endif %}
+</section>
+
+<section class="cartao mt-4">
+  <p class="suave">Lucro de {{ nome_mes }}</p>
+  <p class="valor-grande verde-txt numeros mt-1">{{ fmt.reais(p.total_mes.lucro) }}</p>
+  <p class="suave mt-1">de {{ fmt.reais_sem_centavos(p.metas.meta) }} que você quer ganhar</p>
+  <div class="mt-3">{{ ui.barra([p.total_mes.lucro, 0]|max, p.metas.meta, 'verde') }}</div>
+  {% if p.falta_meta > 0 %}
+  <p class="mt-3">Faltam <strong>{{ fmt.reais(p.falta_meta) }}</strong>, mais ou menos <strong>{{ p.fatias_faltando }} {{ 'fatia' if p.fatias_faltando == 1 else 'fatias' }}</strong>. Isso dá cerca de <strong>{{ p.metas.fatias_por_dia_de_venda }} {{ 'fatia' if p.metas.fatias_por_dia_de_venda == 1 else 'fatias' }}</strong> por dia de venda.</p>
+  {% else %}
+  <p class="mt-3 verde-txt negrito">Meta do mês batida. Parabéns!</p>
+  {% endif %}
+  <a class="botao-sec mt-4" href="{{ P }}/vendas">{% if p.de_hoje %}Ver minhas vendas{% else %}Vendeu hoje? Anotar agora{% endif %}</a>
+</section>
+
+{% if faceis %}
+<section class="mt-8">
+  <div class="linha-entre"><h2>Fatias fáceis</h2><a class="tomate-txt negrito" style="text-decoration:none" href="{{ P }}/receitas">Ver todas ›</a></div>
+  <div class="carrossel mt-3">
+    {% for r in faceis %}
+    <a href="{{ P }}/receitas/{{ r.id }}"><img src="{{ asset(r.imagem) }}" alt="" loading="lazy"><p class="medio mt-2">{{ r.nome | replace('Fatia ', '') }}</p></a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<a class="cartao mt-6" style="display:block;text-decoration:none" href="{{ P }}/medalhas">
+  <div class="linha-entre"><h2>Minhas medalhas</h2><span class="suave">›</span></div>
+  <p class="suave mt-1">{{ p.medalhas_ganhas }} de {{ p.medalhas|length }} conquistadas</p>
+  <div class="linha mt-3" style="flex-wrap:wrap;gap:8px">
+    {% for m in p.medalhas if m.ganhou %}<span class="medalha-mini" title="{{ m.nome }}">{{ ui.ic(m.icone, '', true) }}</span>
+    {% else %}<span class="medalha-mini vazia">{{ ui.ic('Lock') }}</span>{% endfor %}
+  </div>
+</a>
+{% endblock %}

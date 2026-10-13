@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block titulo %}{{ app.nome }}{% endblock %}</title>
+<meta name="description" content="{{ app.descricao }}">
+<meta name="theme-color" content="{{ app.cor_tema }}">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="{{ app.nome }}">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="{{ app.prefixo }}/manifest.webmanifest">
+<link rel="apple-touch-icon" href="{{ asset(app.icone_192) }}">
+<link rel="icon" type="image/png" href="{{ asset(app.icone_192) }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('apps/_nucleo/app.css') }}">
+{% block css %}{% endblock %}
+</head>
+<body>
+{% block topo %}{% endblock %}
+<main class="conteudo {% block classe_conteudo %}{% endblock %}">
+{% block conteudo %}{% endblock %}
+</main>
+{% block menu %}{% endblock %}
+<script>
+window.APP = {
+  prefixo: {{ app.prefixo|tojson }},
+  icones: {{ asset('apps/_nucleo/icones.svg')|tojson }},
+  som: {{ (som_ligado|default(false))|tojson }}
+};
+</script>
+<script src="{{ asset('apps/_nucleo/confetti.browser.js') }}" defer></script>
+<script src="{{ asset('apps/_nucleo/app.js') }}"></script>
+{% block js %}{% endblock %}
+</body>
+</html>

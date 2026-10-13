@@ -538,6 +538,10 @@
            class="nav-link {% if request.endpoint in ['admin.listar_ebooks_view','admin.editar_ebook'] %}active{% endif %}">
             <span class="icon">📚</span> Catálogo de E-books
         </a>
+        <a href="{{ url_for('admin.apps_clientes') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('admin.apps_') %}active{% endif %}">
+            <span class="icon">📱</span> Apps das clientes
+        </a>
         {% endif %}
 
         <!-- Sub-menu do produto ativo -->

@@ -1,0 +1,28 @@
+{% extends 'apps/_nucleo/entrar.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block css %}
+{{ super() }}
+<style>
+  .capa-fatias { position: relative; overflow: hidden; background: var(--tomate); border-radius: 0 0 32px 32px; padding: 28px 16px 36px; margin: -16px -16px 0; color: #fff; }
+  .capa-fatias .bolha { position: absolute; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .capa-fatias .marca { position: relative; display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--tomate); border-radius: 999px; padding: 6px 14px 6px 10px; font-family: var(--fonte-titulo); font-weight: 800; }
+  .leque { position: relative; height: 230px; margin-top: 24px; }
+  .leque img { position: absolute; top: 10px; left: 50%; width: 148px; aspect-ratio: 4/5; object-fit: cover; border: 5px solid #fff; border-radius: 18px; box-shadow: 0 14px 30px rgba(0,0,0,.25); }
+  .leque .e { transform: translateX(-112%) rotate(-9deg); }
+  .leque .d { transform: translateX(12%) rotate(9deg); }
+  .leque .c { top: 0; transform: translateX(-50%); z-index: 1; }
+</style>
+{% endblock %}
+{% block capa %}
+<div class="capa-fatias centro">
+  <span class="bolha" style="width:220px;height:220px;left:-80px;top:-90px"></span>
+  <span class="bolha" style="width:160px;height:160px;right:-50px;bottom:-40px"></span>
+  <span class="marca surgir" style="--atraso:120ms">{{ ui.ic('Cake', '', true) }} {{ app.nome }}</span>
+  <div class="leque">
+    <img class="e surgir" style="--atraso:210ms" src="{{ asset('apps/fatia/receitas/cheesecake-frutas-vermelhas.jpg') }}" alt="">
+    <img class="d surgir" style="--atraso:210ms" src="{{ asset('apps/fatia/receitas/caramelo-salgado-crocante.jpg') }}" alt="">
+    <img class="c surgir" style="--atraso:300ms" src="{{ asset('apps/fatia/receitas/pistache-com-morango.jpg') }}" alt="">
+  </div>
+</div>
+{% endblock %}
+{% block chamada %}Seu passo a passo para vender fatias de bolo{% endblock %}

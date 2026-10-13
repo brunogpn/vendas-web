@@ -1,0 +1,179 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Lista de compras · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .contador { display: flex; align-items: center; gap: 8px; }
+  .contador button { width: 48px; height: 48px; border-radius: 14px; background: var(--areia); display: inline-flex; align-items: center; justify-content: center; }
+  .contador button:active { background: var(--linha); }
+  .contador .n { min-width: 2ch; text-align: center; font-weight: 700; font-size: 1.2rem; }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Lista de compras', P ~ '/mais') }}
+<p class="suave">Escolha o que vai fazer. O app soma os ingredientes e diz quanto comprar.</p>
+{% if not ativa %}<p class="erro mt-4">Seu acesso venceu. Você pode ver a lista, mas as mudanças não ficam salvas.</p>{% endif %}
+
+<section class="mt-8">
+  <h2>O que você vai fazer</h2>
+  <ul class="pilha mt-3" style="--gap:10px" id="escolhidas"></ul>
+  <p class="mt-3" id="total-producao" hidden></p>
+  <button type="button" class="botao-sec mt-4" id="adicionar">{{ ui.ic('Plus') }} Adicionar outra receita</button>
+  <div id="seletor-box" class="mt-4" hidden>
+    <div class="linha-entre"><p class="negrito">Escolha a receita</p><button type="button" class="botao-texto" id="fechar-seletor" aria-label="Fechar">{{ ui.ic('X') }}</button></div>
+    <div id="seletor" class="mt-2"></div>
+  </div>
+</section>
+
+<section class="mt-10" id="para-comprar" hidden>
+  <h2>Para comprar</h2>
+  <p class="mt-1"><strong class="numeros" id="no-carrinho"></strong> no carrinho</p>
+  <p class="suave pequeno">Toque em cada item quando colocar no carrinho.</p>
+  <div id="grupos"></div>
+  <div id="outros-box" hidden>
+    <h3 class="mt-6">Também vai precisar</h3>
+    <ul class="pilha mt-2" style="--gap:8px" id="outros"></ul>
+  </div>
+  <div class="cartao-escuro mt-6">
+    <p class="suave">Gasto previsto no mercado</p>
+    <p class="valor-grande numeros mt-1" id="gasto-previsto"></p>
+    <p class="mt-2 pequeno" id="sem-preco" hidden></p>
+    <p class="suave pequeno mt-2">Conta pelas embalagens inteiras. Sobras ficam para a próxima receita.</p>
+  </div>
+  <div class="grade-2 mt-4">
+    <button type="button" class="botao-sec" id="desmarcar">Desmarcar tudo</button>
+    <button type="button" class="botao-sec" id="nova">Começar uma lista nova</button>
+  </div>
+</section>
+{{ ui.erro('erro') }}
+{% endblock %}
+{% block js %}
+<script src="{{ asset('apps/fatia/custos.js') }}"></script>
+<script src="{{ asset('apps/fatia/escolher_receita.js') }}"></script>
+<script>
+(function () {
+  var catalogo = {{ catalogo|tojson }};
+  var receitas = {{ receitas|tojson }};
+  var precos = {{ precos|tojson }};
+  var lista = {{ lista|tojson }};
+  var $ = function (id) { return document.getElementById(id); };
+  Custos.iniciar(catalogo);
+  var porId = {}; receitas.forEach(function (r) { porId[r.id] = r; });
+  var ordemCatalogo = {}; catalogo.forEach(function (c, i) { ordemCatalogo[c.id] = i; });
+  var grupos = {{ catalogo|map(attribute='grupo')|unique|list|tojson }};
+  var timer = null;
+
+  function salvar() {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      App.post(APP.prefixo + '/lista/salvar', lista).then(function (r) { App.mostrarErro($('erro'), r.ok ? '' : r.erro); });
+    }, 600);
+  }
+
+  function escolhidas() {
+    return Object.keys(lista.receitas).filter(function (id) { return porId[id]; })
+      .map(function (id) { return { receita: porId[id], vezes: lista.receitas[id] }; });
+  }
+
+  function marcavel(chave, html, extra) {
+    var on = lista.marcados.indexOf(chave) >= 0;
+    return '<li><button type="button" class="marcavel" role="checkbox" aria-checked="' + on + '" data-chave="' + App.escapar(chave) + '">' +
+      '<span class="caixinha">' + App.icone('Check') + '</span><span class="cresce"><span class="texto-item">' + html + '</span>' + (extra || '') + '</span></button></li>';
+  }
+
+  function desenhar() {
+    var esc = escolhidas();
+    // Receitas escolhidas.
+    $('escolhidas').innerHTML = esc.map(function (e) {
+      var r = e.receita, total = (r.fatias || 0) * e.vezes;
+      var foto = r.imagem ? '<img src="/static/' + r.imagem + '" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover">' : '';
+      return '<li class="cartao" style="padding:12px"><div class="linha">' + foto + '<div class="cresce"><p class="negrito">' + App.escapar(r.nome) + '</p>' +
+        '<p class="suave pequeno">' + e.vezes + ' ' + App.plural(e.vezes, 'receita', 'receitas') + (total ? ' · ' + total + ' ' + Custos.nomeUnidade(r, total) : '') + '</p></div></div>' +
+        '<div class="linha-entre mt-2"><span class="suave pequeno">Quantas receitas?</span><span class="contador">' +
+        '<button type="button" data-menos="' + r.id + '" aria-label="' + (e.vezes === 1 ? 'Tirar da lista' : 'Uma a menos') + '">' + App.icone(e.vezes === 1 ? 'Trash' : 'Minus') + '</button>' +
+        '<span class="n numeros">' + e.vezes + '</span>' +
+        '<button type="button" data-mais="' + r.id + '" aria-label="Uma a mais"' + (e.vezes >= 50 ? ' disabled' : '') + '>' + App.icone('Plus') + '</button></span></div></li>';
+    }).join('');
+    var fatias = 0, brig = 0;
+    esc.forEach(function (e) { var n = (e.receita.fatias || 0) * e.vezes; if (e.receita.categoria === 'brigadeiros') brig += n; else fatias += n; });
+    var partes = [];
+    if (fatias) partes.push(fatias + ' ' + App.plural(fatias, 'fatia', 'fatias'));
+    if (brig) partes.push(brig + ' ' + App.plural(brig, 'brigadeiro', 'brigadeiros'));
+    $('total-producao').hidden = !partes.length;
+    $('total-producao').innerHTML = 'Ao todo, cerca de <strong>' + partes.join(' e ') + '</strong>.';
+    var vazia = esc.length === 0;
+    $('adicionar').hidden = vazia || !$('seletor-box').hidden;
+    if (vazia) abrirSeletor();
+
+    // Para comprar.
+    $('para-comprar').hidden = vazia;
+    if (vazia) return;
+    var soma = Custos.somarItens(esc);
+    var itens = soma.itens.slice().sort(function (a, b) { return (ordemCatalogo[a.item] || 0) - (ordemCatalogo[b.item] || 0); });
+    var gasto = 0, semPreco = 0, html = '';
+    var chaves = itens.map(function (i) { return i.item; }).concat(soma.outros.map(function (o) { return 'outro:' + o; }));
+    lista.marcados = lista.marcados.filter(function (k) { return chaves.indexOf(k) >= 0; });
+    grupos.forEach(function (g) {
+      var doGrupo = itens.filter(function (i) { var ing = Custos.ingrediente(i.item); return ing && ing.grupo === g; });
+      if (!doGrupo.length) return;
+      html += '<h3 class="mt-6">' + App.escapar(g) + '</h3><ul class="pilha mt-2" style="--gap:8px">';
+      doGrupo.forEach(function (i) {
+        var ing = Custos.ingrediente(i.item);
+        var compra = Custos.textoCompra(i.item, i.qtd, precos);
+        var p = precos[i.item];
+        var valor = '';
+        if (p && p.quantidade) { var v = compra.n * p.preco; gasto += v; valor = ' <span class="negrito numeros" style="float:right">' + App.reais(v) + '</span>'; }
+        else semPreco++;
+        html += marcavel(i.item, '<strong>' + App.escapar(ing.nome) + ':</strong> ' + App.escapar(compra.texto) + valor,
+          '<span class="suave pequeno" style="display:block">Vai usar ' + Custos.textoQuantidade(i.qtd, ing.unidade) + '</span>');
+      });
+      html += '</ul>';
+    });
+    $('grupos').innerHTML = html;
+    $('outros-box').hidden = !soma.outros.length;
+    $('outros').innerHTML = soma.outros.map(function (o) { return marcavel('outro:' + o, App.escapar(o)); }).join('');
+    $('no-carrinho').textContent = lista.marcados.length + ' de ' + chaves.length;
+    $('gasto-previsto').textContent = App.reais(gasto);
+    $('sem-preco').hidden = !semPreco;
+    $('sem-preco').innerHTML = 'Sem contar ' + semPreco + ' ' + App.plural(semPreco, 'item', 'itens') + ' sem preço. <a href="' + APP.prefixo + '/precos" style="color:#fff">Anotar preços</a>';
+  }
+
+  function abrirSeletor() {
+    $('seletor-box').hidden = false;
+    $('adicionar').hidden = true;
+    $('fechar-seletor').hidden = Object.keys(lista.receitas).length === 0;
+    EscolherReceita.montar($('seletor'), receitas, {
+      marcadas: Object.keys(lista.receitas), static: '/static/',
+      aoEscolher: function (id) {
+        if (!lista.receitas[id]) lista.receitas[id] = 1;
+        $('seletor-box').hidden = true;
+        salvar(); desenhar();
+      }
+    });
+  }
+
+  document.body.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-mais],[data-menos],[data-chave]');
+    if (!t) return;
+    if (t.hasAttribute('data-mais')) {
+      var id = t.getAttribute('data-mais'); lista.receitas[id] = Math.min(50, lista.receitas[id] + 1);
+    } else if (t.hasAttribute('data-menos')) {
+      var id2 = t.getAttribute('data-menos');
+      if (lista.receitas[id2] <= 1) delete lista.receitas[id2]; else lista.receitas[id2]--;
+    } else {
+      var k = t.getAttribute('data-chave'), i = lista.marcados.indexOf(k);
+      if (i >= 0) lista.marcados.splice(i, 1); else lista.marcados.push(k);
+    }
+    salvar(); desenhar();
+  });
+  $('adicionar').addEventListener('click', abrirSeletor);
+  $('fechar-seletor').addEventListener('click', function () { $('seletor-box').hidden = true; desenhar(); });
+  $('desmarcar').addEventListener('click', function () { lista.marcados = []; salvar(); desenhar(); });
+  $('nova').addEventListener('click', function () {
+    if (!window.confirm('Apagar esta lista e começar uma nova?')) return;
+    lista = { receitas: {}, marcados: [] }; salvar(); desenhar();
+  });
+  desenhar();
+})();
+</script>
+{% endblock %}

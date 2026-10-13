@@ -1,0 +1,116 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}{{ r.nome }} · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .foto-receita { width: calc(100% + 32px); margin: 8px -16px 0; aspect-ratio: 4/3; object-fit: cover; }
+  .ficha li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+  .ficha li .ic { margin-top: 2px; }
+  .ficha li + li { border-top: 1px solid var(--linha); }
+  .passos li { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; }
+  .passos .num { flex: none; width: 32px; height: 32px; border-radius: 999px; background: var(--tinta); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; }
+  .versao + .versao { border-top: 1px solid var(--linha); }
+  .versao { padding: 12px 0; }
+  .versao a { color: var(--tomate); font-weight: 500; }
+  .mini { display: flex; align-items: center; gap: 12px; padding: 10px 12px; text-decoration: none; }
+  .mini img, .mini .sem { flex: none; width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--areia); display: inline-flex; align-items: center; justify-content: center; color: var(--suave); }
+</style>
+{% endblock %}
+{% block conteudo %}
+{% if de_venda %}
+{{ ui.voltar(P ~ '/receitas' ~ ('?categoria=brigadeiros' if r.categoria == 'brigadeiros' else ''), 'Receitas') }}
+{% else %}
+{{ ui.voltar(P ~ '/receitas', 'Voltar', anterior=true) }}
+{% endif %}
+
+{% if r.imagem %}<img class="foto-receita" src="{{ asset(r.imagem) }}" alt="">{% endif %}
+
+<p class="suave pequeno mt-4">{{ ui.ic(categoria.icone, 'ic-sm') }} {{ categoria.nome }}</p>
+<h1 class="mt-1">{{ r.nome }}</h1>
+{% if r.descricao %}<p class="suave mt-2">{{ r.descricao }}</p>{% endif %}
+{% if not de_venda %}<p class="caixa-areia mt-3 pequeno">Esta é uma receita-base: você usa dentro das fatias.</p>{% endif %}
+
+<ul class="ficha caixa-areia mt-4" style="padding:4px 16px">
+  {% if r.dificuldade %}<li>{{ ui.ic('Gauge', 'tomate-txt') }}<span class="cresce"><span class="suave pequeno" style="display:block">Dificuldade</span><span class="negrito primeira-maiuscula" style="display:block">{{ r.dificuldade }}</span></span></li>{% endif %}
+  {% if r.rendimento %}<li>{{ ui.ic('Stack', 'tomate-txt') }}<span class="cresce"><span class="suave pequeno" style="display:block">Rende</span><span class="negrito">{{ r.rendimento }}</span></span></li>{% endif %}
+  {% if r.validade %}<li>{{ ui.ic('Snowflake', 'tomate-txt') }}<span class="cresce"><span class="suave pequeno" style="display:block">Validade</span><span class="negrito">{{ r.validade }}</span></span></li>{% endif %}
+</ul>
+
+{% if de_venda %}
+<div class="grade-2 mt-4">
+  <a class="botao-sec" href="{{ P }}/calculadora?receita={{ r.id }}">{{ ui.ic('Calculator') }} Calcular preço</a>
+  <a class="botao-sec" href="{{ P }}/lista?adicionar={{ r.id }}">{{ ui.ic('ShoppingCart') }} Pôr na lista</a>
+</div>
+{% endif %}
+
+{% if r.observacoes %}
+<section class="caixa-borda mt-6">
+  <p class="negrito linha">{{ ui.ic('Info') }} Observação do app</p>
+  {% for o in r.observacoes %}<p class="mt-2">{{ o }}</p>{% endfor %}
+</section>
+{% endif %}
+
+{% if r.selos %}
+<div class="linha mt-4" style="flex-wrap:wrap;gap:8px">{% for s in r.selos %}<span class="pilula">{{ s }}</span>{% endfor %}</div>
+{% endif %}
+
+<section class="mt-8">
+  <h2>Ingredientes</h2>
+  <p class="suave pequeno mt-1">Toque para marcar o que já separou.</p>
+  <ul class="pilha mt-3" style="--gap:8px" data-marcaveis="ingredientes-{{ r.id }}">
+    {% for gr in r.ingredientes %}
+    {% set gi = loop.index0 %}
+    {% if varios_grupos_ing %}<li><h3 class="mt-4">{{ gr.titulo }}</h3></li>{% endif %}
+    {% for it in gr.itens %}
+    <li>
+      <button type="button" class="marcavel" role="checkbox" aria-checked="false" data-id="{{ gi }}-{{ loop.index0 }}"><span class="caixinha">{{ ui.ic('Check') }}</span><span class="texto-item">{{ it.texto }}</span></button>
+      {% for l in it.links or [] %}{% if por_id[l] %}<a class="botao-texto" style="margin-left:52px" href="{{ P }}/receitas/{{ l }}">Ver receita: {{ por_id[l].nome }} ›</a>{% endif %}{% endfor %}
+    </li>
+    {% endfor %}
+    {% endfor %}
+  </ul>
+  <button type="button" class="botao-texto mt-2" data-limpar-marcaveis="ingredientes-{{ r.id }}" hidden>Desmarcar tudo</button>
+</section>
+
+{% if r.preparo %}
+<section class="mt-8">
+  <h2>Modo de preparo</h2>
+  {% for gr in r.preparo %}
+  {% if varios_grupos_prep %}<h3 class="mt-4">{{ gr.titulo }}</h3>{% endif %}
+  <ol class="passos mt-2">
+    {% for passo in gr.itens %}<li><span class="num">{{ loop.index }}</span><span class="cresce">{{ passo }}</span></li>{% endfor %}
+  </ol>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if versoes %}
+<section class="mt-8">
+  <h2>Versões desta fatia</h2>
+  <p class="suave mt-1">Da mais simples à mais caprichada para a vitrine.</p>
+  <ul class="mt-2">
+    {% for v in versoes %}
+    <li class="versao"><p class="negrito">{{ v.nome }}</p>
+      <p>{% for parte in v.partes %}{% if not loop.first %} + {% endif %}{% if parte.base %}<a href="{{ P }}/receitas/{{ parte.base.id }}">{{ parte.texto }}</a>{% else %}{{ parte.texto }}{% endif %}{% endfor %}</p></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if r.dica %}<p class="dica mt-6">{{ ui.ic('Lightbulb', 'tomate-txt') }} <strong>Dica:</strong> {{ r.dica }}</p>{% endif %}
+{% if r.combina %}<p class="caixa-areia mt-4">{% if r.combina.startswith('Finalize') %}{{ r.combina }}{% else %}<strong>Combina com:</strong> {{ r.combina }}{% endif %}</p>{% endif %}
+
+{% for titulo_lista, lista_r in [('Receitas que você vai usar', usa), ('Fatias que usam esta receita', usada_por)] if lista_r %}
+<section class="mt-8">
+  <h2>{{ titulo_lista }}</h2>
+  <ul class="cartao lista-linhas mt-3" style="padding:0;overflow:hidden">
+    {% for x in lista_r %}
+    <li><a class="mini" href="{{ P }}/receitas/{{ x.id }}">{% if x.imagem %}<img src="{{ asset(x.imagem) }}" alt="" loading="lazy">{% else %}<span class="sem">{{ ui.ic('CookingPot') }}</span>{% endif %}
+      <span class="cresce"><span class="negrito">{{ x.nome }}</span></span><span class="suave">›</span></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+
+<p class="suave pequeno mt-8">📖 Ebook {{ ebook }}{% if r.pagina %}, página {{ r.pagina }} do PDF{% endif %}</p>
+{% endblock %}

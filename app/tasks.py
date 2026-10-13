@@ -714,6 +714,14 @@ def enviar_email_entrega(self, pedido_id: int):
     logger.info("=" * 120)
     logger.info(f"[TASK-EMAIL] 📧 Iniciando entrega por e-mail para pedido #{pedido_id}")
     from fluxos.entrega_pedido_email import executar
+    # Todo caminho que confirma pagamento web passa por aqui: é o ponto único para liberar os apps
+    # (App Fatias etc.) que o produto dá — antes do e-mail, para ele já levar o botão do app.
+    # Idempotente; se falhar, a rota "abrir app" da Estante e a reconciliação de hora em hora cobrem.
+    try:
+        from apps._nucleo.licenca import liberar_licencas_do_pedido
+        liberar_licencas_do_pedido(pedido_id)
+    except Exception as exc:
+        logger.error(f"[TASK-EMAIL] ❌ Erro ao liberar apps do pedido #{pedido_id}: {exc}")
     try:
         executar(pedido_id)
         logger.info(f"[TASK-EMAIL] ✅ E-mail entregue para pedido #{pedido_id}")
@@ -992,3 +1000,29 @@ def reconciliar_pix_pendentes_web(self):
         logger.error(f'[{_TAG}] ❌ Erro: {exc}')
         import traceback
         traceback.print_exc()
+
+
+# ============ APPS DAS CLIENTES (App Fatias etc.) ============
+
+@shared_task(name='tasks.apps_rotina_diaria', bind=True, max_retries=0)
+def apps_rotina_diaria(self):
+    """Avisos de vencimento das licenças e limpeza de sessões/códigos vencidos (ver apps/_nucleo/avisos.py)."""
+    try:
+        from apps._nucleo.avisos import rotina_diaria
+        rotina_diaria()
+    except Exception as exc:
+        logger.error(f'[APPS] ❌ Erro na rotina diária: {exc}')
+        import traceback
+        traceback.print_exc()
+
+
+@shared_task(name='tasks.apps_reconciliar_licencas', bind=True, max_retries=0)
+def apps_reconciliar_licencas(self):
+    """Libera licenças de pedidos pagos que, por algum erro, não liberaram na entrega."""
+    try:
+        from apps._nucleo.licenca import reconciliar_licencas
+        n = reconciliar_licencas()
+        if n:
+            logger.info(f'[APPS] Reconciliação liberou {n} licença(s)')
+    except Exception as exc:
+        logger.error(f'[APPS] ❌ Erro na reconciliação de licenças: {exc}')

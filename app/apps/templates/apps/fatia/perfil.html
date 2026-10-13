@@ -1,0 +1,59 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Meus dados · {{ app.nome }}{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Meus dados e meta', P ~ '/mais') }}
+{% set dias_escolhidos = (perfil.dias_venda or '').split(',') %}
+<form id="form-perfil" class="pilha" novalidate>
+  <div><label class="rotulo" for="nome">Seu nome</label>
+    <input id="nome" class="campo" type="text" maxlength="60" value="{{ perfil.nome or '' }}"></div>
+  <div><label class="rotulo" for="meta">Quanto quer lucrar por mês?</label>
+    <div class="campo-reais"><span>R$</span><input id="meta" class="campo" type="text" inputmode="decimal" value="{{ fmt.reais(perfil.meta_mensal or 1000)|replace('R$ ', '')|replace(',00', '') }}"></div></div>
+  <div><label class="rotulo" for="preco">Preço de cada fatia</label>
+    <div class="campo-reais"><span>R$</span><input id="preco" class="campo" type="text" inputmode="decimal" value="{{ fmt.reais(perfil.preco_fatia or 18)|replace('R$ ', '')|replace(',00', '') }}"></div></div>
+  <div><span class="rotulo">Dias em que você vende</span>
+    <div class="grade-4" id="dias">
+      {% for id, rotulo in dias_semana %}<button type="button" class="opcao" data-dia="{{ id }}" aria-pressed="{{ 'true' if id in dias_escolhidos else 'false' }}">{{ rotulo }}</button>{% endfor %}
+    </div></div>
+  <label class="caixa-areia linha-entre" for="som" style="cursor:pointer">
+    <span class="linha">{{ ui.ic('Bell') }} Som ao terminar tarefas</span>
+    <input id="som" type="checkbox" style="width:24px;height:24px;accent-color:var(--tomate)"{% if perfil.som %} checked{% endif %}>
+  </label>
+  <p class="suave">Email de acesso: {{ cliente.email }}</p>
+  <button type="submit" class="botao" id="salvar">Salvar</button>
+  {{ ui.erro('erro') }}
+</form>
+{% endblock %}
+{% block js %}
+<script>
+(function () {
+  var form = document.getElementById('form-perfil');
+  var erro = document.getElementById('erro');
+  var salvar = document.getElementById('salvar');
+  document.getElementById('dias').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.opcao'); if (!b) return;
+    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+  });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    App.mostrarErro(erro, '');
+    var dias = Array.prototype.map.call(document.querySelectorAll('#dias [aria-pressed="true"]'), function (b) { return b.getAttribute('data-dia'); });
+    var meta = App.lerNumero(document.getElementById('meta').value);
+    var preco = App.lerNumero(document.getElementById('preco').value);
+    if (!(meta > 0)) return App.mostrarErro(erro, 'Escreva quanto quer lucrar por mês.');
+    if (!(preco > 0)) return App.mostrarErro(erro, 'Escreva o preço de cada fatia.');
+    if (!dias.length) return App.mostrarErro(erro, 'Escolha pelo menos um dia de venda.');
+    App.ocupado(salvar, 'Salvando...', App.post(APP.prefixo + '/perfil', {
+      nome: document.getElementById('nome').value, meta_mensal: meta, preco_fatia: preco, dias_venda: dias,
+      som: document.getElementById('som').checked ? 1 : 0
+    })).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erro, r.erro);
+      APP.som = document.getElementById('som').checked;
+      var original = salvar.innerHTML;
+      salvar.innerHTML = App.icone('Check') + ' Salvo';
+      setTimeout(function () { salvar.innerHTML = original; }, 2500);
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+"""Ligação entre os apps e a Estante 2 (/pedido2/<guid>): "Meus Apps" na Estante e "Meus e-books" no app."""
+import logging
+
+from database import db
+from apps import APPS
+from apps._nucleo import licenca as lic
+
+logger = logging.getLogger(__name__)
+
+
+def apps_da_estante(pedido: dict) -> tuple[list[dict], list[dict]]:
+    """Para a Estante 2: ("Meus apps" da cliente do pedido, apps para oferecer no cross-sell).
+
+    Uma busca só da cliente e das licenças para as duas seções (é a página de mais tráfego depois
+    de uma venda). Ofertas = produtos do tipo app (não renovação, à venda no site) de apps que ela
+    ainda não tem, no mesmo formato dos e-books do cross-sell; um card por app, o mais barato."""
+    from database import listar_apps_produto
+    cliente = lic.buscar_cliente_por_email(pedido.get('email'))
+    licencas = lic.listar_licencas_do_cliente(cliente['id']) if cliente else []
+    meus = [{'app': APPS[l['app_slug']], 'licenca': l, 'ativa': lic.licenca_ativa(l)}
+            for l in licencas if l['app_slug'] in APPS]
+    tem = {l['app_slug'] for l in licencas}
+    ofertas, vistos = [], set()
+    for p in listar_apps_produto(renovacao=False, so_venda_web=True):  # ordem: preço
+        if p['app_slug'] in APPS and p['app_slug'] not in tem and p['app_slug'] not in vistos:
+            vistos.add(p['app_slug'])
+            ofertas.append({'produto_id': p['produto_id'], 'ebook_id': None, 'nome_venda': p['nome_venda'],
+                            'imagem_pequena': p['imagem_pequena'], 'imagem_grande': p['imagem_grande'],
+                            'preco_promocional': p['preco_promocional'], 'app_slug': p['app_slug']})
+    return meus, ofertas
+
+
+def pedido_da_estante(cliente: dict, slug: str):
+    """Um pedido pago da cliente com guid, para abrir a Estante 2 a partir do app.
+
+    Prefere o pedido que liberou o app; senão, o pedido pago mais recente com o mesmo e-mail.
+    """
+    linha = db.execute_query(
+        "SELECT p.id, p.guid, p.email, p.contact_phone, p.estado_id, p.data_envio_pedido "
+        "FROM apps_licenca_pedidos lp JOIN pedidos p ON p.id = lp.pedido_id "
+        "WHERE lp.cliente_id = %s AND lp.app_slug = %s AND p.guid IS NOT NULL "
+        "ORDER BY lp.criado_em DESC LIMIT 1", (cliente['id'], slug), fetch_one=True)
+    if linha:
+        return linha
+    return db.execute_query(
+        "SELECT id, guid, email, contact_phone, estado_id, data_envio_pedido FROM pedidos "
+        "WHERE email = %s AND estado_id IN (0, 1000) AND guid IS NOT NULL "
+        "ORDER BY id DESC LIMIT 1", (cliente['email'],), fetch_one=True)
+
+
+def ebooks_da_cliente(cliente: dict, slug: str) -> tuple[str | None, list[dict]]:
+    """(guid da estante, e-books liberados) — os mesmos que a Estante 2 mostra."""
+    from web.checkout import resolver_pedido_por_guid, listar_itens_ebook_do_cliente
+    ref = pedido_da_estante(cliente, slug)
+    if not ref:
+        return None, []
+    pedido, _, erro = resolver_pedido_por_guid(ref['guid'])
+    if erro:
+        return None, []
+    try:
+        itens = [i for i in listar_itens_ebook_do_cliente(pedido) if not i.get('bloqueado')]
+    except Exception as e:
+        logger.error(f"[APPS] Erro ao listar e-books da cliente #{cliente['id']}: {e}")
+        itens = []
+    return pedido['guid'], itens
+

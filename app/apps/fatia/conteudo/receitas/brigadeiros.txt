@@ -1,0 +1,191 @@
+# Brigadeiros sem fogo (ebook bônus).
+# Formato: veja LEIAME.md nesta pasta.
+
+@ brig-chocolate-branco | Brigadeiro de Chocolate Branco | brigadeiros | 5
+rend: Cerca de 40 brigadeiros de 15 g (cálculo aproximado)
+fatias: 40
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+dica: Chocolate de qualidade garante cremosidade. Enrole com as mãos levemente untadas.
+combina: Finalize com açúcar cristal, coco ralado ou granulado branco.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de chocolate branco picado [choc-branco 200]
+- 1 colher (sopa) de manteiga [manteiga 15]
+### Modo de preparo
+* Derreta o chocolate em banho-maria.
+* Misture o leite condensado e a manteiga até ficar uniforme.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-coco | Brigadeiro de Coco | brigadeiros | 6
+rend: Cerca de 45 brigadeiros de 15 g (cálculo aproximado)
+fatias: 45
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Perfeito para festas com tema tropical.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 100 g de coco ralado [coco 100]
+- 2 colheres (sopa) de manteiga [manteiga 30]
+- 150 g de leite em pó (aos poucos, até dar ponto) [leite-po 150]
+### Modo de preparo
+* Misture o leite condensado, o coco ralado e a manteiga até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize com coco ralado fino ou tostado.
+
+@ brig-cafe | Brigadeiro de Café | brigadeiros | 7
+rend: Cerca de 60 brigadeiros de 15 g (cálculo aproximado)
+fatias: 60
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Ajuste a quantidade de café ao seu gosto.
+combina: Finalize com cacau em pó, chocolate granulado ou grãos de café triturados.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de cream cheese [cream-cheese 200]
+- 2 colheres (sopa) de café solúvel [cafe-soluvel 10]
+- 300 g de leite em pó (aos poucos, até dar ponto) [leite-po 300]
+### Modo de preparo
+* Misture o cream cheese com o café solúvel até o café dissolver.
+* Junte o leite condensado e misture até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-doce-de-leite | Brigadeiro de Doce de Leite | brigadeiros | 8
+rend: Cerca de 60 brigadeiros de 15 g (cálculo aproximado)
+fatias: 60
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Um doce de leite de qualidade faz toda a diferença no sabor.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de doce de leite cremoso [doce-leite 200]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 300 g de leite em pó (aos poucos, até dar ponto) [leite-po 300]
+### Modo de preparo
+* Misture o leite condensado, o doce de leite e a manteiga até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-ninho | Brigadeiro de Leite Ninho | brigadeiros | 9
+rend: Cerca de 40 brigadeiros de 15 g (cálculo aproximado)
+fatias: 40
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+dica: Para ficar mais cremoso, adicione 1 colher de creme de leite.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de leite em pó Ninho [leite-po 200]
+- 1 colher (sopa) de manteiga [manteiga 15]
+### Modo de preparo
+* Misture todos os ingredientes até formar uma massa uniforme.
+* Leve à geladeira por 30 minutos.
+* Enrole e passe no granulado de leite Ninho.
+
+@ brig-morango | Brigadeiro de Morango | brigadeiros | 10
+rend: Cerca de 60 brigadeiros de 15 g (cálculo aproximado)
+fatias: 60
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Ótimo para festas infantis, chá de bebê e Dia das Mães. Corante natural de beterraba deixa o rosa mais forte.
+combina: Finalize com açúcar cristal rosa, granulado branco ou confeitos de coração.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de cream cheese [cream-cheese 200]
+- 4 colheres (sopa) de gelatina de morango [gelatina 40]
+- 250 g de leite em pó (aos poucos, até dar ponto) [leite-po 250]
+### Modo de preparo
+* Misture o leite condensado, o cream cheese e a gelatina até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e passe no açúcar rosa.
+
+@ brig-nutella | Brigadeiro de Nutella | brigadeiros | 11
+rend: Cerca de 55 brigadeiros de 15 g (cálculo aproximado)
+fatias: 55
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Avelãs torradas trituradas por fora deixam o brigadeiro com cara de premium.
+combina: Finalize com granulado de chocolate belga, avelãs picadas ou cacau em pó.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de Nutella [creme-avela 200]
+- 1 colher (sopa) de manteiga [manteiga 15]
+- 250 g de leite em pó (aos poucos, até dar ponto) [leite-po 250]
+### Modo de preparo
+* Misture o leite condensado, a Nutella e a manteiga até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-oreo | Brigadeiro de Oreo | brigadeiros | 12
+rend: Cerca de 60 brigadeiros de 15 g (cálculo aproximado)
+fatias: 60
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Deixe pedacinhos maiores de biscoito para ficar crocante. Finalize com farofa de Oreo.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 200 g de cream cheese [cream-cheese 200]
+- 1 xícara de biscoitos Oreo triturados [oreo 100]
+- 200 g de leite em pó (aos poucos, até dar ponto) [leite-po 200]
+### Modo de preparo
+* Misture o leite condensado com o cream cheese até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Adicione os biscoitos triturados.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-pacoca | Brigadeiro de Paçoca | brigadeiros | 13
+rend: Cerca de 35 brigadeiros de 15 g (cálculo aproximado)
+fatias: 35
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+dica: Use paçoca fresca para um sabor mais forte. Faz sucesso em festa junina!
+combina: Finalize com amendoim moído, paçoca em pó ou granulado de amendoim.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 2 colheres (sopa) de manteiga [manteiga 30]
+- 1 xícara de paçoca triturada [pacoca 120]
+### Modo de preparo
+* Misture tudo até ficar uniforme.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize.
+
+@ brig-pistache | Brigadeiro de Pistache | brigadeiros | 14
+rend: Cerca de 50 brigadeiros de 15 g (cálculo aproximado)
+fatias: 50
+un: brigadeiros
+val: Até 7 dias na geladeira.
+dif: fácil
+obs: Receita ajustada pelo app. No ebook ela não leva leite em pó, mas sem ele a massa fica mole demais para enrolar. Na primeira vez, faça meia receita para testar o ponto.
+dica: Pistache de qualidade dá uma cor verde mais bonita e sabor de verdade.
+## Ingredientes
+- 1 lata de leite condensado [leite-cond 395]
+- 100 g de pasta de pistache [pasta-pistache 100]
+- 2 colheres (sopa) de manteiga [manteiga 30]
+- 250 g de leite em pó (aos poucos, até dar ponto) [leite-po 250]
+### Modo de preparo
+* Misture o leite condensado, a pasta de pistache e a manteiga até ficar uniforme.
+* Acrescente o leite em pó aos poucos, misturando com as mãos, até a massa desgrudar das mãos. Pode precisar de um pouco menos ou um pouco mais.
+* Leve à geladeira por 2 horas.
+* Enrole e finalize com pistache triturado.

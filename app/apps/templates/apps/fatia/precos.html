@@ -1,0 +1,89 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Meus preços · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .ing-linha { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px 16px; text-align: left; }
+  .ing-linha:active { background: var(--areia); }
+  .ing-linha .seta { transition: transform 250ms var(--ease-out); color: var(--suave); }
+  .ing-linha[aria-expanded="true"] .seta { transform: rotate(180deg); }
+  .ing-editor { padding: 0 16px 16px; }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Meus preços', P ~ '/mais') }}
+<p class="suave">Anote quanto você paga em cada ingrediente. O app usa esses preços para calcular quanto custa cada fatia e quanto você vai gastar no mercado.</p>
+
+<div class="caixa-areia mt-4">
+  <p><strong class="numeros" id="qtd-com-preco">0</strong> de {{ catalogo|length }} ingredientes com preço</p>
+  <div class="mt-2 barra verde" role="progressbar"><div id="barra-precos"></div></div>
+  <p class="suave pequeno mt-2">Não precisa anotar todos. Comece pelos das receitas que você vai fazer.</p>
+</div>
+
+<div class="mt-4" style="position:relative">
+  <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--suave)">{{ ui.ic('MagnifyingGlass') }}</span>
+  <input id="busca" class="campo" style="padding-left:48px" type="search" placeholder="Buscar ingrediente" aria-label="Buscar ingrediente" autocomplete="off">
+</div>
+<p class="suave mt-4" id="vazio" hidden>Nenhum ingrediente com esse nome.</p>
+<div id="grupos"></div>
+{% endblock %}
+{% block js %}
+<script src="{{ asset('apps/fatia/custos.js') }}"></script>
+<script src="{{ asset('apps/fatia/editor_preco.js') }}"></script>
+<script>
+(function () {
+  var catalogo = {{ catalogo|tojson }};
+  var grupos = {{ grupos|tojson }};
+  var precos = {{ precos|tojson }};
+  var aberto = null;
+  Custos.iniciar(catalogo);
+
+  function legenda(ing) {
+    var p = precos[ing.id];
+    if (!p) return '<span class="tomate-txt pequeno">Toque para anotar o preço</span>';
+    var tam = p.quantidade === ing.embalagem ? ing.rotuloEmbalagem : Custos.textoQuantidade(p.quantidade, ing.unidade);
+    return '<span class="suave pequeno">' + App.escapar(tam) + '</span>';
+  }
+  function desenhar() {
+    var termo = App.semAcento(document.getElementById('busca').value);
+    var html = '', total = 0;
+    grupos.forEach(function (g) {
+      var itens = catalogo.filter(function (i) { return i.grupo === g && (!termo || i.busca.indexOf(termo) >= 0); });
+      if (!itens.length) return;
+      html += '<section class="mt-6"><h2 class="suave" style="font-family:var(--fonte);font-size:1.05rem;font-weight:500">' + App.escapar(g) +
+        '</h2><ul class="cartao lista-linhas mt-2" style="padding:0;overflow:hidden">';
+      itens.forEach(function (i) {
+        var p = precos[i.id];
+        html += '<li><button type="button" class="ing-linha" data-item="' + i.id + '" aria-expanded="' + (aberto === i.id) + '">' +
+          '<span class="cresce"><span class="negrito" style="display:block">' + App.escapar(i.nome) + '</span>' + legenda(i) + '</span>' +
+          (p ? '<span class="negrito numeros">' + App.reais(p.preco) + '</span>' : '') +
+          '<span class="seta">' + App.icone('CaretDown') + '</span></button>' +
+          '<div class="ing-editor" data-editor="' + i.id + '"' + (aberto === i.id ? '' : ' hidden') + '></div></li>';
+      });
+      html += '</ul></section>';
+    });
+    document.getElementById('grupos').innerHTML = html;
+    document.getElementById('vazio').hidden = html !== '';
+    catalogo.forEach(function (i) { if (precos[i.id]) total++; });
+    document.getElementById('qtd-com-preco').textContent = total;
+    document.getElementById('barra-precos').style.transform = 'translateX(' + (Math.round(total / catalogo.length * 100) - 100) + '%)';
+    if (aberto) {
+      var cont = document.querySelector('[data-editor="' + aberto + '"]');
+      if (cont) EditorPreco.abrir(cont, aberto, precos[aberto], function (novo) {
+        if (novo) precos[aberto] = novo; else delete precos[aberto];
+        aberto = null;
+        desenhar();
+      });
+    }
+  }
+  document.getElementById('grupos').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-item]'); if (!b) return;
+    var id = b.getAttribute('data-item');
+    aberto = aberto === id ? null : id;
+    desenhar();
+  });
+  document.getElementById('busca').addEventListener('input', desenhar);
+  desenhar();
+})();
+</script>
+{% endblock %}

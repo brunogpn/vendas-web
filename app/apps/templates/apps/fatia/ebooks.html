@@ -1,0 +1,25 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Meus e-books · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .livro { display: flex; align-items: center; gap: 14px; padding: 12px; text-decoration: none; }
+  .livro img, .livro .sem-capa { flex: none; width: 56px; height: 76px; object-fit: cover; border-radius: 8px; background: var(--areia); display: inline-flex; align-items: center; justify-content: center; color: var(--suave); }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Meus e-books', P ~ '/mais') }}
+{% if itens %}
+<p class="suave">Seus livros ficam sempre com você, mesmo depois que o acesso ao app vencer.</p>
+<ul class="cartao lista-linhas mt-4" style="padding:0;overflow:hidden">
+  {% for item in itens %}
+  <li><a class="livro" href="/pedido/{{ item.guid_pedido }}/ler/{{ item.id }}?estante=v2">
+    {% if item.imagem_pequena %}<img src="{{ url_for('static', filename='images/' ~ item.imagem_pequena) }}" alt="">{% else %}<span class="sem-capa">{{ ui.ic('BookOpenText') }}</span>{% endif %}
+    <span class="cresce negrito">{{ item.nome }}</span><span class="suave">›</span></a></li>
+  {% endfor %}
+</ul>
+<a class="botao-sec mt-6" href="/pedido2/{{ guid }}">{{ ui.ic('Books') }} Abrir minha estante</a>
+{% else %}
+<p class="caixa-areia">Não encontramos seus e-books por aqui. Eles estão no email da sua compra, no botão "Acessar minha estante". Se precisar, escreva para <a href="mailto:{{ app.email_suporte }}">{{ app.email_suporte }}</a>.</p>
+{% endif %}
+{% endblock %}

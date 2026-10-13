@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+{% block title %}Apps das clientes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Apps das clientes</h1>
+        <p class="page-subtitle">Quem tem acesso a cada app (ex.: App Fatias), até quando, e se está usando. Ajustes e link de acesso ficam na página de cada cliente.</p>
+    </div>
+</div>
+
+{% if erro_tabela %}
+<div class="alert alert-warning">As tabelas dos apps ainda não existem neste banco (aplique as migrations 080 e 081). Detalhe: {{ erro_tabela }}</div>
+{% endif %}
+
+<div class="card">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+    {% for slug, cfg in apps.items() %}
+        {% set r = resumo.get(slug, {}) %}
+        <div style="min-width:220px">
+            <p style="font-weight:700">{{ cfg.nome }} <span style="color:var(--muted);font-family:var(--mono);font-size:12px">/app/{{ slug }}/</span></p>
+            <p style="font-size:14px;color:var(--muted);margin-top:4px">
+                {{ r.total or 0 }} licenças · {{ r.ativas or 0 }} ativas · {{ r.entraram or 0 }} já entraram · {{ r.ativas_7d or 0 }} usaram nos últimos 7 dias
+            </p>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <form method="GET" style="display:flex;gap:8px;margin-bottom:16px">
+        <input type="search" name="q" value="{{ q }}" placeholder="Buscar por e-mail ou nome" style="flex:1">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+    {% if clientes %}
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Cliente</th><th>Apps</th><th>Criada em</th><th></th></tr></thead>
+            <tbody>
+            {% for c in clientes %}
+                <tr>
+                    <td><strong>{{ c.email }}</strong><br><span style="color:var(--muted);font-size:13px">{{ c.nome or '' }}</span></td>
+                    <td style="font-size:13px">
+                        {% for l in licencas.get(c.id, []) %}
+                        {{ apps[l.app_slug].nome if l.app_slug in apps else l.app_slug }} até {{ l.expira_em.strftime('%d/%m/%Y') }}{% if l.ultimo_acesso_em %} · último acesso {{ l.ultimo_acesso_em.strftime('%d/%m') }}{% else %} · <span style="color:var(--muted)">nunca entrou</span>{% endif %}<br>
+                        {% else %}<span style="color:var(--muted)">sem licença</span>{% endfor %}
+                    </td>
+                    <td style="font-size:13px;color:var(--muted)">{{ c.criado_em.strftime('%d/%m/%Y %H:%M') if c.criado_em else '' }}</td>
+                    <td style="text-align:right"><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.apps_cliente', cliente_id=c.id) }}">Abrir</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--muted);font-size:14px">{{ 'Nenhuma cliente encontrada.' if q else 'Nenhuma cliente ainda.' }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <p style="font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Liberar acesso manualmente</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Para cortesia, troca de pedido ou teste. Se a cliente já existe, os dias somam na licença dela.</p>
+    <form method="POST" action="{{ url_for('admin.apps_criar_cliente') }}" class="form-grid">
+        <div class="form-group"><label for="email">E-mail</label><input id="email" name="email" type="email" required></div>
+        <div class="form-group"><label for="nome">Nome (opcional)</label><input id="nome" name="nome" type="text" maxlength="120"></div>
+        <div class="form-group"><label for="app_slug">App</label>
+            <select id="app_slug" name="app_slug">{% for slug, cfg in apps.items() %}<option value="{{ slug }}">{{ cfg.nome }}</option>{% endfor %}</select></div>
+        <div class="form-group"><label for="dias">Dias de acesso</label><input id="dias" name="dias" type="number" min="1" value="90" required></div>
+        <div><button type="submit" class="btn btn-primary">Liberar acesso</button></div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'apps/_nucleo/base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Boas-vindas · {{ app.nome }}{% endblock %}
+{% block classe_conteudo %}sem-menu{% endblock %}
+{% block css %}
+<style>
+  .assistente { max-width: 28rem; margin: 0 auto; min-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
+  .passinhos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .passinhos span { height: 6px; border-radius: 999px; background: var(--linha); transition: background-color 300ms ease; }
+  .passinhos span.feito { background: var(--tomate); }
+  .rodape-fixo { margin-top: auto; padding-top: 24px; }
+  .numero-enorme { font-family: var(--fonte-titulo); font-weight: 800; font-size: 4rem; line-height: 1; }
+</style>
+{% endblock %}
+{% block conteudo %}
+<div class="assistente">
+  <div id="topo-perguntas">
+    <p class="suave pequeno" id="contador">Pergunta 1 de 5</p>
+    <div class="passinhos mt-2" aria-hidden="true">{% for i in range(5) %}<span></span>{% endfor %}</div>
+  </div>
+
+  <section data-pergunta="1" class="mt-8 surgir">
+    <span class="selo">{{ ui.ic('HandWaving', 'ic-lg') }}</span>
+    <h1 class="mt-4">Que bom ter você aqui!</h1>
+    <p class="suave mt-2">Vamos fazer 5 perguntas rapidinhas para montar o seu plano.</p>
+    <label class="rotulo mt-6" for="nome">Como você gosta de ser chamada?</label>
+    <input id="nome" class="campo" type="text" autocomplete="given-name" maxlength="60" value="{{ nome_inicial }}">
+  </section>
+
+  <section data-pergunta="2" class="mt-8 surgir" hidden>
+    <span class="selo">{{ ui.ic('Target', 'ic-lg') }}</span>
+    <h1 class="mt-4">Quanto você quer ganhar por mês com as fatias?</h1>
+    <p class="suave mt-2">Pense no lucro, o que sobra depois de pagar os ingredientes. Você pode mudar depois.</p>
+    <div class="grade-2 mt-6" id="metas">
+      {% for v in metas_opcoes %}<button type="button" class="opcao" data-valor="{{ v }}" aria-pressed="false">{{ fmt.reais_sem_centavos(v) }}</button>{% endfor %}
+    </div>
+    <label class="rotulo mt-4" for="meta-outro">Outro valor (R$)</label>
+    <div class="campo-reais"><span>R$</span><input id="meta-outro" class="campo" type="text" inputmode="decimal" placeholder="0"></div>
+  </section>
+
+  <section data-pergunta="3" class="mt-8 surgir" hidden>
+    <span class="selo">{{ ui.ic('Wallet', 'ic-lg') }}</span>
+    <h1 class="mt-4">Quanto você pode gastar para começar?</h1>
+    <p class="suave mt-2">Com ingredientes e embalagens. Dá para começar com pouco.</p>
+    <div class="pilha mt-6" id="investimentos" style="--gap:10px">
+      {% for rotulo, valor in [('Até R$ 100', 100), ('De R$ 100 a R$ 300', 300), ('De R$ 300 a R$ 500', 500), ('Mais de R$ 500', 800)] %}
+      <button type="button" class="opcao" style="width:100%" data-valor="{{ valor }}" aria-pressed="false">{{ rotulo }}</button>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section data-pergunta="4" class="mt-8 surgir" hidden>
+    <span class="selo">{{ ui.ic('CalendarDots', 'ic-lg') }}</span>
+    <h1 class="mt-4">Em quais dias você pretende vender?</h1>
+    <p class="suave mt-2">Toque em todos os dias que quiser.</p>
+    <div class="grade-4 mt-6" id="dias">
+      {% for id, rotulo in dias_semana %}<button type="button" class="opcao" data-dia="{{ id }}" aria-pressed="false">{{ rotulo }}</button>{% endfor %}
+    </div>
+  </section>
+
+  <section data-pergunta="5" class="mt-8 surgir" hidden>
+    <span class="selo">{{ ui.ic('Tag', 'ic-lg') }}</span>
+    <h1 class="mt-4">Por quanto você pensa em vender cada fatia?</h1>
+    <p class="suave mt-2">Não sabe ainda? Deixe R$ 18. Mais pra frente, a calculadora mostra o preço certo.</p>
+    <div class="campo-reais mt-6"><span>R$</span><input id="preco" class="campo" style="font-size:1.6rem" type="text" inputmode="decimal" value="18"></div>
+  </section>
+
+  <section id="final" class="mt-10 centro" hidden>
+    <span class="selo selo-verde estourar" style="width:72px;height:72px">{{ ui.ic('Check', 'ic-lg') }}</span>
+    <h1 class="mt-4" id="final-titulo">Seu plano está pronto</h1>
+    <div class="cartao-escuro mt-6">
+      <p>Para ganhar <strong id="final-meta"></strong> por mês, venda cerca de</p>
+      <p class="numero-enorme numeros mt-2" id="final-numero"></p>
+      <p class="mt-1">fatias por semana</p>
+    </div>
+    <p class="mt-6">Agora é só seguir as tarefas, uma de cada vez. Cada tarefa é rapidinha, e você pode fazer quantas quiser no mesmo dia!</p>
+  </section>
+
+  {{ ui.erro('erro') }}
+
+  <div class="rodape-fixo pilha" style="--gap:8px">
+    <button type="button" class="botao" id="continuar" disabled>Continuar {{ ui.ic('ArrowRight', 'ic-sm') }}</button>
+    <button type="button" class="botao-sec" id="voltar" hidden>{{ ui.ic('ArrowLeft', 'ic-sm') }} Voltar</button>
+    <button type="button" class="botao" id="ir" hidden>Ir para a primeira tarefa {{ ui.ic('ArrowRight', 'ic-sm') }}</button>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+(function () {
+  var etapa = 1;
+  var r = { nome: document.getElementById('nome').value.trim(), meta: 0, investimento: 0, dias: [], preco: 18 };
+  var continuar = document.getElementById('continuar');
+  var voltar = document.getElementById('voltar');
+  var erro = document.getElementById('erro');
+  var textoContinuar = continuar.innerHTML;
+
+  function valida() {
+    if (etapa === 1) return r.nome.length > 0;
+    if (etapa === 2) return r.meta > 0;
+    if (etapa === 3) return r.investimento > 0;
+    if (etapa === 4) return r.dias.length > 0;
+    if (etapa === 5) return r.preco > 0;
+    return false;
+  }
+  function mostrar() {
+    document.querySelectorAll('[data-pergunta]').forEach(function (s) { s.hidden = Number(s.getAttribute('data-pergunta')) !== etapa; });
+    document.getElementById('contador').textContent = 'Pergunta ' + etapa + ' de 5';
+    document.querySelectorAll('.passinhos span').forEach(function (s, i) { s.classList.toggle('feito', i < etapa); });
+    voltar.hidden = etapa === 1;
+    continuar.innerHTML = etapa === 5 ? 'Ver meu plano' : textoContinuar;
+    continuar.disabled = !valida();
+    App.mostrarErro(erro, '');
+  }
+  function escolhaUnica(grupoId, aoEscolher) {
+    var grupo = document.getElementById(grupoId);
+    grupo.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.opcao'); if (!b) return;
+      grupo.querySelectorAll('.opcao').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      aoEscolher(Number(b.getAttribute('data-valor')));
+      continuar.disabled = !valida();
+    });
+    return grupo;
+  }
+
+  document.getElementById('nome').addEventListener('input', function (e) { r.nome = e.target.value.trim(); continuar.disabled = !valida(); });
+  var metas = escolhaUnica('metas', function (v) { r.meta = v; document.getElementById('meta-outro').value = ''; });
+  document.getElementById('meta-outro').addEventListener('input', function (e) {
+    metas.querySelectorAll('.opcao').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+    r.meta = App.lerNumero(e.target.value);
+    continuar.disabled = !valida();
+  });
+  escolhaUnica('investimentos', function (v) { r.investimento = v; });
+  document.getElementById('dias').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.opcao'); if (!b) return;
+    var d = b.getAttribute('data-dia');
+    var i = r.dias.indexOf(d);
+    if (i >= 0) r.dias.splice(i, 1); else r.dias.push(d);
+    b.setAttribute('aria-pressed', i >= 0 ? 'false' : 'true');
+    continuar.disabled = !valida();
+  });
+  document.getElementById('preco').addEventListener('input', function (e) { r.preco = App.lerNumero(e.target.value); continuar.disabled = !valida(); });
+
+  voltar.addEventListener('click', function () { if (etapa > 1) { etapa--; mostrar(); } });
+  continuar.addEventListener('click', function () {
+    if (!valida()) return;
+    if (etapa < 5) { etapa++; mostrar(); return; }
+    App.ocupado(continuar, 'Salvando...', App.post(APP.prefixo + '/perfil', {
+      nome: r.nome, meta_mensal: r.meta, investimento: r.investimento, dias_venda: r.dias, preco_fatia: r.preco
+    })).then(function (res) {
+      if (!res.ok) { App.mostrarErro(erro, res.erro); return; }
+      document.getElementById('topo-perguntas').hidden = true;
+      document.querySelectorAll('[data-pergunta]').forEach(function (s) { s.hidden = true; });
+      document.getElementById('final-titulo').textContent = 'Seu plano está pronto, ' + r.nome.split(' ')[0];
+      document.getElementById('final-meta').textContent = App.reaisSemCentavos(res.meta);
+      document.getElementById('final-numero').textContent = res.fatias_por_semana;
+      document.getElementById('final').hidden = false;
+      continuar.hidden = true; voltar.hidden = true;
+      document.getElementById('ir').hidden = false;
+      App.confete(true);
+    });
+  });
+  document.getElementById('ir').addEventListener('click', function () {
+    var b = this;
+    App.ocupado(b, 'Abrindo...', App.post(APP.prefixo + '/perfil', { onboarding_ok: 1 })).then(function (res) {
+      if (!res.ok) { App.mostrarErro(erro, res.erro); return; }
+      window.location.href = APP.prefixo + '/';
+    });
+  });
+  mostrar();
+})();
+</script>
+{% endblock %}

@@ -57,10 +57,18 @@ def executar(pedido_id: int) -> None:
         for item in db.listar_itens_pedido(pedido_id)
     ]
     # Estante 2 (com cross-sell) — mesma estante para onde o checkout redireciona após o pagamento.
-    link_estante = f"{base_url}/pedido2/{db.garantir_guid_pedido(pedido_id)}"
+    guid = db.garantir_guid_pedido(pedido_id)
+    link_estante = f"{base_url}/pedido2/{guid}"
+    # Apps que esta compra dá (ex.: App Fatias): botão que entra no app já logada, via Estante.
+    from apps import apps_do_produto
+    apps = [{'nome': cfg.nome, 'link': f"{base_url}/pedido2/{guid}/abrir-app/{cfg.slug}"}
+            for cfg, _dias in apps_do_produto(pedido['produto_id'])]
+    if apps:
+        # Produto do tipo app: não há o que "baixar" — o principal é o acesso ao app.
+        subject = f'Pedido {pedido_num} ✅ Seu acesso está liberado: {nome_produto}!'
 
     html_entrega = _corpo_html(nome_cliente, nome_produto, itens, link_estante,
-                               nome_remetente_email, cor_primaria, cor_secundaria)
+                               nome_remetente_email, cor_primaria, cor_secundaria, apps=apps)
 
     resultado = _enviar_gmail(
         destinatario=destinatario,
@@ -105,7 +113,8 @@ def _corpo_html(nome: str, nome_produto: str,
                 link_estante: str,
                 nome_remetente: str,
                 cor_primaria: str,
-                cor_secundaria: str) -> str:
+                cor_secundaria: str,
+                apps: list | None = None) -> str:
     """
     Gera HTML do e-mail de entrega com personalização por produto.
 
@@ -119,6 +128,8 @@ def _corpo_html(nome: str, nome_produto: str,
         nome_remetente: Nome usado no corpo e assinatura (ex: 'Luiza', 'Luiza Carolina')
         cor_primaria: Cor do header em hex (ex: '#2d6a1f')
         cor_secundaria: Cor dos botões em hex (ex: '#b45309')
+        apps: lista de dicts {nome, link} — apps que a compra libera (ex.: App Fatias); cada um
+              ganha um botão próprio logo abaixo do botão da Estante
     """
     def _juntar_nomes(nomes: list) -> str:
         if len(nomes) <= 1:
@@ -161,6 +172,7 @@ def _corpo_html(nome: str, nome_produto: str,
               também dá pra salvar para ler depois, quando quiser.
             </p>
 
+            {_bloco_apps(apps, cor_primaria)}
             <!-- Botão de acesso -->
             <table width="100%" style="background:#fff8e1; border-radius:12px;
                                         margin:0 0 20px; text-align:center;">
@@ -224,3 +236,31 @@ def _corpo_html(nome: str, nome_produto: str,
         cor_secundaria=cor_secundaria,
         rodape=rodape,
     )
+
+
+def _bloco_apps(apps: list | None, cor: str) -> str:
+    """Botão de cada app liberado pela compra (vazio quando o produto não dá app)."""
+    if not apps:
+        return ''
+    botoes = ''.join(f'''
+              <tr>
+                <td style="padding:8px 20px 20px;">
+                  <a href="{a['link']}"
+                     style="display:inline-block; background:{cor}; color:#ffffff;
+                            font-size:17px; font-weight:bold; text-decoration:none;
+                            padding:16px 32px; border-radius:12px;">
+                    📱 Abrir meu {a['nome']}
+                  </a>
+                </td>
+              </tr>''' for a in apps)
+    return f'''
+            <table width="100%" style="background:#eef6ff; border-radius:12px;
+                                        margin:0 0 20px; text-align:center;">
+              <tr>
+                <td style="padding:20px 20px 4px;">
+                  <p style="font-size:15px; color:#333; margin:0;">
+                    Sua compra liberou o seu aplicativo. Toque no botão para entrar:
+                  </p>
+                </td>
+              </tr>{botoes}
+            </table>'''

@@ -1,0 +1,177 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Minhas vendas · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .tres-colunas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+  .dia-antigo { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 4px; text-align: left; }
+  .dia-antigo:active { background: var(--areia); }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Minhas vendas') }}
+
+<section class="cartao">
+  <p class="suave">Lucro de {{ nome_mes }}</p>
+  <p class="valor-grande numeros mt-1 {{ 'verde-txt' if p.total_mes.lucro >= 0 else 'tomate-txt' }}">{{ fmt.reais(p.total_mes.lucro) }}</p>
+  <div class="mt-3">{{ ui.barra([p.total_mes.lucro, 0]|max, p.metas.meta, 'verde') }}</div>
+  {% if p.falta_meta > 0 %}
+  <p class="suave mt-2">Faltam {{ fmt.reais(p.falta_meta) }} para a meta de {{ fmt.reais_sem_centavos(p.metas.meta) }} (cerca de {{ p.fatias_faltando }} {{ 'fatia' if p.fatias_faltando == 1 else 'fatias' }}).</p>
+  {% else %}
+  <p class="verde-txt negrito mt-2">Meta do mês batida.</p>
+  {% endif %}
+  <div class="tres-colunas mt-4">
+    <div class="caixa-areia" style="padding:10px"><p class="suave minusculo">Fatias</p><p class="negrito numeros">{{ p.total_mes.fatias }}</p></div>
+    <div class="caixa-areia" style="padding:10px"><p class="suave minusculo">Recebeu</p><p class="negrito numeros">{{ fmt.reais_sem_centavos(p.total_mes.recebido) }}</p></div>
+    <div class="caixa-areia" style="padding:10px"><p class="suave minusculo">Gastou</p><p class="negrito numeros">{{ fmt.reais_sem_centavos(p.total_mes.gasto) }}</p></div>
+  </div>
+</section>
+
+<form id="form-dia" class="cartao mt-4 pilha" novalidate>
+  <h2 id="titulo-dia">Como foi hoje?</h2>
+  <div>
+    <label class="rotulo pequeno suave" for="data">Anotar outro dia:</label>
+    <input id="data" class="campo" type="date" max="{{ hoje.isoformat() }}" value="{{ hoje.isoformat() }}">
+  </div>
+  <div>
+    <label class="rotulo" for="gasto">Quanto você gastou?</label>
+    <div class="campo-reais"><span>R$</span><input id="gasto" class="campo" type="text" inputmode="decimal" placeholder="0,00"></div>
+    <span class="ajuda">Ingredientes, embalagens, transporte.</span>
+  </div>
+  <div>
+    <label class="rotulo" for="fatias">Quantas fatias vendeu?</label>
+    <input id="fatias" class="campo" type="text" inputmode="numeric" placeholder="0">
+    <span class="ajuda">Pode deixar 0 se foi só dia de compras.</span>
+  </div>
+  <div>
+    <label class="rotulo" for="recebido">Quanto você recebeu?</label>
+    <div class="campo-reais"><span>R$</span><input id="recebido" class="campo" type="text" inputmode="decimal" placeholder="0,00"></div>
+    <span class="ajuda">Tudo que entrou: dinheiro, Pix e cartão.</span>
+  </div>
+
+  <div id="resultado" class="caixa-verde">
+    <p class="suave pequeno" id="resultado-rotulo">Lucro do dia</p>
+    <p class="valor-grande numeros" style="font-size:2rem" id="resultado-valor">R$ 0,00</p>
+    <p class="suave pequeno mt-1" id="resultado-nota" hidden>É normal nos dias de compra. O dinheiro volta com as vendas.</p>
+  </div>
+
+  <div id="separar" class="caixa-borda" hidden>
+    <p class="linha negrito">{{ ui.ic('PiggyBank', 'tomate-txt') }} Guarde para as próximas compras</p>
+    <p class="valor-grande numeros mt-1" style="font-size:1.8rem" id="separar-valor"></p>
+    <p class="mt-2" id="separar-texto"></p>
+    <p class="mt-2" id="separar-resto" hidden></p>
+    {% if p.metas.custo_estimado %}
+    <p class="suave pequeno mt-2">Valor aproximado. <a href="{{ P }}/calculadora">Calcule o custo da sua fatia</a> para ficar certinho.</p>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="botao" id="salvar"{% if not ativa %} disabled{% endif %}>Salvar o dia</button>
+  <button type="button" class="botao-texto" id="apagar" style="justify-content:center" hidden>Apagar este dia</button>
+  {{ ui.erro('erro') }}
+</form>
+
+<section class="mt-8" id="anteriores-secao"{% if not p.vendas %} hidden{% endif %}>
+  <h2>Dias anteriores</h2>
+  <ul class="lista-linhas mt-2" id="anteriores"></ul>
+</section>
+{% endblock %}
+{% block js %}
+<script>
+(function () {
+  var vendas = {{ vendas_json|tojson }};
+  var hoje = {{ hoje.isoformat()|tojson }};
+  var custoFatia = {{ p.metas.custo|tojson }};
+  var ativa = {{ ativa|tojson }};
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('form-dia'), data = $('data'), gasto = $('gasto'), fatias = $('fatias'), recebido = $('recebido');
+  var erro = $('erro');
+
+  function curta(d) { return d.slice(8, 10) + '/' + d.slice(5, 7); }
+  function doDia(d) { return vendas.find(function (v) { return v.data === d; }); }
+
+  function carregar(d) {
+    var v = doDia(d);
+    data.value = d;
+    gasto.value = v ? App.paraCampo(v.gasto) : '';
+    fatias.value = v && v.fatias ? String(v.fatias) : '';
+    recebido.value = v ? App.paraCampo(v.recebido) : '';
+    $('titulo-dia').textContent = d === hoje ? 'Como foi hoje?' : 'Dia ' + curta(d);
+    $('salvar').textContent = v ? 'Atualizar este dia' : 'Salvar o dia';
+    $('apagar').hidden = !(v && ativa);
+    App.mostrarErro(erro, '');
+    calcular();
+  }
+
+  function calcular() {
+    var g = App.lerNumero(gasto.value), r = App.lerNumero(recebido.value);
+    var lucro = r - g;
+    var vendidas = Math.round(App.lerNumero(fatias.value));
+    var separar = Math.min(vendidas * custoFatia, r);
+    var soVenda = separar > 0 && g === 0;
+    $('resultado-rotulo').textContent = soVenda ? 'Entrou hoje' : (lucro >= 0 ? 'Lucro do dia' : 'Neste dia você investiu');
+    $('resultado-valor').textContent = App.reais(Math.abs(soVenda ? r : lucro));
+    $('resultado').className = (lucro >= 0 && !soVenda) ? 'caixa-verde' : 'caixa-areia';
+    $('resultado-nota').hidden = lucro >= 0;
+    $('separar').hidden = !(separar > 0);
+    if (separar > 0) {
+      $('separar-valor').textContent = App.reais(separar);
+      $('separar-texto').textContent = 'É o custo ' + App.plural(vendidas, 'de 1 fatia vendida', 'das ' + vendidas + ' fatias vendidas') +
+        '. Separando esse dinheiro, a próxima produção já está paga.';
+      var resto = $('separar-resto');
+      resto.hidden = !soVenda;
+      if (soVenda) resto.innerHTML = 'O resto, <strong>' + App.reais(r - separar) + '</strong>, é o seu lucro.';
+    }
+    return { lucro: lucro, separar: separar };
+  }
+
+  function desenharAnteriores() {
+    var ul = $('anteriores');
+    ul.innerHTML = vendas.map(function (v) {
+      var l = v.recebido - v.gasto;
+      return '<li><button type="button" class="dia-antigo" data-dia="' + v.data + '"><span><strong>' + curta(v.data) + '</strong><br>' +
+        '<span class="suave pequeno">' + v.fatias + ' ' + App.plural(v.fatias, 'fatia', 'fatias') + ', recebeu ' + App.reais(v.recebido) + '</span></span>' +
+        '<span class="negrito numeros ' + (l >= 0 ? 'verde-txt' : 'suave') + '">' + (l >= 0 ? '+' : '-') + App.reais(Math.abs(l)) + '</span></button></li>';
+    }).join('');
+    $('anteriores-secao').hidden = vendas.length === 0;
+  }
+
+  [gasto, fatias, recebido].forEach(function (c) { c.addEventListener('input', calcular); });
+  data.addEventListener('change', function () { if (data.value) carregar(data.value); });
+  $('anteriores').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-dia]'); if (!b) return;
+    carregar(b.getAttribute('data-dia'));
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    App.mostrarErro(erro, '');
+    var c = calcular();
+    var registro = { data: data.value, gasto: App.lerNumero(gasto.value), fatias: Math.round(App.lerNumero(fatias.value)), recebido: App.lerNumero(recebido.value) };
+    App.ocupado($('salvar'), 'Salvando...', App.post(APP.prefixo + '/vendas/salvar', registro)).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erro, r.erro);
+      vendas = vendas.filter(function (v) { return v.data !== registro.data; }).concat([registro])
+        .sort(function (a, b) { return a.data < b.data ? 1 : -1; });
+      App.comemorar({
+        titulo: c.lucro > 0 ? 'Venda registrada!' : 'Dia registrado!',
+        mensagem: c.separar > 0 ? 'Agora separe ' + App.reais(c.separar) + ' para as próximas compras. Assim você nunca fica sem ingredientes.'
+          : (c.lucro > 0 ? 'Você lucrou ' + App.reais(c.lucro) + '. Cada fatia deixa você mais perto da meta.' : 'Anotar tudo é o segredo de quem cresce.'),
+        conquistas: r.conquistas,
+        onFechar: function () { window.location.reload(); }
+      });
+    });
+  });
+
+  $('apagar').addEventListener('click', function () {
+    if (!window.confirm('Apagar o registro do dia ' + curta(data.value) + '?')) return;
+    App.ocupado($('apagar'), 'Apagando...', App.post(APP.prefixo + '/vendas/apagar', { data: data.value })).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erro, r.erro);
+      window.location.reload();
+    });
+  });
+
+  desenharAnteriores();
+  carregar(hoje);
+})();
+</script>
+{% endblock %}

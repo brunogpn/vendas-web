@@ -1,0 +1,43 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Minhas medalhas · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .medalha { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 16px 8px; }
+  .medalha .circulo { width: 64px; height: 64px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: var(--tinta); color: #fff; }
+  .medalha.nao .circulo { background: transparent; border: 2px dashed var(--linha); color: var(--suave); }
+  .medalha.nao .nome { color: var(--suave); }
+  .niveis li { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
+  .niveis .bola { flex: none; width: 40px; height: 40px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--linha); color: var(--suave); }
+  .niveis .alcancado .bola { background: var(--tinta); border-color: var(--tinta); color: #fff; }
+  .niveis .atual .bola { background: var(--tomate); border-color: var(--tomate); color: #fff; box-shadow: 0 0 0 5px var(--tomate-claro); }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Minhas medalhas', P ~ '/mais') }}
+<p>Você conquistou <strong>{{ p.medalhas_ganhas }}</strong> de {{ p.medalhas|length }} medalhas.</p>
+<ul class="grade-2 mt-4">
+  {% for m in p.medalhas %}
+  <li class="medalha cartao {{ '' if m.ganhou else 'nao' }}">
+    <span class="circulo">{{ ui.ic(m.icone, 'ic-lg', m.ganhou) }}</span>
+    <span class="nome negrito">{{ m.nome }}</span>
+    <span class="suave pequeno">{{ m.descricao }}</span>
+  </li>
+  {% endfor %}
+</ul>
+
+<section class="mt-10">
+  <h2>Níveis</h2>
+  <p class="suave mt-1">Cada tarefa vale {{ pontos_tarefa }} pontos e cada dia de vendas anotado vale {{ pontos_dia }}.</p>
+  <ol class="niveis mt-3">
+    {% for n in niveis %}
+    {% set e_atual = n.nome == p.nivel.nome %}
+    <li class="{{ 'atual' if e_atual else ('alcancado' if p.pontos >= n.min else '') }}">
+      <span class="bola">{% if e_atual %}{{ ui.ic(n.icone, '', true) }}{% elif p.pontos >= n.min %}{{ ui.ic('Check') }}{% else %}{{ ui.ic(n.icone) }}{% endif %}</span>
+      <span class="cresce"><span class="negrito">{{ n.nome }}</span>{% if e_atual %}<br><span class="tomate-txt pequeno negrito">você está aqui</span>{% endif %}</span>
+      <span class="suave numeros">{{ n.min }} pts</span>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

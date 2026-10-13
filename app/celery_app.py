@@ -129,6 +129,17 @@ celery_app.conf.beat_schedule = {
         'kwargs': {'fonte': 'fechamento'},
         'options': {'queue': 'baixa'},
     },
+    # Apps das clientes (App Fatias): avisos de vencimento às 9h e reconciliação de licenças.
+    'apps-rotina-diaria': {
+        'task': 'tasks.apps_rotina_diaria',
+        'schedule': crontab(hour=9, minute=2),
+        'options': {'queue': 'baixa'},
+    },
+    'apps-reconciliar-licencas': {
+        'task': 'tasks.apps_reconciliar_licencas',
+        'schedule': crontab(minute=47),  # toda hora no :47
+        'options': {'queue': 'baixa'},
+    },
 }
 
 from celery.signals import worker_process_init
@@ -188,6 +199,8 @@ celery_app.conf.update(
         "tasks.verificar_qualidade_whatsapp_produto":     {"queue": "normal"},
         "tasks.verificar_emails_clientes":               {"queue": "baixa"},
         "tasks.coletar_custo_whatsapp":                  {"queue": "baixa"},
+        "tasks.apps_rotina_diaria":                      {"queue": "baixa"},
+        "tasks.apps_reconciliar_licencas":               {"queue": "baixa"},
         # NF-e — tudo na fila 'normal' (orquestrador, emissão individual e relatório)
         "tasks.emitir_nfe":                              {"queue": "normal"},
         "tasks.emitir_nfe_cartao":                       {"queue": "normal"},

@@ -1,0 +1,98 @@
+{% extends 'apps/_nucleo/base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Entrar · {{ app.nome }}{% endblock %}
+{% block classe_conteudo %}sem-menu{% endblock %}
+{% block css %}
+<style>
+  .entrar-capa { margin: -16px -16px 0; }
+  .codigo-campo { text-align: center; font-size: 1.9rem; letter-spacing: .5em; padding-left: .5em; font-variant-numeric: tabular-nums; }
+</style>
+{% endblock %}
+{% block conteudo %}
+{% block capa %}
+<div class="entrar-capa centro" style="padding:48px 16px 8px">
+  <span class="selo selo-tomate">{{ ui.ic('DeviceMobile', 'ic-lg') }}</span>
+  <p class="titulo-fonte negrito grande mt-3">{{ app.nome }}</p>
+</div>
+{% endblock %}
+
+<h1 class="mt-8 surgir" style="--atraso:300ms">{% block chamada %}{{ app.descricao }}{% endblock %}</h1>
+
+{% if link_invalido %}
+<p class="caixa-areia mt-4">Esse link de acesso já foi usado ou venceu. Sem problema: entre com o código que mandamos no seu email.</p>
+{% endif %}
+
+<form id="etapa-email" class="mt-6 pilha" novalidate>
+  <label for="email" class="rotulo">Seu email da compra</label>
+  <input id="email" class="campo mt-0" type="email" inputmode="email" autocomplete="email" placeholder="seuemail@gmail.com" required>
+  <button type="submit" class="botao">Receber código no email</button>
+  <p class="suave">Não precisa de senha. Vamos mandar um código de 6 números para o seu email.</p>
+  {{ ui.erro('erro-email') }}
+</form>
+
+<form id="etapa-codigo" class="mt-6 pilha" novalidate hidden>
+  <p>Mandamos um código para <strong id="email-mostrado"></strong>. Abra seu email e digite os 6 números aqui:</p>
+  <input id="codigo" class="campo codigo-campo" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="Código de 6 números">
+  <p id="codigo-dev" class="caixa-areia" hidden></p>
+  <button type="submit" class="botao" id="botao-entrar" disabled>Entrar</button>
+  <p class="suave">Não chegou? Olhe a caixa de spam ou lixo eletrônico.</p>
+  <button type="button" class="botao-texto" id="trocar-email">Usar outro email ou pedir novo código</button>
+  {{ ui.erro('erro-codigo') }}
+</form>
+
+<p class="suave centro mt-10">Precisa de ajuda? Escreva para <a href="mailto:{{ app.email_suporte }}">{{ app.email_suporte }}</a></p>
+{% endblock %}
+
+{% block js %}
+<script>
+(function () {
+  var formEmail = document.getElementById('etapa-email');
+  var formCodigo = document.getElementById('etapa-codigo');
+  var email = document.getElementById('email');
+  var codigo = document.getElementById('codigo');
+  var botaoEntrar = document.getElementById('botao-entrar');
+  var erroEmail = document.getElementById('erro-email');
+  var erroCodigo = document.getElementById('erro-codigo');
+  var dev = document.getElementById('codigo-dev');
+
+  formEmail.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    App.mostrarErro(erroEmail, '');
+    var botao = formEmail.querySelector('button[type=submit]');
+    App.ocupado(botao, 'Enviando...', App.post(APP.prefixo + '/entrar/codigo', { email: email.value })).then(function (r) {
+      if (!r.ok) return App.mostrarErro(erroEmail, r.erro);
+      document.getElementById('email-mostrado').textContent = email.value.trim().toLowerCase();
+      if (r.codigo_dev) { dev.innerHTML = 'Modo de teste: o código é <strong>' + r.codigo_dev + '</strong>'; dev.hidden = false; }
+      formEmail.hidden = true;
+      formCodigo.hidden = false;
+      codigo.focus();
+    });
+  });
+
+  codigo.addEventListener('input', function () {
+    codigo.value = codigo.value.replace(/\D/g, '').slice(0, 6);
+    botaoEntrar.disabled = codigo.value.length !== 6;
+  });
+
+  formCodigo.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (codigo.value.length !== 6) return;
+    App.mostrarErro(erroCodigo, '');
+    App.ocupado(botaoEntrar, 'Entrando...', App.post(APP.prefixo + '/entrar/confirmar', { email: email.value, codigo: codigo.value })).then(function (r) {
+      if (!r.ok) { App.mostrarErro(erroCodigo, r.erro); botaoEntrar.disabled = codigo.value.length !== 6; return; }
+      window.location.href = r.destino;
+    });
+  });
+
+  document.getElementById('trocar-email').addEventListener('click', function () {
+    codigo.value = '';
+    botaoEntrar.disabled = true;
+    dev.hidden = true;
+    App.mostrarErro(erroCodigo, '');
+    formCodigo.hidden = true;
+    formEmail.hidden = false;
+    email.focus();
+  });
+})();
+</script>
+{% endblock %}

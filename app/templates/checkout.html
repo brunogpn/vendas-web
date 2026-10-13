@@ -1170,10 +1170,13 @@
     // cliente ainda não tem) — padrão do site desde 10/2026; o e-mail de entrega aponta pra
     // mesma estante. location.replace (não .href) pra não deixar o checkout já finalizado no
     // histórico do navegador.
+    // Produto do tipo app (ex.: App Fatias): vai direto para o app, já logada (a rota abre a
+    // licença na hora); produto de e-book segue para a Estante como sempre.
+    const APP_SLUG = {{ (ebook_principal.app_slug or '')|tojson }};
     function pagamentoConfirmado(guid) {
         mostrarEstado('sucesso');
         setTimeout(() => {
-            window.location.replace('/pedido2/' + guid);
+            window.location.replace(APP_SLUG ? '/pedido2/' + guid + '/abrir-app/' + APP_SLUG : '/pedido2/' + guid);
         }, 1500);
     }
 

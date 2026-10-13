@@ -1182,10 +1182,13 @@
     // mesma experiência que ele já estava usando, já que essa compra nasceu do cross-sell da
     // estante v2. location.replace (não .href) pra não deixar o checkout já finalizado no
     // histórico do navegador.
+    // Produto do tipo app (ex.: App Fatias): vai direto para o app, já logada (a rota abre a
+    // licença na hora); produto de e-book segue para a Estante como sempre.
+    const APP_SLUG = {{ (ebook_principal.app_slug or '')|tojson }};
     function pagamentoConfirmado(guid) {
         mostrarEstado('sucesso');
         setTimeout(() => {
-            window.location.replace('/pedido2/' + guid);
+            window.location.replace(APP_SLUG ? '/pedido2/' + guid + '/abrir-app/' + APP_SLUG : '/pedido2/' + guid);
         }, 1500);
     }
 

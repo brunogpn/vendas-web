@@ -1,0 +1,16 @@
+{% extends 'apps/_nucleo/base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block topo %}
+{% if not ativa %}
+<div class="faixa-vencida" role="status"><strong>Seu acesso venceu.</strong> Você ainda vê tudo, mas não consegue anotar nada novo. <a href="{{ P }}/acesso">Renovar agora</a></div>
+{% endif %}
+{% endblock %}
+{% block menu %}
+<nav class="menu-baixo" aria-label="Menu principal">
+  <ul>
+    {% for chave, href, icone, rotulo in [('inicio', '/', 'House', 'Início'), ('tarefas', '/tarefas', 'ListChecks', 'Tarefas'), ('receitas', '/receitas', 'BookOpenText', 'Receitas'), ('vendas', '/vendas', 'Wallet', 'Vendas'), ('mais', '/mais', 'DotsThreeCircle', 'Mais')] %}
+    <li><a href="{{ P }}{{ href }}"{% if menu == chave %} aria-current="page"{% endif %}>{{ ui.ic(icone, '', menu == chave) }}<span>{{ rotulo }}</span></a></li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endblock %}

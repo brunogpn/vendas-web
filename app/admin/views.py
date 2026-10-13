@@ -1732,9 +1732,22 @@ def produto_ebooks(produto_id):
     produto = _get_produto_or_redirect(produto_id)
     if not produto:
         return redirect(url_for('admin.dashboard'))
+    from database import get_app_produto, buscar_chave_pix_venda_web
+    from apps import APPS
+    app_produto = get_app_produto(produto_id)
+    # Produto de app novo costuma nascer por clonagem, que não copia chave PIX nem planilhas do
+    # Google Ads: sem elas o checkout não gera PIX / as conversões não chegam no Ads (ROI errado).
+    pendencias_app = []
+    if app_produto:
+        if not buscar_chave_pix_venda_web(produto_id):
+            pendencias_app.append('Sem chave PIX de venda web — o checkout não gera o PIX (tela "Chaves Pix").')
+        if not db.execute_query("SELECT 1 FROM google_ads_planilha_dns WHERE produto_id = %s AND ativo = 1 LIMIT 1",
+                                (produto_id,), fetch_one=True):
+            pendencias_app.append('Sem planilha do Google Ads — as vendas deste produto NÃO vão como conversão para o Ads (tela "Planilhas Google").')
     return render_template(
         'admin/produto_ebooks.html', produto=produto,
         vinculos=listar_ebooks_produto(produto_id), catalogo=listar_ebooks(),
+        app_produto=app_produto, apps_disponiveis=APPS, pendencias_app=pendencias_app,
     )
 
 
@@ -1745,6 +1758,10 @@ def vincular_ebook_produto_view(produto_id):
     papel = request.form.get('papel')
     if not ebook_id or papel not in ('principal', 'bonus', 'bump'):
         flash('Escolha um e-book do catálogo e um papel válido.', 'warning')
+        return redirect(url_for('admin.produto_ebooks', produto_id=produto_id))
+    from database import get_app_produto
+    if papel == 'principal' and get_app_produto(produto_id):
+        flash('Este produto é do tipo app: o app é o principal. Vincule os e-books como bônus ou order bump.', 'warning')
         return redirect(url_for('admin.produto_ebooks', produto_id=produto_id))
     try:
         vincular_ebook_produto(

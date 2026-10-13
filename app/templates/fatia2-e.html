@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Desafio da Primeira Feira — Fatia de Bolo | Ju Negreiros</title><meta name="description" content="Responda algumas perguntas simples e veja como seria começar a vender fatias de bolo. 30 receitas de fatias + 2 bônus por R$10,00."><link rel="preload" as="image" href="/static/images/hero-fatia-e.webp" fetchpriority="high" type="image/webp"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Desafio da Primeira Feira — Fatia de Bolo | Ju Negreiros</title><meta name="description" content="Responda algumas perguntas simples e veja como seria começar a vender fatias de bolo. 30 receitas de fatias + 2 bônus por {{ preco_basico|brl|replace('R$ ', 'R$') }}."><link rel="preload" as="image" href="/static/images/hero-fatia-e.webp" fetchpriority="high" type="image/webp"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
 :root{--bg:#0f0c0a;--panel:#1c1511;--panel2:#241a15;--cream:#fff3e7;--muted:#bca99c;--line:#3a2d25;--berry:#d7473c;--berry2:#ef6659;--gold:#d5a35f;--gold2:#f3c47f;--green:#67a77d;--shadow:0 22px 80px rgba(0,0,0,.32);--radius:26px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Manrope,system-ui,sans-serif;background:radial-gradient(circle at top right,rgba(215,71,60,.08),transparent 30%),radial-gradient(circle at 20% 10%,rgba(213,163,95,.06),transparent 28%),var(--bg);color:var(--cream)}button,input{font:inherit}img{display:block;max-width:100%}.top{position:sticky;top:0;z-index:50;background:rgba(15,12,10,.86);backdrop-filter:blur(14px);border-bottom:1px solid rgba(58,45,37,.78)}.top-inner{max-width:900px;margin:auto;padding:11px 16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}.brand{font-size:12px;font-weight:800;letter-spacing:.7px;color:var(--gold2)}.track{height:9px;background:#2c211b;border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--berry),var(--gold));transition:.35s}.meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:4px}.wrap{max-width:900px;margin:auto;padding:18px 16px 70px}.hidden{display:none!important}.hero{display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:linear-gradient(145deg,var(--panel),#15100d);box-shadow:var(--shadow);margin-top:18px}.hero-copy{padding:40px 34px}.hero-photo{min-height:470px;overflow:hidden}.hero-photo img{width:100%;height:100%;object-fit:cover}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid #4a342a;background:#211711;border-radius:999px;color:var(--gold2);font-size:11px;font-weight:800;letter-spacing:.7px}h1,h2,h3{font-family:'DM Serif Display',serif;font-weight:400}h1{font-size:clamp(42px,7vw,70px);line-height:.98;letter-spacing:-1.8px;margin:18px 0}h2{font-size:clamp(32px,5vw,46px);line-height:1.02;margin:0 0 12px}h3{font-size:26px;margin:0 0 8px}p{color:var(--muted);line-height:1.7}.hero p{font-size:17px}.cta{display:block;width:100%;border:none;border-radius:18px;padding:17px 20px;font-weight:800;font-size:16px;cursor:pointer;text-align:center;text-decoration:none;color:white;background:linear-gradient(135deg,var(--berry2),var(--berry));box-shadow:0 14px 34px rgba(215,71,60,.25);transition:.2s}.cta:hover{transform:translateY(-2px)}.cta.alt{background:#211914;border:1px solid #4a382e;color:var(--cream);box-shadow:none}.micro{font-size:11px;color:#8d7d73;text-align:center;margin-top:10px}.panel{background:linear-gradient(145deg,var(--panel),#17110e);border:1px solid var(--line);border-radius:var(--radius);padding:26px;margin:18px 0;box-shadow:var(--shadow)}.step{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--gold2);margin-bottom:10px}.grid{display:grid;gap:12px;margin-top:16px}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}.grid.four{grid-template-columns:repeat(4,1fr)}.option{width:100%;border:1px solid #3b2d25;border-radius:18px;background:#211813;color:var(--cream);padding:16px;text-align:left;cursor:pointer;transition:.2s}.option:hover{transform:translateY(-2px);border-color:#71463b;background:#281c16}.option strong{display:block;font-size:15px}.option small{display:block;color:#9f8d81;line-height:1.5;margin-top:5px}.option.center{text-align:center}.feedback{margin-top:15px;border-left:3px solid var(--gold);background:#17110e;border-radius:0 14px 14px 0;padding:14px 16px;color:#d6c7bd;line-height:1.6}.feedback b{color:var(--cream)}.unlock{display:inline-flex;align-items:center;gap:8px;border-radius:999px;background:#241a14;border:1px solid #433229;color:var(--gold2);padding:8px 11px;font-size:11px;font-weight:800;margin-bottom:10px}.photo-strip{margin:16px 0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:#17110e}.photo-strip img{width:100%;aspect-ratio:16/9;object-fit:contain;background:#120d0b}.photo-copy{padding:16px}.cards-photo{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.photo-card{background:#1e1612;border:1px solid #392b24;border-radius:18px;overflow:hidden;cursor:pointer;transition:.2s}.photo-card:hover{transform:translateY(-2px);border-color:#71463b}.photo-card img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#120d0b}.photo-card .txt{padding:12px}.photo-card strong{display:block;font-size:14px}.photo-card small{display:block;color:#9c8b80;margin-top:4px;line-height:1.4}.input{width:100%;background:#17110e;border:1px solid #433127;color:var(--cream);border-radius:16px;padding:15px 16px;margin-top:12px;outline:none}.loading{min-height:170px;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:700;color:#d8c9bf}.resultbox{border:1px solid #4b392f;background:linear-gradient(145deg,#1a120f,#211713);border-radius:24px;padding:20px;margin-top:16px}.money{font-family:'DM Serif Display',serif;font-size:54px;color:var(--gold2);line-height:1}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}.stat{background:#15100d;border:1px solid #34271f;border-radius:15px;padding:12px}.stat span{display:block;font-size:10px;color:#8f7e72;text-transform:uppercase}.stat strong{display:block;margin-top:4px;font-size:17px}.personal{margin-top:14px;padding:16px;border-radius:18px;background:#201611;border:1px solid #463126}.personal b{color:var(--gold2)}.offer-hero{display:grid;grid-template-columns:.9fr 1.1fr;border-radius:30px;overflow:hidden;border:1px solid var(--line);background:#18110e;margin-top:20px}.offer-hero img{width:100%;height:100%;object-fit:cover;min-height:390px}.offer-copy{padding:30px}.benefits{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.benefit{background:#17110e;border:1px solid #392b23;border-radius:16px;padding:14px}.benefit b{display:block;margin-bottom:4px}.benefit span{font-size:12px;color:#9c8c82;line-height:1.5}.pricebox{background:#17100e;border:1px solid #4b372d;border-radius:22px;padding:22px;text-align:center;margin-top:18px}.old{text-decoration:line-through;color:#8f7c70}.price{font-family:'DM Serif Display',serif;font-size:52px;color:var(--cream);margin:4px 0}.faq details{border-top:1px solid #382a23;padding:15px 0}.faq summary{cursor:pointer;font-weight:800}.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:100}.confetti i{position:absolute;top:-20px;width:9px;height:14px;border-radius:2px;animation:fall 1.7s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.95}}@media(max-width:760px){.hero,.offer-hero{grid-template-columns:1fr}.hero-photo{min-height:330px;order:-1}.hero-copy{padding:28px 22px}.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}.cards-photo{grid-template-columns:1fr 1fr}.benefits{grid-template-columns:1fr}.photo-strip img{height:220px}}
 </style>
 <style>
@@ -76,6 +76,9 @@
   #s9 .photo-copy{display:none}#s9>p{margin:8px 0}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.confetti{display:none}.option,.dream-card,.photo-card,.cta,.fill{transition:none}}
+
+/* Popup "Plano Guiado com desconto" (da v8) */
+.upsell-overlay{position:fixed;inset:0;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:120}.upsell-overlay.show{display:flex}.upsell-modal{width:min(560px,100%);background:#fff;color:#1f1a17;border-radius:28px;padding:24px;box-shadow:0 32px 90px rgba(0,0,0,.35);position:relative}.upsell-close{position:absolute;top:14px;right:16px;border:none;background:transparent;font-size:34px;line-height:1;cursor:pointer;color:#52453d}.upsell-modal h3{font-family:Manrope,system-ui,sans-serif;font-size:24px;font-weight:900;margin:0 0 12px;color:#181311}.upsell-modal p{color:#544841;font-size:16px;line-height:1.65;margin:0 0 14px}.upsell-box{border:3px solid #26201d;border-radius:24px;padding:18px;margin-top:16px}.upsell-top{font-size:12px;font-weight:900;letter-spacing:1px;color:#cf6418;text-transform:uppercase;margin-bottom:10px}.upsell-title{font-family:Manrope,system-ui,sans-serif;font-size:20px;font-weight:900;color:#181311;margin-bottom:8px}.upsell-price-line{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.upsell-old{font-size:22px;color:#5a4d45;text-decoration:line-through}.upsell-new{font-size:54px;line-height:1;font-weight:900;color:#111}.upsell-save{background:#d7f4dc;color:#237742;border-radius:999px;padding:8px 12px;font-weight:800;font-size:15px}.upsell-mini{font-size:16px;color:#4c413b;margin-bottom:16px}.upsell-btn{display:block;width:100%;border:none;border-radius:18px;padding:18px 20px;background:#ff6c19;color:#fff;font-weight:900;font-size:18px;cursor:pointer;text-align:center;text-decoration:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.14)}.upsell-link{display:block;text-align:center;margin-top:18px;color:#4b4039;text-decoration:underline;font-weight:700;background:none;border:none;cursor:pointer}@media(max-width:760px){.upsell-modal{padding:20px}.upsell-new{font-size:44px}}
 </style></head>
 <body>
 <div class="top"><div class="top-inner"><div class="brand">FATIA DE BOLO</div><div><div class="track"><div class="fill" id="fill"></div></div><div class="meta"><span id="stepName">Início</span><span id="stepCount">0/14</span></div></div></div></div>
@@ -349,6 +352,41 @@
   <div class="panel">
     <div class="step">Seu próximo passo</div>
     <h2>Aprenda a fazer suas fatias e dar os primeiros passos nas vendas.</h2>
+    {# Com produto do tipo app do Fatia à venda (admin → E-books do produto → tipo app): dois planos
+       (Básico + Guiado) e, se houver um segundo produto de app mais barato, o popup de desconto ao
+       clicar no Básico (como na v8). Sem nenhum: só o plano Básico, como antes. #}
+    {% if guiado %}
+    <div class="plans">
+      <div class="plan">
+        <h3>Plano Básico</h3>
+        <div class="plan-price">{{ preco_basico|brl|replace(',00', '') }}</div>
+        <p>Para aprender e começar por conta própria.</p>
+        <ul>
+          <li>30 receitas de fatias</li>
+          <li>Bônus: receitas caseiras de bolos</li>
+          <li>Bônus: guia de vendas na feira</li>
+          <li>Material em PDF</li>
+        </ul>
+        <a class="cta alt" id="checkoutBasic" href="/pay/12">QUERO O PLANO DE {{ preco_basico|brl|replace(',00', '') }} →</a>
+      </div>
+      <div class="plan recommended">
+        <div class="badge">MAIS COMPLETO</div>
+        <h3>Plano Guiado</h3>
+        <div class="plan-price">{{ guiado.preco_promocional|brl|replace(',00', '') }}</div>
+        <p>Para aprender e ter um plano dizendo o que fazer.</p>
+        <ul>
+          <li>Tudo do Plano Básico</li>
+          <li>Aplicativo com meta de renda</li>
+          <li>O que fazer hoje, passo a passo</li>
+          <li>Calculadora de preço e lucro</li>
+          <li>Lista de compras pronta</li>
+          <li>Controle das vendas</li>
+          <li>{{ guiado.dias }} dias de acesso ao app</li>
+        </ul>
+        <a class="cta" id="checkoutGuided" href="/pay/{{ guiado.produto_id }}">QUERO O PLANO GUIADO →</a>
+      </div>
+    </div>
+    {% else %}
     <div class="plans single-offer">
       <div class="plan recommended">
         <h3>Guia Completo "Fatia de Bolo"</h3>
@@ -360,13 +398,14 @@
         </ul>
         <div class="pricebox">
           <p>O e-book + os 2 bônus por</p>
-          <div class="plan-price">R$ 10,00</div>
+          <div class="plan-price">{{ preco_basico|brl }}</div>
           <p>Pagamento único · Acesso imediato após o pagamento.</p>
           <a class="cta" id="checkoutBasic" href="/pay/12">QUERO MINHAS RECEITAS + 2 BÔNUS →</a>
           <div class="micro">🔒 Compra segura · Material digital em PDF para celular, tablet ou computador.</div>
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
 
 
@@ -579,7 +618,47 @@ function confetti(){
 // Checkout do sistema (produto 12), repassando a querystring (gclid/campanha) como no fatia-e.html.
 $("checkoutBasic").href=CHECKOUT_URL+window.location.search;
 $("checkoutBasic").addEventListener("click",()=>track(17,"Clicou em comprar"));
+// Plano Guiado (produto do tipo app) e popup de desconto — só existem se houver produto de app à venda.
+// Cada link repassa a querystring (gclid/campanha) como o do Básico. Roda no DOMContentLoaded porque
+// o popup fica depois deste script no HTML.
+document.addEventListener("DOMContentLoaded",()=>{
+["checkoutGuided","checkoutGuidedDiscount"].forEach(id=>{const a=document.getElementById(id);if(!a)return;
+  a.href=a.getAttribute("href")+window.location.search;a.addEventListener("click",()=>track(17,"Clicou em comprar"))});
+(function(){
+  const overlay=document.getElementById("upsellOverlay");if(!overlay)return;
+  const basico=$("checkoutBasic");let mostrou=false;
+  const fechar=()=>{overlay.classList.remove("show");document.body.style.overflow=""};
+  basico.addEventListener("click",e=>{if(mostrou)return;e.preventDefault();mostrou=true;
+    overlay.classList.add("show");document.body.style.overflow="hidden"});
+  document.getElementById("upsellFechar").addEventListener("click",fechar);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)fechar()});
+  window.addEventListener("keydown",e=>{if(e.key==="Escape")fechar()});
+  document.getElementById("upsellSoBasico").addEventListener("click",()=>{fechar();window.location.href=basico.href});
+})();
+});
 track(0,"Abriu a página");
 </script>
 
+{% if guiado and desconto %}
+<div class="upsell-overlay" id="upsellOverlay" aria-hidden="true">
+  <div class="upsell-modal" role="dialog" aria-modal="true" aria-labelledby="upsellTitle">
+    <button class="upsell-close" type="button" id="upsellFechar" aria-label="Fechar">×</button>
+    <h3 id="upsellTitle">Espera, tem certeza?</h3>
+    <p>O Plano Básico te ensina o caminho. Mas o <b>Plano Guiado</b> ajuda muito mais quem quer começar sem ficar travada, porque mostra o que fazer, como se organizar e como perseguir sua meta de renda.</p>
+    <div class="upsell-box">
+      <div class="upsell-top">Só nesta tela</div>
+      <div class="upsell-title">Plano Guiado com desconto</div>
+      <p>Leve o plano mais completo com a ferramenta que mostra sua meta, sua semana e o próximo passo.</p>
+      <div class="upsell-price-line">
+        <div class="upsell-old">{{ guiado.preco_promocional|brl }}</div>
+        <div class="upsell-new">{{ desconto.preco_promocional|brl }}</div>
+        <div class="upsell-save">economize {{ (guiado.preco_promocional - desconto.preco_promocional)|brl }}</div>
+      </div>
+      <div class="upsell-mini">Por apenas {{ ((desconto.preco_promocional|float) - preco_basico)|brl }} a mais que o Básico, você já leva a versão guiada.</div>
+      <a class="upsell-btn" id="checkoutGuidedDiscount" href="/pay/{{ desconto.produto_id }}">🎁 Sim, quero o Plano Guiado por {{ desconto.preco_promocional|brl }}</a>
+    </div>
+    <button class="upsell-link" type="button" id="upsellSoBasico">Não, quero só o plano básico</button>
+  </div>
+</div>
+{% endif %}
 </body></html>

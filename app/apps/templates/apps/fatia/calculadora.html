@@ -1,0 +1,239 @@
+{% extends 'apps/fatia/_base.html' %}
+{% import 'apps/_nucleo/_componentes.html' as ui with context %}
+{% block titulo %}Calculadora de preço · {{ app.nome }}{% endblock %}
+{% block css %}
+<style>
+  .ing-calc { display: flex; width: 100%; align-items: center; gap: 12px; padding: 12px 16px; text-align: left; }
+  .ing-calc:active { background: var(--areia); }
+  .opcao-preco { display: block; width: 100%; text-align: left; border: 2px solid var(--linha); border-radius: var(--raio); padding: 14px 16px; background: var(--cartao); transition: border-color 160ms ease; }
+  .opcao-preco[aria-checked="true"] { border-color: var(--tinta); box-shadow: inset 0 0 0 1px var(--tinta); }
+  .linha-conta { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+  details summary { cursor: pointer; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+</style>
+{% endblock %}
+{% block conteudo %}
+{{ ui.titulo('Calculadora de preço', P ~ '/mais') }}
+
+<div id="sem-receita" hidden>
+  <p class="suave">Descubra quanto custa cada fatia e por quanto vender para ter lucro. Escolha a receita:</p>
+  <div id="seletor" class="mt-4"></div>
+</div>
+
+<div id="com-receita" hidden>
+  <div class="cartao linha" style="padding:12px">
+    <img id="r-foto" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover" hidden>
+    <p class="cresce titulo-fonte negrito grande" id="r-nome"></p>
+    <button type="button" class="botao-sec" style="width:auto;min-height:44px;padding:8px 16px" id="trocar">Trocar</button>
+  </div>
+
+  <section class="mt-8">
+    <h2>1. Quanto custam os ingredientes</h2>
+    <p class="mt-2" id="faltam"></p>
+    <ul class="cartao lista-linhas mt-3" style="padding:0;overflow:hidden" id="sem-preco"></ul>
+    <details class="cartao mt-3" style="padding:0" id="com-preco-box">
+      <summary class="linha-entre" style="padding:14px 16px"><span id="com-preco-titulo"></span><span class="suave">{{ ui.ic('CaretDown') }}</span></summary>
+      <ul class="lista-linhas" id="com-preco" style="border-top:1px solid var(--linha)"></ul>
+    </details>
+    <p class="suave pequeno mt-3" id="outros" hidden></p>
+  </section>
+
+  <section class="mt-8">
+    <h2>2. Quanto rende</h2>
+    <label class="rotulo mt-3" for="rende" id="rende-rotulo"></label>
+    <input id="rende" class="campo" type="text" inputmode="numeric">
+    <span class="ajuda" id="rende-ajuda"></span>
+    <label class="rotulo mt-4" for="embalagem">Embalagem de cada <span data-unidade-singular></span></label>
+    <div class="campo-reais"><span>R$</span><input id="embalagem" class="campo" type="text" inputmode="decimal" placeholder="0,00"></div>
+    <span class="ajuda">Pote, forminha, guardanapo, colherzinha. Se ainda não sabe, deixe em branco.</span>
+  </section>
+
+  <section class="mt-8">
+    <h2>3. Por quanto vender</h2>
+    <p class="caixa-areia mt-3" id="sem-conta">Anote o preço dos ingredientes ali em cima para ver a conta.</p>
+    <div id="conta" hidden>
+      <div class="cartao-escuro mt-3">
+        <p class="suave">Cada <span data-unidade-singular></span> custa para você</p>
+        <p class="valor-grande numeros mt-1" id="custo-fatia"></p>
+        <div class="mt-3 pequeno" id="detalhe"></div>
+        <p class="mt-3 pequeno" id="aviso-faltam" hidden>⚠ Ainda faltam preços. O custo real é maior.</p>
+      </div>
+      <div class="pilha mt-4" style="--gap:10px" role="radiogroup" aria-label="Escolha o preço" id="opcoes"></div>
+      <div id="resultado" class="mt-4"></div>
+      <p class="caixa-areia mt-4" id="aviso-brigadeiro" hidden>As metas do app usam o preço da fatia. Este cálculo é só para você saber quanto cobrar no brigadeiro.</p>
+      <div id="usar-box" class="mt-4" hidden>
+        <button type="button" class="botao" id="usar"></button>
+        <p class="suave pequeno mt-2 centro" id="usar-legenda"></p>
+      </div>
+      {{ ui.erro('erro') }}
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ asset('apps/fatia/custos.js') }}"></script>
+<script src="{{ asset('apps/fatia/editor_preco.js') }}"></script>
+<script src="{{ asset('apps/fatia/escolher_receita.js') }}"></script>
+<script>
+(function () {
+  var catalogo = {{ catalogo|tojson }};
+  var receitas = {{ receitas|tojson }};
+  var precos = {{ precos|tojson }};
+  var naLista = {{ na_lista|tojson }};
+  var metas = {{ metas|tojson }};
+  var escolhida = {{ escolhida|tojson }};
+  var precoAtual = {{ (perfil.preco_fatia or none)|tojson }};
+  var $ = function (id) { return document.getElementById(id); };
+  Custos.iniciar(catalogo);
+  var porId = {}; receitas.forEach(function (r) { porId[r.id] = r; });
+  var r = null, editando = null, escolha = 'recomendado', salvo = false;
+
+  function trocarReceita(id) {
+    var q = new URLSearchParams(location.search);
+    if (id) q.set('receita', id); else q.delete('receita');
+    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
+    escolhida = id;
+    window.scrollTo(0, 0);
+    iniciar();
+  }
+
+  function iniciar() {
+    r = escolhida ? porId[escolhida] : null;
+    $('sem-receita').hidden = !!r;
+    $('com-receita').hidden = !r;
+    if (!r) {
+      EscolherReceita.montar($('seletor'), receitas, { marcadas: naLista, static: '/static/', aoEscolher: trocarReceita });
+      return;
+    }
+    $('r-nome').textContent = r.nome;
+    if (r.imagem) { $('r-foto').src = '/static/' + r.imagem; $('r-foto').hidden = false; } else $('r-foto').hidden = true;
+    var plural = Custos.nomeUnidade(r, 2), singular = Custos.nomeUnidade(r, 1);
+    document.querySelectorAll('[data-unidade-singular]').forEach(function (s) { s.textContent = singular; });
+    $('rende-rotulo').textContent = 'Quantas ' + plural + ' você tira?';
+    $('rende').value = r.fatias || '';
+    $('rende-ajuda').textContent = r.fatias ? 'O ebook diz cerca de ' + r.fatias + '. Mude se você corta diferente.' : 'Conte quantas sai de uma receita.';
+    $('embalagem').value = App.ler('calculadora-embalagem', '');
+    escolha = 'recomendado'; salvo = false; editando = null;
+    desenhar();
+  }
+
+  function linhaIngrediente(it) {
+    var ing = Custos.ingrediente(it.item);
+    var p = precos[it.item];
+    var valor = p && p.quantidade ? '<span class="negrito numeros">' + App.reais(p.preco / p.quantidade * it.qtd) + '</span>'
+      : '<span class="pilula">Anotar preço</span>';
+    return '<li><button type="button" class="ing-calc" data-item="' + it.item + '"><span class="cresce"><span class="negrito" style="display:block">' +
+      App.escapar(ing ? ing.nome : it.item) + '</span><span class="suave pequeno">Usa ' + Custos.textoQuantidade(it.qtd, ing ? ing.unidade : 'g') +
+      '</span></span>' + valor + '</button><div data-editor="' + it.item + '" style="padding:0 16px 16px"' + (editando === it.item ? '' : ' hidden') + '></div></li>';
+  }
+
+  function desenhar() {
+    var conta = Custos.custoDeItens(r.itens, precos);
+    var semPreco = r.itens.filter(function (it) { return conta.semPreco.indexOf(it.item) >= 0; });
+    var comPreco = r.itens.filter(function (it) { return conta.semPreco.indexOf(it.item) < 0; });
+    $('faltam').innerHTML = semPreco.length === 0 ? '<span class="verde-txt negrito">' + App.icone('Check', 'ic-sm') + ' Todos os ingredientes têm preço.</span>'
+      : (comPreco.length === 0 ? 'Anote o preço de cada ingrediente. Toque em cada um:'
+        : 'Faltam ' + semPreco.length + ' ' + App.plural(semPreco.length, 'preço', 'preços') + '. Sem eles, a conta fica mais barata do que é de verdade.');
+    $('sem-preco').innerHTML = semPreco.map(linhaIngrediente).join('');
+    $('sem-preco').hidden = semPreco.length === 0;
+    $('com-preco-box').hidden = comPreco.length === 0;
+    $('com-preco-titulo').innerHTML = (semPreco.length ? 'Com preço (' + comPreco.length + '): ' : 'Ingredientes: ') + '<strong class="numeros">' + App.reais(conta.total) + '</strong>';
+    $('com-preco').innerHTML = comPreco.map(linhaIngrediente).join('');
+    if (editando && comPreco.some(function (it) { return it.item === editando; })) $('com-preco-box').open = true;
+    $('outros').hidden = !r.outros.length;
+    $('outros').textContent = 'Não entram na conta (são decoração ou pouca quantidade): ' + r.outros.map(function (o) { return o.toLowerCase(); }).join('; ') + '.';
+    if (editando) {
+      var cont = document.querySelector('[data-editor="' + editando + '"]');
+      if (cont) EditorPreco.abrir(cont, editando, precos[editando], function (novo) {
+        if (novo) precos[editando] = novo; else delete precos[editando];
+        editando = null;
+        desenhar();
+      });
+    }
+    contas(conta);
+  }
+
+  function contas(conta) {
+    conta = conta || Custos.custoDeItens(r.itens, precos);
+    var temConta = r.itens.length > conta.semPreco.length;
+    $('sem-conta').hidden = temConta;
+    $('conta').hidden = !temConta;
+    if (!temConta) return;
+    var reserva = conta.total * Custos.RESERVA_GAS_LUZ;
+    var fatias = Math.max(1, Math.round(App.lerNumero($('rende').value)) || r.fatias || 1);
+    var emb = App.lerNumero($('embalagem').value);
+    var custo = (conta.total + reserva) / fatias + emb;
+    var unidadeP = Custos.nomeUnidade(r, 2);
+    $('custo-fatia').textContent = App.reais(custo);
+    $('detalhe').innerHTML =
+      '<div class="linha-conta"><span>Ingredientes ÷ ' + fatias + ' ' + unidadeP + '</span><span class="numeros">' + App.reais(conta.total / fatias) + '</span></div>' +
+      '<div class="linha-conta"><span>Gás, luz e perdas (10%)</span><span class="numeros">' + App.reais(reserva / fatias) + '</span></div>' +
+      (emb > 0 ? '<div class="linha-conta"><span>Embalagem</span><span class="numeros">' + App.reais(emb) + '</span></div>' : '');
+    $('aviso-faltam').hidden = conta.semPreco.length === 0;
+
+    var sugestoes = Custos.sugestoesDePreco(r.categoria, custo);
+    var outroValor = $('outro-preco') ? $('outro-preco').value : '';
+    $('opcoes').innerHTML = sugestoes.map(function (s) {
+      return '<button type="button" class="opcao-preco" role="radio" aria-checked="' + (escolha === s.id) + '" data-escolha="' + s.id + '">' +
+        '<span class="linha-entre"><span class="negrito">' + s.nome + '</span><span class="titulo-fonte negrito grande numeros">' + App.reais(s.preco) + '</span></span>' +
+        '<span class="suave pequeno" style="display:block">' + s.texto + '</span>' +
+        '<span class="verde-txt pequeno negrito" style="display:block;margin-top:4px">Você ganha ' + App.reais(s.preco - custo) + ' por ' + Custos.nomeUnidade(r, 1) + '</span></button>';
+    }).join('') +
+      '<div class="opcao-preco" role="radio" aria-checked="' + (escolha === 'outro') + '" data-escolha="outro">' +
+        '<span class="negrito">Outro preço</span><span class="suave pequeno" style="display:block">Se na sua região se cobra diferente.</span>' +
+        '<div class="campo-reais mt-2"><span>R$</span><input id="outro-preco" class="campo" type="text" inputmode="decimal" placeholder="0,00" value="' + App.escapar(outroValor) + '"></div></div>';
+
+    var preco = escolha === 'outro' ? App.lerNumero(outroValor) : sugestoes.filter(function (s) { return s.id === escolha; })[0].preco;
+    var lucro = preco - custo;
+    var paraMeta = lucro > 0 ? Math.ceil(metas.meta / lucro) : 0;
+    var porDia = Math.ceil(paraMeta / (metas.dias_por_semana * 4.3));
+    $('resultado').innerHTML = preco > 0 ? (lucro > 0
+      ? '<div class="caixa-verde"><p>Vendendo a <strong>' + App.reais(preco) + '</strong>, você lucra <strong>' + App.reais(lucro) + '</strong> em cada ' + Custos.nomeUnidade(r, 1) + '.</p>' +
+        '<p class="mt-2">Para lucrar <strong>' + App.reaisSemCentavos(metas.meta) + '</strong> no mês, venda cerca de <strong>' + paraMeta + ' ' + unidadeP + '</strong> (' + porDia + ' por dia de venda).</p></div>'
+      : '<div class="caixa-tomate"><p>Com esse preço você perde dinheiro. Cobre mais que ' + App.reais(custo) + '.</p></div>') : '';
+
+    var brigadeiro = r.categoria === 'brigadeiros';
+    $('aviso-brigadeiro').hidden = !brigadeiro;
+    $('usar-box').hidden = brigadeiro;
+    if (!brigadeiro) {
+      var usar = $('usar');
+      usar.disabled = !(lucro > 0);
+      usar.innerHTML = salvo ? App.icone('Check') + ' Preço salvo' : 'Usar ' + App.reais(preco > 0 ? preco : 0) + ' no app';
+      $('usar-legenda').textContent = salvo ? 'Pronto! Suas metas agora usam esse preço e esse custo.'
+        : (precoAtual ? 'Hoje suas metas usam ' + App.reais(precoAtual) + ' por fatia.' : 'Suas metas vão usar esse preço e esse custo.');
+      usar.onclick = function () {
+        App.mostrarErro($('erro'), '');
+        App.ocupado(usar, 'Salvando...', App.post(APP.prefixo + '/perfil', { preco_fatia: preco, custo_fatia: Math.round(custo * 100) / 100 })).then(function (res) {
+          if (!res.ok) return App.mostrarErro($('erro'), res.erro);
+          precoAtual = preco; salvo = true; contas();
+        });
+      };
+    }
+  }
+
+  document.getElementById('com-receita').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-item]');
+    if (b) { var id = b.getAttribute('data-item'); editando = editando === id ? null : id; desenhar(); return; }
+    var o = ev.target.closest('[data-escolha]');
+    if (o) {
+      var nova = o.getAttribute('data-escolha');
+      if (nova !== escolha) { escolha = nova; salvo = false; contas(); if (nova === 'outro') $('outro-preco').focus(); }
+    }
+  });
+  document.getElementById('com-receita').addEventListener('input', function (ev) {
+    if (ev.target.id === 'outro-preco') {
+      escolha = 'outro'; salvo = false;
+      var pos = ev.target.selectionStart;
+      contas();
+      var campo = $('outro-preco'); campo.focus(); try { campo.setSelectionRange(pos, pos); } catch (e) { /* nada */ }
+    } else if (ev.target.id === 'rende' || ev.target.id === 'embalagem') {
+      if (ev.target.id === 'embalagem') App.gravar('calculadora-embalagem', ev.target.value);
+      salvo = false;
+      contas();
+    }
+  });
+  $('trocar').addEventListener('click', function () { trocarReceita(null); });
+  iniciar();
+})();
+</script>
+{% endblock %}

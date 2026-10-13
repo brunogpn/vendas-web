@@ -10,6 +10,7 @@ from flask_login import LoginManager
 from admin import admin_bp
 from admin.auth import init_login_manager
 from web import web_bp
+from apps import registrar as apps_registrar
 from database import busca_produtos_disponiveis_web
 import os
 import logging
@@ -36,6 +37,9 @@ init_login_manager(app)
 
 # Registra o Blueprint de web checkout
 app.register_blueprint(web_bp)
+
+# Apps das clientes (PWA em /app/<slug>/, ex.: App Fatias) — ver docs/APPS.md
+apps_registrar(app)
 
 
 @app.template_filter('brl')
@@ -449,7 +453,22 @@ def fatia_e():
     from web.checkout import rastrear_visita_funil, COOKIE_MAX_AGE_FUNIL
     produto_id = 12
     pedido_id = rastrear_visita_funil(request, produto_id, estado_novo=1004)
-    resp = make_response(render_template('fatia2-e.html'))
+    # Plano Guiado = produto do tipo app do Fatia à venda (o mais caro); havendo outro mais barato,
+    # ele vira o desconto do popup. Sem nenhum, a landing mostra só o plano de R$ 10.
+    guiado = desconto = None
+    preco_basico = 10.0
+    try:
+        from database import listar_apps_produto, get_ebook_principal_produto
+        principal = get_ebook_principal_produto(produto_id)
+        if principal:
+            preco_basico = float(principal['preco_promocional'])
+        ofertas = listar_apps_produto('fatia', renovacao=False, so_venda_web=True)  # ordem: preço
+        if ofertas:
+            guiado = ofertas[-1]
+            desconto = ofertas[0] if len(ofertas) > 1 else None
+    except Exception as e:
+        logger.error(f"[FATIA-E] Erro ao buscar os planos do app: {e}")
+    resp = make_response(render_template('fatia2-e.html', guiado=guiado, desconto=desconto, preco_basico=preco_basico))
     resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id), max_age=COOKIE_MAX_AGE_FUNIL)
     return resp
 

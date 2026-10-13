@@ -1,0 +1,26 @@
+{# Componentes comuns das telas dos apps. Uso: {% import 'apps/_nucleo/_componentes.html' as ui with context %} #}
+
+{% macro ic(nome, classe='', fill=false) -%}
+<svg class="ic {{ classe }}" aria-hidden="true"><use href="{{ asset('apps/_nucleo/icones.svg') }}#{{ nome }}{{ '-fill' if fill }}"></use></svg>
+{%- endmacro %}
+
+{% macro voltar(href, rotulo='Voltar', anterior=false) -%}
+<a class="voltar" href="{{ href }}"{% if anterior %} data-voltar-anterior{% endif %}>{{ ic('ArrowLeft', 'ic-sm') }} {{ rotulo }}</a>
+{%- endmacro %}
+
+{% macro titulo(texto, voltar_para=none, rotulo_voltar='Voltar', anterior=false) -%}
+<header class="cabecalho">
+  {% if voltar_para %}{{ voltar(voltar_para, rotulo_voltar, anterior) }}{% endif %}
+  <h1>{{ texto }}</h1>
+</header>
+{%- endmacro %}
+
+{# Barra de progresso: valor/total, com o preenchimento deslizando por transform. #}
+{% macro barra(valor, total, classe='') -%}
+{%- set pct = ([100, ((valor / total * 100) | round | int)] | min) if total and total > 0 and valor > 0 else 0 -%}
+<div class="barra {{ classe }}" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"><div style="transform:translateX({{ pct - 100 }}%)"></div></div>
+{%- endmacro %}
+
+{% macro erro(id='erro', texto='') -%}
+<p id="{{ id }}" class="erro" role="alert"{% if not texto %} hidden{% endif %}>{{ texto }}</p>
+{%- endmacro %}

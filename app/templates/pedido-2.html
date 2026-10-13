@@ -222,6 +222,19 @@
 
         .vazio { text-align: center; color: var(--sub); padding: 40px 0; }
 
+        /* Card "Meus apps": um por app, largo e com botão claro (público 35+). */
+        .card-app {
+            display: flex; align-items: center; gap: 14px;
+            background: #fff; color: var(--texto-card); text-decoration: none;
+            border-radius: 16px; border: 2px solid var(--azul); padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .35); margin-bottom: 12px;
+        }
+        .card-app-icone { font-size: 30px; flex: none; }
+        .card-app-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .card-app-texto strong { font-size: 17px; }
+        .card-app-texto span { font-size: 13px; color: var(--sub-card); line-height: 1.35; }
+        .card-app-botao { flex: none; background: var(--azul); color: #fff; font-weight: 900; font-size: 15px; padding: 12px 16px; border-radius: 12px; }
+
         .rodape-suporte {
             text-align: center;
             font-size: 13px;
@@ -284,7 +297,24 @@
                 </header>
             </div>
 
+            {# Apps das clientes (ex.: App Fatias): card grande, antes dos livros. O botão entra no
+               app já logada, por um link de uso único (ver apps/_nucleo/rotas.py). #}
+            {% if meus_apps %}
+            <div class="secao-titulo-lista">Meus apps</div>
+            {% for a in meus_apps %}
+            <a class="card-app" href="/pedido2/{{ guid }}/abrir-app/{{ a.app.slug }}">
+                <span class="card-app-icone">📱</span>
+                <span class="card-app-texto">
+                    <strong>{{ a.app.nome }}</strong>
+                    <span>{% if a.ativa %}{{ a.app.descricao }}{% else %}Seu acesso venceu. Toque para ver como renovar.{% endif %}</span>
+                </span>
+                <span class="card-app-botao">Abrir →</span>
+            </a>
+            {% endfor %}
+            {% endif %}
+
             {% if itens %}
+            {% if meus_apps %}<div class="secao-titulo-lista">Meus livros</div>{% endif %}
             <div class="grid-ebooks">
                 {% for item in itens %}
                 <a class="item-ebook{% if item.bloqueado %} bloqueado{% endif %}" href="/pedido/{{ item.guid_pedido }}/ler/{{ item.id }}?estante=v2">

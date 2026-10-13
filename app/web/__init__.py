@@ -333,8 +333,18 @@ def pedido_publico_v2(guid):
         import logging
         logging.getLogger(__name__).error(f"[ESTANTE] Erro ao registrar visualização v2 do pedido #{pedido['id']}: {e}")
 
+    # "Meus apps": apps (ex.: App Fatias) da cliente deste pedido. Extra da página — não pode derrubá-la.
+    try:
+        from apps._nucleo.estante import apps_da_estante
+        meus_apps, apps_ofertas = apps_da_estante(pedido)
+        cross_sell = apps_ofertas + cross_sell
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"[ESTANTE] Erro ao listar apps do pedido #{pedido['id']}: {e}")
+        meus_apps = []
+
     return render_template('pedido-2.html', primeiro_nome=primeiro_nome, itens=itens,
-                            cross_sell=cross_sell, guid=guid)
+                            cross_sell=cross_sell, guid=guid, meus_apps=meus_apps)
 
 
 @web_bp.get('/pedido/<guid>/ler/<int:item_id>')

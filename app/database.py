@@ -1710,11 +1710,83 @@ def remover_vinculo_ebook_produto(vinculo_id, produto_id):
 def get_ebook_principal_produto(produto_id):
     """Retorna o vínculo 'principal' (com dados do catálogo via JOIN) de um produto, ou None se
     o produto ainda não tem e-book principal cadastrado — usado pelo checkout web como sinal de
-    'produto não configurado', pra recusar a venda em vez de usar um preço/arquivo arbitrário."""
-    return db.execute_query(
+    'produto não configurado', pra recusar a venda em vez de usar um preço/arquivo arbitrário.
+
+    Produto do tipo app (linha em apps_produto, migration 082) não tem e-book principal: devolve
+    o app no mesmo formato (id/ebook_id/path_arquivo None, app_slug preenchido), para o checkout,
+    o PIX/cartão e o pedido_itens seguirem pelo mesmo caminho dos e-books."""
+    principal = db.execute_query(
         _SELECT_EBOOKS_PRODUTO + " WHERE ep.produto_id = %s AND ep.papel = 'principal'",
         (produto_id,), fetch_one=True
     )
+    if principal:
+        return principal
+    app = get_app_produto(produto_id)
+    if not app:
+        return None
+    return {
+        'id': None, 'produto_id': produto_id, 'ebook_id': None, 'papel': 'principal', 'ordem': 0,
+        'preco_original': app['preco_original'], 'preco_promocional': app['preco_promocional'],
+        'nome_venda': app['nome_venda'], 'descricao': app['descricao'],
+        'path_arquivo': None, 'nome_arquivo': None,
+        'imagem_grande': app['imagem_grande'], 'imagem_pequena': app['imagem_pequena'],
+        'app_slug': app['app_slug'],
+    }
+
+
+# ============================================================
+# Produto do tipo app (apps_produto, migration 082) — ver docs/APPS.md
+# ============================================================
+
+def get_app_produto(produto_id):
+    """A configuração de app do produto (None = produto de e-book, o padrão). Tolera a migration
+    082 ainda não aplicada (devolve None), para o checkout de e-book nunca depender dela."""
+    try:
+        return db.execute_query("SELECT * FROM apps_produto WHERE produto_id = %s", (produto_id,), fetch_one=True)
+    except Error as e:
+        if getattr(e, 'errno', None) == 1146:  # tabela não existe
+            return None
+        raise
+
+
+def salvar_app_produto(produto_id, app_slug, dias, renovacao, nome_venda, descricao, imagem_grande,
+                       imagem_pequena, preco_original, preco_promocional):
+    db.execute_query(
+        """INSERT INTO apps_produto (produto_id, app_slug, dias, renovacao, nome_venda, descricao, imagem_grande,
+                                     imagem_pequena, preco_original, preco_promocional)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+           ON DUPLICATE KEY UPDATE app_slug=VALUES(app_slug), dias=VALUES(dias), renovacao=VALUES(renovacao),
+               nome_venda=VALUES(nome_venda), descricao=VALUES(descricao), imagem_grande=VALUES(imagem_grande),
+               imagem_pequena=VALUES(imagem_pequena), preco_original=VALUES(preco_original),
+               preco_promocional=VALUES(preco_promocional)""",
+        (produto_id, app_slug, dias, 1 if renovacao else 0, nome_venda, descricao or None, imagem_grande or None,
+         imagem_pequena or None, preco_original, preco_promocional))
+
+
+def remover_app_produto(produto_id):
+    return db.execute_query("DELETE FROM apps_produto WHERE produto_id = %s", (produto_id,),
+                            return_rowcount=True) > 0
+
+
+def listar_apps_produto(app_slug=None, renovacao=None, so_venda_web=False):
+    """Produtos do tipo app (opcionalmente de um app / só renovações / só os vendáveis no site)."""
+    sql = ("SELECT ap.*, p.nome AS produto_nome, p.ativo, p.disponivel_web FROM apps_produto ap "
+           "JOIN produtos p ON p.id = ap.produto_id WHERE 1=1")
+    params = []
+    if app_slug is not None:
+        sql += " AND ap.app_slug = %s"
+        params.append(app_slug)
+    if renovacao is not None:
+        sql += " AND ap.renovacao = %s"
+        params.append(1 if renovacao else 0)
+    if so_venda_web:
+        sql += " AND p.ativo = TRUE AND p.disponivel_web = TRUE"
+    try:
+        return db.execute_query(sql + " ORDER BY ap.preco_promocional, ap.produto_id", tuple(params), fetch_all=True) or []
+    except Error as e:
+        if getattr(e, 'errno', None) == 1146:
+            return []
+        raise
 
 
 def listar_ebooks_bonus_produto(produto_id):
@@ -1931,12 +2003,20 @@ def criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_princip
         )
         return
 
-    db.execute_query(
-        """INSERT INTO pedido_itens (pedido_id, tipo, ebook_produto_id, nome, path_arquivo, nome_arquivo, valor)
-           VALUES (%s, 'principal', %s, %s, %s, %s, %s)""",
-        (pedido_id, ebook_principal['id'], ebook_principal['nome_venda'],
-         ebook_principal['path_arquivo'], ebook_principal['nome_arquivo'], valor_principal)
-    )
+    if ebook_principal.get('app_slug'):
+        # Produto do tipo app: o item principal é o acesso ao app (sem PDF).
+        db.execute_query(
+            """INSERT INTO pedido_itens (pedido_id, tipo, app_slug, nome, valor)
+               VALUES (%s, 'principal', %s, %s, %s)""",
+            (pedido_id, ebook_principal['app_slug'], ebook_principal['nome_venda'], valor_principal)
+        )
+    else:
+        db.execute_query(
+            """INSERT INTO pedido_itens (pedido_id, tipo, ebook_produto_id, nome, path_arquivo, nome_arquivo, valor)
+               VALUES (%s, 'principal', %s, %s, %s, %s, %s)""",
+            (pedido_id, ebook_principal['id'], ebook_principal['nome_venda'],
+             ebook_principal['path_arquivo'], ebook_principal['nome_arquivo'], valor_principal)
+        )
 
     bonus_rows = listar_ebooks_bonus_produto(produto_id)
     if bonus_rows:

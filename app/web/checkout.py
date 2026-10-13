@@ -735,6 +735,8 @@ def baixar_item_pedido(pedido_id: int, item_id: int):
     item = get_item_pedido(item_id, pedido_id)
     if not item:
         return None, 403
+    if not item.get('path_arquivo'):  # item principal de produto do tipo app: não há arquivo
+        return None, 404
 
     pedido = get_pedido(pedido_id)
     if not pedido or pedido.get('estado_id') != 1000:
@@ -819,7 +821,9 @@ def resolver_pedido_por_guid(guid: str, item_id: int = None):
 
     if item_id is not None:
         item = get_item_pedido_ebook(item_id, pedido['id'])
-        if not item:
+        # Item sem arquivo = item principal de um produto do tipo app (migration 082): não há o
+        # que ler/baixar (o app abre por "Meus apps").
+        if not item or not item.get('path_arquivo'):
             return pedido, None, 'item_invalido'
         if not canal_web and item['tipo'] == 'bonus' and not pago:
             return pedido, item, 'aguardando_pagamento'
@@ -892,6 +896,9 @@ def listar_itens_ebook_do_cliente(pedido):
             item['bloqueado'] = False  # já filtrado por estado_id IN (0,1000) na query
             linhas.append(item)
 
+    # O item principal de um produto do tipo app (migration 082) não tem arquivo: ele aparece em
+    # "Meus apps" (pela licença), não como livro.
+    linhas = [l for l in linhas if l.get('path_arquivo')]
     return _consolidar_itens_ebook(linhas)
 
 
