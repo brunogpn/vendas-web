@@ -24,6 +24,9 @@ class AppConfig:
     cor_tema: str                   # barra do navegador / splash do PWA
     cor_fundo: str
     cor_botao_email: str            # botão dos e-mails
+    # False = piloto: o app só é oferecido no endereço de piloto da landing (ex.: /fatia-e-piloto);
+    # a landing dos anúncios e o cross-sell da Estante não o mostram. Quem comprou usa normalmente.
+    publico: bool = False
     # Ícones do PWA, relativos a /static/ (192 e 512 px).
     icone_192: str = ''
     icone_512: str = ''

@@ -70,6 +70,13 @@ migrations/080_apps_nucleo.sql, 081_app_fatia.sql
   página mostra Básico + Plano Guiado (o mais caro); havendo um segundo mais barato, ele vira o popup
   de desconto ao clicar no Básico. Sem nenhum, fica só o Básico, como antes.
 
+### Piloto (antes de lançar)
+
+`publico=False` no `config.py` do app (o Fatia começa assim): a landing dos anúncios (`/fatia-e`)
+continua só com o Básico e a Estante não oferece o app; os dois planos aparecem só em
+**`/fatia-e-piloto`** (fora do funil e dos buscadores) para homologação. Quem compra no piloto usa
+tudo normalmente (e-mail, "Meus apps", app). Para lançar: `publico=True` e deploy.
+
 ### Checklist ao criar um produto de app em produção
 
 1. Criar o produto (pode clonar o 12) e marcar *disponível web* quando estiver pronto.

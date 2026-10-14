@@ -17,16 +17,25 @@ def apps_da_estante(pedido: dict) -> tuple[list[dict], list[dict]]:
     from database import listar_apps_produto
     cliente = lic.buscar_cliente_por_email(pedido.get('email'))
     licencas = lic.listar_licencas_do_cliente(cliente['id']) if cliente else []
-    meus = [{'app': APPS[l['app_slug']], 'licenca': l, 'ativa': lic.licenca_ativa(l)}
+    produtos_app = listar_apps_produto()  # ordem: preço
+    # Capa do app na Estante (mesmo formato dos livros): a "Imagem pequena" de um produto do app,
+    # cadastrada no admin; sem nenhuma, o template usa o ícone do app (ver pedido-2.html).
+    capas = {}
+    for p in produtos_app:
+        if p['imagem_pequena']:
+            capas.setdefault(p['app_slug'], p['imagem_pequena'])
+    meus = [{'app': APPS[l['app_slug']], 'licenca': l, 'ativa': lic.licenca_ativa(l), 'capa': capas.get(l['app_slug'])}
             for l in licencas if l['app_slug'] in APPS]
     tem = {l['app_slug'] for l in licencas}
     ofertas, vistos = [], set()
-    for p in listar_apps_produto(renovacao=False, so_venda_web=True):  # ordem: preço
-        if p['app_slug'] in APPS and p['app_slug'] not in tem and p['app_slug'] not in vistos:
+    for p in produtos_app:
+        if (p['app_slug'] in APPS and APPS[p['app_slug']].publico and not p['renovacao'] and p['ativo'] and p['disponivel_web']
+                and p['app_slug'] not in tem and p['app_slug'] not in vistos):
             vistos.add(p['app_slug'])
             ofertas.append({'produto_id': p['produto_id'], 'ebook_id': None, 'nome_venda': p['nome_venda'],
-                            'imagem_pequena': p['imagem_pequena'], 'imagem_grande': p['imagem_grande'],
-                            'preco_promocional': p['preco_promocional'], 'app_slug': p['app_slug']})
+                            'imagem_pequena': p['imagem_pequena'] or capas.get(p['app_slug']),
+                            'imagem_grande': p['imagem_grande'], 'preco_promocional': p['preco_promocional'],
+                            'app_slug': p['app_slug'], 'icone_app': APPS[p['app_slug']].icone_512})
     return meus, ofertas
 
 

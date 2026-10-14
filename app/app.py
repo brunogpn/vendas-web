@@ -448,18 +448,15 @@ def tempero_e():
 def fatia():
     return render_template('fatia.html')
 
-@app.get("/fatia-e")
-def fatia_e():
-    from web.checkout import rastrear_visita_funil, COOKIE_MAX_AGE_FUNIL
-    produto_id = 12
-    pedido_id = rastrear_visita_funil(request, produto_id, estado_novo=1004)
-    # Plano Guiado = produto do tipo app do Fatia à venda (o mais caro); havendo outro mais barato,
-    # ele vira o desconto do popup. Sem nenhum, a landing mostra só o plano de R$ 10.
-    guiado = desconto = None
-    preco_basico = 10.0
+def _planos_app_fatia(produto_basico_id):
+    """(preço do Básico, Plano Guiado, desconto do popup) para a landing do Fatia.
+
+    Guiado = produto do tipo app do Fatia à venda no site (o mais caro); havendo outro mais barato,
+    ele vira o desconto do popup. Sem nenhum: (preço, None, None) e a landing mostra só o Básico."""
+    preco_basico, guiado, desconto = 10.0, None, None
     try:
         from database import listar_apps_produto, get_ebook_principal_produto
-        principal = get_ebook_principal_produto(produto_id)
+        principal = get_ebook_principal_produto(produto_basico_id)
         if principal:
             preco_basico = float(principal['preco_promocional'])
         ofertas = listar_apps_produto('fatia', renovacao=False, so_venda_web=True)  # ordem: preço
@@ -468,8 +465,33 @@ def fatia_e():
             desconto = ofertas[0] if len(ofertas) > 1 else None
     except Exception as e:
         logger.error(f"[FATIA-E] Erro ao buscar os planos do app: {e}")
+    return preco_basico, guiado, desconto
+
+
+@app.get("/fatia-e")
+def fatia_e():
+    from web.checkout import rastrear_visita_funil, COOKIE_MAX_AGE_FUNIL
+    from apps import app_config
+    produto_id = 12
+    pedido_id = rastrear_visita_funil(request, produto_id, estado_novo=1004)
+    preco_basico, guiado, desconto = _planos_app_fatia(produto_id)
+    cfg = app_config('fatia')
+    if not (cfg and cfg.publico):  # app em piloto: a landing dos anúncios fica só com o Básico
+        guiado = desconto = None
     resp = make_response(render_template('fatia2-e.html', guiado=guiado, desconto=desconto, preco_basico=preco_basico))
     resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id), max_age=COOKIE_MAX_AGE_FUNIL)
+    return resp
+
+
+@app.get("/fatia-e-piloto")
+def fatia_e_piloto():
+    """Piloto do App Fatias (homologação): a mesma landing com Básico + Plano Guiado, enquanto o app
+    não é público. Fora do funil (não cria pedido rascunho nem conta no Analytics Web) e fora dos
+    buscadores."""
+    preco_basico, guiado, desconto = _planos_app_fatia(12)
+    resp = make_response(render_template('fatia2-e.html', guiado=guiado, desconto=desconto,
+                                         preco_basico=preco_basico, piloto=True))
+    resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
     return resp
 
 @app.get("/orquidea-e")

@@ -56,3 +56,18 @@ def test_estante_nao_lista_o_app_como_livro(monkeypatch):
     monkeypatch.setattr(database, 'listar_pedidos_vinculados_pagos', lambda pid: [])
     r = checkout.listar_itens_ebook_do_cliente({'id': 1, 'guid': 'g', 'estado_id': 1000, 'email': 'a@b', 'contact_phone': None})
     assert [i['nome'] for i in r] == ['Fatias que Vendem']
+
+
+def test_app_em_piloto_nao_e_oferecido_na_estante(monkeypatch):
+    """publico=False (piloto): quem não tem o app não o vê no cross-sell; quem tem vê em "Meus apps"."""
+    import dataclasses
+    import apps
+    from apps._nucleo import estante, licenca as lic
+    produto = {**APP, 'ativo': 1, 'disponivel_web': 1}
+    monkeypatch.setattr(database, 'listar_apps_produto', lambda *a, **k: [produto])
+    monkeypatch.setattr(lic, 'buscar_cliente_por_email', lambda e: None)  # cliente sem app
+    for publico, esperado in ((False, []), (True, [16])):
+        cfg = dataclasses.replace(apps.APPS['fatia'], publico=publico)
+        monkeypatch.setattr(estante, 'APPS', {'fatia': cfg})
+        meus, ofertas = estante.apps_da_estante({'email': 'x@y.com'})
+        assert meus == [] and [o['produto_id'] for o in ofertas] == esperado

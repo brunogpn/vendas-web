@@ -222,18 +222,10 @@
 
         .vazio { text-align: center; color: var(--sub); padding: 40px 0; }
 
-        /* Card "Meus apps": um por app, largo e com botão claro (público 35+). */
-        .card-app {
-            display: flex; align-items: center; gap: 14px;
-            background: #fff; color: var(--texto-card); text-decoration: none;
-            border-radius: 16px; border: 2px solid var(--azul); padding: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, .35); margin-bottom: 12px;
-        }
-        .card-app-icone { font-size: 30px; flex: none; }
-        .card-app-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-        .card-app-texto strong { font-size: 17px; }
-        .card-app-texto span { font-size: 13px; color: var(--sub-card); line-height: 1.35; }
-        .card-app-botao { flex: none; background: var(--azul); color: #fff; font-weight: 900; font-size: 15px; padding: 12px 16px; border-radius: 12px; }
+        /* Capa do app sem imagem cadastrada: ícone do app sobre fundo da cor dele, no formato 3:4 dos livros. */
+        .capa-app { display: flex; align-items: center; justify-content: center; background: #c4402a; }
+        .capa-app img { width: 62%; border-radius: 22%; box-shadow: 0 8px 22px rgba(0,0,0,.3); }
+        .badge-app { position: absolute; top: 8px; left: 8px; background: #fff; color: #1a1a2e; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.3); }
 
         .rodape-suporte {
             text-align: center;
@@ -297,20 +289,30 @@
                 </header>
             </div>
 
-            {# Apps das clientes (ex.: App Fatias): card grande, antes dos livros. O botão entra no
-               app já logada, por um link de uso único (ver apps/_nucleo/rotas.py). #}
+            {# Apps das clientes (ex.: App Fatias): mesmo card dos livros, tocar abre o app já logada
+               (ver apps/_nucleo/rotas.py). Capa = "Imagem pequena" do produto do app; sem ela, o ícone. #}
             {% if meus_apps %}
             <div class="secao-titulo-lista">Meus apps</div>
-            {% for a in meus_apps %}
-            <a class="card-app" href="/pedido2/{{ guid }}/abrir-app/{{ a.app.slug }}">
-                <span class="card-app-icone">📱</span>
-                <span class="card-app-texto">
-                    <strong>{{ a.app.nome }}</strong>
-                    <span>{% if a.ativa %}{{ a.app.descricao }}{% else %}Seu acesso venceu. Toque para ver como renovar.{% endif %}</span>
-                </span>
-                <span class="card-app-botao">Abrir →</span>
-            </a>
-            {% endfor %}
+            <div class="grid-ebooks">
+                {% for a in meus_apps %}
+                <a class="item-ebook" href="/pedido2/{{ guid }}/abrir-app/{{ a.app.slug }}">
+                    <div class="capa-wrap">
+                        {% if a.capa %}
+                        <img class="capa" src="{{ url_for('static', filename='images/' + a.capa) }}" alt="{{ a.app.nome }}">
+                        {% else %}
+                        <div class="capa capa-app"><img src="{{ url_for('static', filename=a.app.icone_512) }}" alt="{{ a.app.nome }}"></div>
+                        {% endif %}
+                        <span class="badge-app">APP</span>
+                    </div>
+                    <div class="titulo">{{ a.app.nome }}</div>
+                    {% if a.ativa %}
+                    <div class="cta-ler">📱 Abrir app</div>
+                    {% else %}
+                    <div class="legenda-bloqueado">Acesso vencido — toque para renovar</div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
             {% endif %}
 
             {% if itens %}
@@ -349,6 +351,8 @@
                         {% if produto.imagem_pequena %}
                         <img class="capa" src="{{ url_for('static', filename='images/' + produto.imagem_pequena) }}" alt="{{ produto.nome_venda }}"
                              loading="lazy" decoding="async">
+                        {% elif produto.icone_app %}
+                        <div class="capa capa-app"><img src="{{ url_for('static', filename=produto.icone_app) }}" alt="{{ produto.nome_venda }}" loading="lazy"></div>
                         {% else %}
                         <div class="capa placeholder">📖</div>
                         {% endif %}
