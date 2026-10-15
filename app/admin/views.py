@@ -2176,8 +2176,14 @@ _ETAPAS_QUIZ = {
         'O que você já tentou', 'O que te trava', 'Sua experiência', 'Uma possibilidade',
         'Escolha da fatia', 'Primeiro teste', 'Onde vender', 'Movimento do local', 'Preço',
         'Sua simulação', 'O que falta?', 'Viu o resultado', 'Viu a oferta', 'Clicou em comprar',
+        'Viu o popup do app (saiu sem escolher)', 'Recusou o popup e foi para o Básico',
+        'Aceitou o app com desconto',
     ],
 }
+# Etapas em que "parar" = foi para o checkout (não é desistência; não entra na "maior desistência").
+# O quiz guarda só a etapa MAIS AVANÇADA: 17 = clicou em comprar sem popup (Guiado, ou Básico sem
+# oferta); 18 = viu o popup e saiu (abandono real); 19 = recusou e foi ao Básico; 20 = aceitou.
+_ETAPAS_CHECKOUT_QUIZ = {'fatia2-e': {17, 19, 20}}
 
 
 def _montar_etapas_quiz(linhas):
@@ -2208,10 +2214,11 @@ def _montar_etapas_quiz(linhas):
                 'desistencia': round(100 * pararam / acumulado, 1) if acumulado else 0.0,
                 'pagos': int(row.get('pagos') or 0),
                 'ultima': n == ultima,
+                'compra': n in _ETAPAS_CHECKOUT_QUIZ.get(pagina, {ultima}),
                 'maior_queda': False,
             })
         etapas.reverse()
-        candidatas = [e for e in etapas if not e['ultima'] and e['pararam'] > 0]
+        candidatas = [e for e in etapas if not e['compra'] and e['pararam'] > 0]
         if candidatas:
             max(candidatas, key=lambda e: e['pararam'])['maior_queda'] = True
         resultado.append({'pagina': pagina, 'total': total, 'etapas': etapas})

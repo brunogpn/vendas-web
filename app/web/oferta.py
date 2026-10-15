@@ -42,24 +42,49 @@ def validar_token(token, produto_id, agora: float | None = None) -> bool:
     return hmac.compare_digest(assinatura, _assinatura(pid, expira))
 
 
-def desconto_do_produto(produto_id: int, preco: float) -> float:
-    """Desconto cadastrado no produto, limitado para o preço nunca ficar abaixo de R$ 0,01."""
+def desconto_valido(desconto, preco, produto_id=None, avisar: bool = False) -> float:
+    """REGRA ÚNICA do desconto (checkout, landing, Estante): vale se for > 0 e MENOR que o preço.
+    Desconto maior ou igual ao preço (ex.: o preço foi baixado depois de cadastrar a oferta) é
+    ignorado — preço cheio — em vez de vender por centavos. O admin também recusa salvar assim."""
+    desconto, preco = float(desconto or 0), float(preco or 0)
+    if desconto <= 0:
+        return 0.0
+    if desconto >= preco:
+        if avisar:  # só no checkout (vitrine/landing chamam a cada visita: não encher o log)
+            logger.warning(f"[OFERTA] Desconto R$ {desconto:.2f} >= preço R$ {preco:.2f} no produto #{produto_id} — ignorado")
+        return 0.0
+    return round(desconto, 2)
+
+
+def desconto_do_produto(produto_id: int, preco: float, avisar: bool = False) -> float:
+    """Desconto de oferta cadastrado no produto, já pela regra única (desconto_valido)."""
     try:
         linha = db.execute_query("SELECT desconto_oferta FROM produtos WHERE id = %s", (produto_id,), fetch_one=True)
     except Exception as e:  # migration 083 ainda não aplicada: sem desconto, checkout segue igual
         logger.error(f"[OFERTA] Erro ao ler o desconto do produto #{produto_id}: {e}")
         return 0.0
-    desconto = float((linha or {}).get('desconto_oferta') or 0)
-    if desconto <= 0:
-        return 0.0
-    return round(min(desconto, float(preco) - 0.01), 2) if preco > 0.01 else 0.0
+    return desconto_valido((linha or {}).get('desconto_oferta'), preco, produto_id, avisar)
 
 
 def desconto_da_oferta(token, produto_id: int, preco: float) -> float:
     """O desconto a aplicar neste checkout: o do produto, se o token da oferta for válido; senão 0."""
     if not token or not validar_token(token, produto_id):
         return 0.0
-    return desconto_do_produto(produto_id, preco)
+    return desconto_do_produto(produto_id, preco, avisar=True)
+
+
+def oferta_divergente(body: dict, desconto: float) -> dict | None:
+    """O checkout mostrou um desconto (data-desconto) diferente do que o backend aplicaria agora
+    (token venceu com a página aberta, admin mudou a oferta...): não cobra diferente do que a cliente
+    viu — devolve o aviso para o front recarregar a página com o preço certo."""
+    try:
+        exibido = float(body.get('desconto_exibido') or 0)
+    except (TypeError, ValueError):
+        exibido = 0.0
+    if abs(exibido - desconto) > 0.009:
+        return {'oferta_alterada': True,
+                'mensagem': 'O valor da oferta mudou desde que você abriu esta página. Vamos atualizar o preço.'}
+    return None
 
 
 def gravar_desconto_pedido(pedido_id: int, desconto: float, sempre: bool = False) -> None:
@@ -102,10 +127,9 @@ def descontos_dos_produtos(produto_ids) -> dict:
 
 def aplicar_na_vitrine(item: dict, descontos: dict) -> dict:
     """Card de cross-sell com oferta: preço com desconto, preço cheio riscado e token no link."""
-    desconto = descontos.get(item['produto_id'], 0)
     preco = float(item['preco_promocional'])
-    if desconto <= 0 or preco <= 0.01:
+    desconto = desconto_valido(descontos.get(item['produto_id'], 0), preco, item['produto_id'])
+    if desconto <= 0:
         return item
-    desconto = round(min(desconto, preco - 0.01), 2)
     return {**item, 'preco_promocional': round(preco - desconto, 2), 'preco_cheio': preco,
             'oferta': gerar_token(item['produto_id'])}

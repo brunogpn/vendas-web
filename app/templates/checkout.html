@@ -1296,7 +1296,7 @@
         recalcularTotal();
 
         const endpoint = (metodoAtual === 'cartao') ? '/api/v1/cartao/gerar' : '/api/v1/pix/gerar';
-        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, oferta: OFERTA, ...dados, ...utmData };
+        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, oferta: OFERTA, desconto_exibido: DESCONTO, ...dados, ...utmData };
         if (dadosCartao) Object.assign(payload, dadosCartao);
 
         try {
@@ -1306,6 +1306,15 @@
                 body: JSON.stringify(payload),
             });
             const data = await resp.json();
+            if (data.oferta_alterada) {
+                // A oferta venceu ou mudou com a página aberta: nada foi cobrado. Recarrega SEM o
+                // ?oferta= vencido, para a página mostrar o preço que vale agora.
+                alert('A oferta especial expirou ou foi alterada. Vamos mostrar o preço atualizado — nada foi cobrado.');
+                const u = new URL(window.location.href);
+                u.searchParams.delete('oferta');
+                window.location.replace(u.pathname + u.search);
+                return;
+            }
             currentPedidoId = data.pedido_id;
 
             if (data.erro_validacao) {

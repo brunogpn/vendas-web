@@ -13,13 +13,28 @@ def _oferta_do_link(produto_id, ebook_principal):
     O desconto aqui é só para MOSTRAR no checkout; quem aplica no valor cobrado é gerar_pix/gerar_cartao,
     que validam o token de novo."""
     from web.oferta import desconto_da_oferta
-    from database import resolver_valor_principal_produto
+    from database import preco_cobrado_principal
     token = request.args.get('oferta') or None
     if not token:
         return None, 0.0
-    _, preco = resolver_valor_principal_produto(produto_id)  # mesmo preço do backend (inclui o override de teste)
-    desconto = desconto_da_oferta(token, produto_id, float(preco or ebook_principal['preco_promocional']))
+    desconto = desconto_da_oferta(token, produto_id, preco_cobrado_principal(produto_id, ebook_principal))
     return (token, desconto) if desconto > 0 else (None, 0.0)
+
+
+def _retomar_sem_perder_oferta(pedido_id, oferta):
+    """O cookie aponta para um pedido já iniciado deste produto; retomar reabre o PIX/cartão dele.
+    Se a cliente chegou agora por uma OFERTA (popup/Estante) e aquele pedido não tem desconto (e não
+    foi pago), não retoma — segue para um pedido novo, com o desconto."""
+    if pedido_id is None or not oferta:
+        return pedido_id
+    from database import get_pedido
+    pedido = get_pedido(pedido_id) or {}
+    # Só abandona pedido sem cobrança em andamento: 1001 (só identidade), 1002 (PIX gerado e não pago —
+    # o novo leva o desconto), 1006/1007 (cartão negado / não processado). Nunca 1005 (autorização de
+    # cartão em curso ou em timeout: pode já ter sido cobrado) nem 1000 (pago).
+    if pedido.get('estado_id') in (1001, 1002, 1006, 1007) and float(pedido.get('desconto') or 0) <= 0:
+        return None
+    return pedido_id
 
 
 @web_bp.get('/pay/<int:produto_id>')
@@ -45,7 +60,7 @@ def checkout(produto_id):
     # novo nesse caso.
     pedido_id_inicial = None
     if not request.args.get('pedido'):
-        pedido_id_retomar = get_pedido_finalizado_via_cookie(request, produto_id)
+        pedido_id_retomar = _retomar_sem_perder_oferta(get_pedido_finalizado_via_cookie(request, produto_id), oferta)
         if pedido_id_retomar is not None:
             # Cliente já saiu de 1003/1004 nessa visita (pago, aguardando identidade, ou
             # aguardando pix) — reaproveita o fluxo já existente do link de retorno do BB Pay
@@ -138,7 +153,8 @@ def checkout_v2(produto_id):
 
     pedido_id_inicial = None
     if not request.args.get('pedido'):
-        pedido_id_retomar = get_pedido_finalizado_via_cookie(request, produto_id, cookie_prefixo='pedido_web_v2')
+        pedido_id_retomar = _retomar_sem_perder_oferta(
+            get_pedido_finalizado_via_cookie(request, produto_id, cookie_prefixo='pedido_web_v2'), oferta)
         if pedido_id_retomar is not None:
             url_retomar = f'/pay2/{produto_id}?pedido={pedido_id_retomar}'
             if ref_guid:

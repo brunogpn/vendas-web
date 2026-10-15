@@ -67,7 +67,7 @@ def test_app_em_piloto_nao_e_oferecido_na_estante(monkeypatch):
     monkeypatch.setattr(database, 'listar_apps_produto', lambda *a, **k: [produto])
     monkeypatch.setattr(lic, 'buscar_cliente_por_email', lambda e: None)  # cliente sem app
     import web.oferta
-    monkeypatch.setattr(web.oferta, 'desconto_do_produto', lambda pid, preco: 0.0)
+    monkeypatch.setattr(web.oferta, 'descontos_dos_produtos', lambda ids: {})
     for publico, esperado in ((False, []), (True, [16])):
         cfg = dataclasses.replace(apps.APPS['fatia'], publico=publico)
         monkeypatch.setattr(estante, 'APPS', {'fatia': cfg})

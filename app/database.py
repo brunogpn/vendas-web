@@ -1817,9 +1817,14 @@ def resolver_valor_principal_produto(produto_id):
     ebook_principal = get_ebook_principal_produto(produto_id)
     if not ebook_principal:
         return None, None
+    return ebook_principal, preco_cobrado_principal(produto_id, ebook_principal)
+
+
+def preco_cobrado_principal(produto_id, ebook_principal) -> float:
+    """Preço que o checkout cobra pelo principal: o cadastrado ou o override de teste
+    CHECKOUT_VALOR_TESTE_PRODUTO_<id>. Fonte única para o backend e para a tela (oferta)."""
     _teste = os.getenv(f'CHECKOUT_VALOR_TESTE_PRODUTO_{produto_id}')
-    valor = float(_teste) if _teste else float(ebook_principal['preco_promocional'])
-    return ebook_principal, valor
+    return float(_teste) if _teste else float(ebook_principal['preco_promocional'])
 
 
 def listar_itens_pedido(pedido_id):

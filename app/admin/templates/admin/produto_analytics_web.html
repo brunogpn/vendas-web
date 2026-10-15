@@ -280,7 +280,7 @@
                             <span style="font-family:var(--mono); font-size:12px; white-space:nowrap;">{{ e.chegaram }} ({{ e.pct }}%)</span>
                         </div>
                     </td>
-                    {% if e.ultima %}
+                    {% if e.compra %}
                     <td colspan="2" style="text-align:right; font-family:var(--mono); color:var(--accent2); font-weight:600;">{{ e.pararam }} foram para o checkout</td>
                     {% else %}
                     <td style="text-align:right; font-family:var(--mono); font-weight:600;">{{ e.pararam if e.pararam else '·' }}</td>

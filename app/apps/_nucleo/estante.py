@@ -12,8 +12,9 @@ def apps_da_estante(pedido: dict) -> tuple[list[dict], list[dict]]:
     """Para a Estante 2: ("Meus apps" da cliente do pedido, apps para oferecer no cross-sell).
 
     Uma busca só da cliente e das licenças para as duas seções (é a página de mais tráfego depois
-    de uma venda). Ofertas = produtos do tipo app (não renovação, à venda no site) de apps que ela
-    ainda não tem, no mesmo formato dos e-books do cross-sell; um card por app, o mais barato."""
+    de uma venda). Ofertas = produtos do tipo app (não renovação, à venda no site, app público) de
+    apps que ela ainda não tem, no mesmo formato dos e-books do cross-sell; um card por app: o produto
+    principal (o mais caro), com o desconto de oferta quando houver."""
     from database import listar_apps_produto
     cliente = lic.buscar_cliente_por_email(pedido.get('email'))
     licencas = lic.listar_licencas_do_cliente(cliente['id']) if cliente else []

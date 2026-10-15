@@ -153,8 +153,11 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
 
     # Desconto de oferta (popup/Estante, migration 083): só com o token assinado do link, e o valor
     # vem do banco — nunca do cliente. Sem token, preço cheio.
-    from web.oferta import desconto_da_oferta, gravar_desconto_pedido
+    from web.oferta import desconto_da_oferta, gravar_desconto_pedido, oferta_divergente
     desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    divergente = oferta_divergente(body, desconto)
+    if divergente:
+        return divergente
     valor_principal = round(valor_principal - desconto, 2)
 
     # Bumps: nunca confiar em preço vindo do cliente — releitura pelos ids escolhidos.
@@ -484,8 +487,19 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
         return {'aprovado': False, 'mensagem': 'Produto não disponível no momento.'}
 
     # Desconto de oferta (ver gerar_pix): juros do parcelamento incidem sobre o valor já com desconto.
-    from web.oferta import desconto_da_oferta, gravar_desconto_pedido
+    from web.oferta import desconto_da_oferta, desconto_valido, gravar_desconto_pedido, oferta_divergente
     desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    # Nova tentativa (1006/1007) de um pedido que JÁ ganhou o desconto: mantém o desconto concedido,
+    # mesmo que a cliente tenha voltado por um link sem ?oferta= (ex.: retomada ?pedido=).
+    _pid = body.get('pedido_id')
+    _anterior = get_pedido_cartao_para_retry(int(_pid), produto_id) if _pid and str(_pid).isdigit() else None
+    _ja_concedido = float((_anterior or {}).get('desconto') or 0)
+    if desconto <= 0 and _anterior and _anterior['estado_id'] in (1006, 1007) and _ja_concedido > 0:
+        desconto = desconto_valido(_ja_concedido, valor_principal, produto_id)
+    else:
+        divergente = oferta_divergente(body, desconto)
+        if divergente:
+            return {'aprovado': False, **divergente}
     valor_principal = round(valor_principal - desconto, 2)
 
     bump_rows = listar_bumps_validos(produto_id, body.get('bump_ids'))
@@ -501,7 +515,9 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     # tentativa anterior), pra tentar outro cartão não criar um pedido novo a cada vez.
     pedido_id_body = body.get('pedido_id')
     pedido_existente = get_pedido_cartao_para_retry(int(pedido_id_body), produto_id) if pedido_id_body else None
-    eh_retry_de_negado = bool(pedido_existente and pedido_existente['estado_id'] == 1006)
+    # 1006 (negado) e 1007 (não processado): nova tentativa no MESMO pedido, cujos itens já foram
+    # gravados na primeira — não regravar (duplicaria pedido_itens).
+    eh_retry_de_negado = bool(pedido_existente and pedido_existente['estado_id'] in (1006, 1007))
     if pedido_existente:
         pedido_id = pedido_existente['id']
         if eh_retry_de_negado:
@@ -522,7 +538,7 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
 
     # Nova tentativa no mesmo pedido (1006/1007): regrava o desconto (mesmo 0) e o item principal,
     # para o pedido refletir o que será cobrado agora.
-    gravar_desconto_pedido(pedido_id, desconto, sempre=bool(pedido_existente and pedido_existente['estado_id'] in (1006, 1007)))
+    gravar_desconto_pedido(pedido_id, desconto, sempre=eh_retry_de_negado)
     if eh_retry_de_negado:
         from web.oferta import sincronizar_item_principal
         sincronizar_item_principal(pedido_id, valor_principal)

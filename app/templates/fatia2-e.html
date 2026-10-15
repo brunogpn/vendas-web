@@ -627,7 +627,7 @@ const comCampanha=href=>{const u=new URL(href,location.origin);new URLSearchPara
 const guiado=document.getElementById("checkoutGuided");
 if(guiado){guiado.href=comCampanha(guiado.getAttribute("href"));guiado.addEventListener("click",()=>track(17,"Clicou em comprar"))}
 const comDesconto=document.getElementById("checkoutGuidedDiscount");
-if(comDesconto){comDesconto.href=comCampanha(comDesconto.getAttribute("href"));comDesconto.addEventListener("click",()=>track(19,"Aceitou o app com desconto"))}
+if(comDesconto){comDesconto.href=comCampanha(comDesconto.getAttribute("href"));comDesconto.addEventListener("click",()=>track(20,"Aceitou o app com desconto"))}
 (function(){
   const overlay=document.getElementById("upsellOverlay");if(!overlay)return;
   const basico=$("checkoutBasic");let mostrou=false;
@@ -637,7 +637,7 @@ if(comDesconto){comDesconto.href=comCampanha(comDesconto.getAttribute("href"));c
   document.getElementById("upsellFechar").addEventListener("click",fechar);
   overlay.addEventListener("click",e=>{if(e.target===overlay)fechar()});
   window.addEventListener("keydown",e=>{if(e.key==="Escape")fechar()});
-  document.getElementById("upsellSoBasico").addEventListener("click",()=>{fechar();window.location.href=basico.href});
+  document.getElementById("upsellSoBasico").addEventListener("click",()=>{track(19,"Recusou o popup e foi para o Básico");fechar();window.location.href=basico.href});
 })();
 });
 track(0,"Abriu a página");
