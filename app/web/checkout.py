@@ -151,6 +151,12 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
         return {'fallback': True}
     numero_convenio = int(produto.get('numero_convenio_bb', 0)) if produto else 0
 
+    # Desconto de oferta (popup/Estante, migration 083): só com o token assinado do link, e o valor
+    # vem do banco — nunca do cliente. Sem token, preço cheio.
+    from web.oferta import desconto_da_oferta, gravar_desconto_pedido
+    desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    valor_principal = round(valor_principal - desconto, 2)
+
     # Bumps: nunca confiar em preço vindo do cliente — releitura pelos ids escolhidos.
     bump_rows = listar_bumps_validos(produto_id, body.get('bump_ids'))
     valor = valor_principal + sum(float(b['preco_promocional']) for b in bump_rows)
@@ -198,6 +204,7 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
             placement=body.get('placement', ''),
             video_id=body.get('video_id', ''),
         )
+    gravar_desconto_pedido(pedido_id, desconto)
     try:
         criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_principal, bump_rows)
     except Exception as e:
@@ -476,6 +483,11 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
         logger.error(f'[WEB-CHECKOUT] Produto #{produto_id} sem e-book principal vinculado ao gerar cartão.')
         return {'aprovado': False, 'mensagem': 'Produto não disponível no momento.'}
 
+    # Desconto de oferta (ver gerar_pix): juros do parcelamento incidem sobre o valor já com desconto.
+    from web.oferta import desconto_da_oferta, gravar_desconto_pedido
+    desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    valor_principal = round(valor_principal - desconto, 2)
+
     bump_rows = listar_bumps_validos(produto_id, body.get('bump_ids'))
     valor_original = valor_principal + sum(float(b['preco_promocional']) for b in bump_rows)
 
@@ -507,6 +519,13 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
             matchtype=body.get('matchtype', ''), device=body.get('device', ''),
             placement=body.get('placement', ''), video_id=body.get('video_id', ''),
         )
+
+    # Nova tentativa no mesmo pedido (1006/1007): regrava o desconto (mesmo 0) e o item principal,
+    # para o pedido refletir o que será cobrado agora.
+    gravar_desconto_pedido(pedido_id, desconto, sempre=bool(pedido_existente and pedido_existente['estado_id'] in (1006, 1007)))
+    if eh_retry_de_negado:
+        from web.oferta import sincronizar_item_principal
+        sincronizar_item_principal(pedido_id, valor_principal)
 
     # Só grava o snapshot de itens na primeira finalização — num retry após negação (1006), os
     # itens já foram gravados na tentativa anterior; gravar de novo duplicaria as linhas em

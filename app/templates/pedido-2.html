@@ -346,7 +346,7 @@
             <div class="secao-titulo-lista">Livros que você ainda não tem</div>
             <div class="grid-ebooks">
                 {% for produto in cross_sell %}
-                <a class="item-ebook disponivel" href="/pay2/{{ produto.produto_id }}?ref={{ guid }}">
+                <a class="item-ebook disponivel" href="/pay2/{{ produto.produto_id }}?ref={{ guid }}{% if produto.oferta %}&oferta={{ produto.oferta }}{% endif %}">
                     <div class="capa-wrap">
                         {% if produto.imagem_pequena %}
                         <img class="capa" src="{{ url_for('static', filename='images/' + produto.imagem_pequena) }}" alt="{{ produto.nome_venda }}"
@@ -359,6 +359,7 @@
                         <span class="badge-preco">{{ produto.preco_promocional|brl }}</span>
                     </div>
                     <div class="titulo">{{ produto.nome_venda }}</div>
+                    {% if produto.preco_cheio %}<div class="legenda-bloqueado">de <s>{{ produto.preco_cheio|brl }}</s> por {{ produto.preco_promocional|brl }}</div>{% endif %}
                     <div class="btn-comprar">Comprar</div>
                 </a>
                 {% endfor %}

@@ -67,6 +67,10 @@
         .linha-item span:last-child  { flex-shrink: 0; white-space: nowrap; }
         .linha-item-principal { font-size: 17px; font-weight: 700; }
         .linha-item-extra { font-size: 13px; color: var(--laranja); }
+        /* Desconto de oferta (popup/Estante, web/oferta.py): linha verde logo abaixo do produto. */
+        .linha-item-desconto { font-size: 14px; font-weight: 700; color: var(--verde); }
+        .selo-oferta { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px;
+                       background: #e3f1e8; color: var(--verde); font-size: 11px; font-weight: 700; }
         .resumo-total-wrap {
             display: flex; justify-content: space-between; align-items: center;
             margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--borda);
@@ -429,16 +433,22 @@
                      onerror="this.style.display='none'">
                 {% endif %}
                 <div class="resumo-hero-texto">
-                    <div class="resumo-label">Detalhes da sua compra:</div>
+                    <div class="resumo-label">Detalhes da sua compra:{% if desconto %} <span class="selo-oferta">🎁 Oferta aplicada</span>{% endif %}</div>
                     <div id="resumoItens" class="resumo-itens">
                         <div class="linha-item linha-item-principal">
                             <span>{{ ebook_principal.nome_venda }}</span>
                             <span>R$ {{ "%.2f"|format(ebook_principal.preco_promocional) }}</span>
                         </div>
+                        {% if desconto %}
+                        <div class="linha-item linha-item-desconto">
+                            <span>🎁 Desconto especial</span>
+                            <span>− R$ {{ "%.2f"|format(desconto) }}</span>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="resumo-total-wrap">
                         <span>Total</span>
-                        <strong id="resumoTotal">R$ {{ "%.2f"|format(ebook_principal.preco_promocional) }}</strong>
+                        <strong id="resumoTotal">R$ {{ "%.2f"|format((ebook_principal.preco_promocional|float) - (desconto or 0)) }}</strong>
                     </div>
                 </div>
             </div>
@@ -602,7 +612,7 @@
 
         <div class="total-linha">
             <span>Total</span>
-            <strong id="totalDisplay">R$ {{ "%.2f"|format(ebook_principal.preco_promocional) }}</strong>
+            <strong id="totalDisplay">R$ {{ "%.2f"|format((ebook_principal.preco_promocional|float) - (desconto or 0)) }}</strong>
         </div>
 
         <button class="btn-finalizar" id="btnFinalizar">FINALIZAR COMPRA</button>
@@ -673,6 +683,8 @@
     data-preco="{{ '%.2f'|format(ebook_principal.preco_promocional) }}"
     data-nome="{{ ebook_principal.nome_venda }}"
     data-pedido-id-inicial="{{ pedido_id_inicial or '' }}"
+    data-desconto="{{ '%.2f'|format(desconto or 0) }}"
+    data-oferta="{{ oferta or '' }}"
     data-tem-cartao="{{ '1' if config_cartao else '' }}"
     id="checkout-config">
 </script>
@@ -680,6 +692,10 @@
     const _cfg = document.getElementById('checkout-config').dataset;
     const PRODUTO_ID = parseInt(_cfg.produtoId);
     const PRECO_BASE = parseFloat(_cfg.preco);
+    // Desconto de oferta (popup/Estante): entra como item negativo; o backend revalida o token e
+    // busca o desconto no banco — o valor daqui é só para mostrar.
+    const DESCONTO = parseFloat(_cfg.desconto) || 0;
+    const OFERTA = _cfg.oferta || '';
     const PRODUTO_NOME = _cfg.nome;
     const TEM_CARTAO = !!_cfg.temCartao;
     // Pedido criado ao carregar a página (funil: chegou no checkout) — se o cliente finalizar,
@@ -712,6 +728,7 @@
 
     function itensSelecionados() {
         const itens = [{ nome: PRODUTO_NOME, preco: PRECO_BASE }];
+        if (DESCONTO > 0) itens.push({ nome: '🎁 Desconto especial', preco: -DESCONTO, desconto: true });
         document.querySelectorAll('.bump-checkbox:checked').forEach(cb => {
             const nome = cb.closest('.bump-card').querySelector('.bump-nome').textContent.trim();
             itens.push({ nome, preco: parseFloat(cb.dataset.preco) });
@@ -721,7 +738,11 @@
 
     function renderizarLinhasItens(containerId, itens) {
         const wrap = document.getElementById(containerId);
-        wrap.innerHTML = itens.map((item, i) => `
+        wrap.innerHTML = itens.map((item, i) => item.desconto ? `
+            <div class="linha-item linha-item-desconto">
+                <span>${item.nome}</span>
+                <span>− ${formatarReal(-item.preco)}</span>
+            </div>` : `
             <div class="linha-item ${i === 0 ? 'linha-item-principal' : 'linha-item-extra'}">
                 <span>${i === 0 ? item.nome : '+ ' + item.nome}</span>
                 <span>${formatarReal(item.preco)}</span>
@@ -1287,7 +1308,7 @@
         recalcularTotal();
 
         const endpoint = (metodoAtual === 'cartao') ? '/api/v1/cartao/gerar' : '/api/v1/pix/gerar';
-        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, ...dados, ...utmData };
+        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, oferta: OFERTA, ...dados, ...utmData };
         if (dadosCartao) Object.assign(payload, dadosCartao);
 
         try {

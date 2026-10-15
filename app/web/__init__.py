@@ -8,6 +8,20 @@ def guia_paes():
     return render_template('guia-paes-sem-gluten.html')
 
 
+def _oferta_do_link(produto_id, ebook_principal):
+    """(token, desconto) do link de oferta (?oferta=, popup/Estante — ver web/oferta.py), ou (None, 0).
+    O desconto aqui é só para MOSTRAR no checkout; quem aplica no valor cobrado é gerar_pix/gerar_cartao,
+    que validam o token de novo."""
+    from web.oferta import desconto_da_oferta
+    from database import resolver_valor_principal_produto
+    token = request.args.get('oferta') or None
+    if not token:
+        return None, 0.0
+    _, preco = resolver_valor_principal_produto(produto_id)  # mesmo preço do backend (inclui o override de teste)
+    desconto = desconto_da_oferta(token, produto_id, float(preco or ebook_principal['preco_promocional']))
+    return (token, desconto) if desconto > 0 else (None, 0.0)
+
+
 @web_bp.get('/pay/<int:produto_id>')
 def checkout(produto_id):
     from database import (get_produto_disponivel_web, get_ebook_principal_produto,
@@ -24,6 +38,7 @@ def checkout(produto_id):
         return 'Produto não encontrado', 404
 
     config_cartao = get_config_cartao_produto(produto_id)  # None = aba Cartão não aparece
+    oferta, desconto = _oferta_do_link(produto_id, ebook_principal)
 
     # Retorno do BB Pay / link salvo (?pedido=) é um caso à parte, já tratado no JS da própria
     # página (resume o pedido existente) — não faz sentido criar/reaproveitar um pedido 1003
@@ -36,7 +51,10 @@ def checkout(produto_id):
             # aguardando pix) — reaproveita o fluxo já existente do link de retorno do BB Pay
             # (?pedido=<id>) em vez de duplicar em Python a lógica pago→downloads /
             # pendente→retomar pix, que o JS de checkout.html já sabe fazer.
-            resp = redirect(f'/pay/{produto_id}?pedido={pedido_id_retomar}')
+            url_retomar = f'/pay/{produto_id}?pedido={pedido_id_retomar}'
+            if oferta:
+                url_retomar += f'&oferta={oferta}'
+            resp = redirect(url_retomar)
             resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
         pedido_id_inicial = rastrear_visita_funil(request, produto_id, estado_novo=1003)
@@ -49,6 +67,8 @@ def checkout(produto_id):
         bumps=listar_ebooks_bump_produto(produto_id),
         pedido_id_inicial=pedido_id_inicial,
         config_cartao=config_cartao,
+        oferta=oferta,
+        desconto=desconto,
     ))
     if pedido_id_inicial is not None:
         resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id_inicial), max_age=COOKIE_MAX_AGE_FUNIL)
@@ -84,6 +104,7 @@ def checkout_v2(produto_id):
         return 'Produto não encontrado', 404
 
     config_cartao = get_config_cartao_produto(produto_id)
+    oferta, desconto = _oferta_do_link(produto_id, ebook_principal)
 
     prefill = {}
     bonus = listar_ebooks_bonus_produto(produto_id)
@@ -122,6 +143,8 @@ def checkout_v2(produto_id):
             url_retomar = f'/pay2/{produto_id}?pedido={pedido_id_retomar}'
             if ref_guid:
                 url_retomar += f'&ref={quote(ref_guid)}'
+            if oferta:
+                url_retomar += f'&oferta={oferta}'
             resp = redirect(url_retomar)
             resp.set_cookie(f'pedido_web_v2_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
@@ -145,6 +168,8 @@ def checkout_v2(produto_id):
         pedido_id_inicial=pedido_id_inicial,
         config_cartao=config_cartao,
         prefill=prefill,
+        oferta=oferta,
+        desconto=desconto,
     ))
     if pedido_id_inicial is not None:
         resp.set_cookie(f'pedido_web_v2_{produto_id}', str(pedido_id_inicial), max_age=COOKIE_MAX_AGE_FUNIL)
@@ -325,6 +350,14 @@ def pedido_publico_v2(guid):
         if item.get('ebook_id') and not item.get('bloqueado')
     }
     cross_sell = listar_produtos_cross_sell_cliente(ebook_ids_possuidos)
+    # Desconto de oferta (migration 083) também nos e-books do cross-sell: preço com desconto + token no link.
+    try:
+        from web.oferta import aplicar_na_vitrine, descontos_dos_produtos
+        descontos = descontos_dos_produtos(c['produto_id'] for c in cross_sell)
+        cross_sell = [aplicar_na_vitrine(dict(c), descontos) for c in cross_sell]
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"[ESTANTE] Erro ao aplicar ofertas no cross-sell: {e}")
     primeiro_nome = (pedido.get('contact_name') or '').strip().split(' ')[0] or 'cliente'
 
     try:

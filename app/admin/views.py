@@ -1744,10 +1744,16 @@ def produto_ebooks(produto_id):
         if not db.execute_query("SELECT 1 FROM google_ads_planilha_dns WHERE produto_id = %s AND ativo = 1 LIMIT 1",
                                 (produto_id,), fetch_one=True):
             pendencias_app.append('Sem planilha do Google Ads — as vendas deste produto NÃO vão como conversão para o Ads (tela "Planilhas Google").')
+    try:  # desconto de oferta (migration 083); sem a coluna ainda, o bloco mostra 0
+        linha = db.execute_query("SELECT desconto_oferta FROM produtos WHERE id = %s", (produto_id,), fetch_one=True)
+        desconto_oferta = float((linha or {}).get('desconto_oferta') or 0)
+    except Exception:
+        desconto_oferta = 0.0
     return render_template(
         'admin/produto_ebooks.html', produto=produto,
         vinculos=listar_ebooks_produto(produto_id), catalogo=listar_ebooks(),
         app_produto=app_produto, apps_disponiveis=APPS, pendencias_app=pendencias_app,
+        desconto_oferta=desconto_oferta,
     )
 
 

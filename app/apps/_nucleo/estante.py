@@ -27,15 +27,21 @@ def apps_da_estante(pedido: dict) -> tuple[list[dict], list[dict]]:
     meus = [{'app': APPS[l['app_slug']], 'licenca': l, 'ativa': lic.licenca_ativa(l), 'capa': capas.get(l['app_slug'])}
             for l in licencas if l['app_slug'] in APPS]
     tem = {l['app_slug'] for l in licencas}
-    ofertas, vistos = [], set()
-    for p in produtos_app:
-        if (p['app_slug'] in APPS and APPS[p['app_slug']].publico and not p['renovacao'] and p['ativo'] and p['disponivel_web']
-                and p['app_slug'] not in tem and p['app_slug'] not in vistos):
-            vistos.add(p['app_slug'])
-            ofertas.append({'produto_id': p['produto_id'], 'ebook_id': None, 'nome_venda': p['nome_venda'],
-                            'imagem_pequena': p['imagem_pequena'] or capas.get(p['app_slug']),
-                            'imagem_grande': p['imagem_grande'], 'preco_promocional': p['preco_promocional'],
-                            'app_slug': p['app_slug'], 'icone_app': APPS[p['app_slug']].icone_512})
+    # Um card por app: o produto principal (o mais caro à venda, não renovação). Se ele tem desconto de
+    # oferta (produtos.desconto_oferta, migration 083), o card mostra o preço com desconto e o link
+    # leva o token da oferta (web/oferta.py) — o checkout aplica e grava o desconto.
+    from web.oferta import aplicar_na_vitrine, descontos_dos_produtos
+    principal_por_app = {}
+    for p in produtos_app:  # ordem: preço → o último de cada app é o mais caro
+        if (p['app_slug'] in APPS and APPS[p['app_slug']].publico and not p['renovacao'] and p['ativo']
+                and p['disponivel_web'] and p['app_slug'] not in tem):
+            principal_por_app[p['app_slug']] = p
+    descontos = descontos_dos_produtos(p['produto_id'] for p in principal_por_app.values())
+    ofertas = [aplicar_na_vitrine({'produto_id': p['produto_id'], 'ebook_id': None, 'nome_venda': p['nome_venda'],
+                                   'imagem_pequena': p['imagem_pequena'] or capas.get(slug),
+                                   'imagem_grande': p['imagem_grande'], 'preco_promocional': p['preco_promocional'],
+                                   'app_slug': slug, 'icone_app': APPS[slug].icone_512}, descontos)
+               for slug, p in principal_por_app.items()]
     return meus, ofertas
 
 

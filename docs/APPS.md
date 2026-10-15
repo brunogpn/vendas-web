@@ -67,8 +67,20 @@ migrations/080_apps_nucleo.sql, 081_app_fatia.sql
   "abrir app" também libera; `tasks.apps_reconciliar_licencas` (de hora em hora, :47) pega o que faltou.
 - **Só no site:** produto de app não deve ser vendido pelo WhatsApp (lá entrega antes de cobrar).
 - **Landing do Fatia** (`/fatia-e`): se houver produto de app do Fatia à venda (e não renovação), a
-  página mostra Básico + Plano Guiado (o mais caro); havendo um segundo mais barato, ele vira o popup
-  de desconto ao clicar no Básico. Sem nenhum, fica só o Básico, como antes.
+  página mostra Básico + Plano Guiado (o mais caro); se o Guiado tiver desconto de oferta cadastrado,
+  o clique no Básico abre o popup com o Guiado por esse preço (ver "Desconto de oferta"). Sem nenhum
+  app, fica só o Básico, como antes.
+
+### Desconto de oferta (popup do Básico e Estante 2)
+
+Migration 083. O desconto fica no produto (`produtos.desconto_oferta`, admin → E-books do produto →
+"Desconto de oferta"; vale para app e e-book). Quem mostra a oferta gera um link com **token assinado**
+(`?oferta=`, `app/web/oferta.py`, vale 24 h e só para aquele produto): o popup "última tentativa" ao
+clicar no Básico do `/fatia-e` (aparece quando o Plano Guiado tem desconto) e o card do app no
+cross-sell da Estante 2. `gerar_pix`/`gerar_cartao` validam o token e buscam o desconto no banco — sem
+token, preço cheio. O checkout mostra "🎁 Desconto especial −R$ X" e o selo "Oferta aplicada"; o pedido
+grava `pedidos.desconto` e o item principal já com desconto. NF-e, ROI e conversão do Ads usam o valor
+pago, então já saem certos. O quiz registra as etapas 18 (viu o popup) e 19 (aceitou) no Analytics Web.
 
 ### Piloto (antes de lançar)
 

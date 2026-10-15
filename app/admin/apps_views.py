@@ -210,3 +210,32 @@ def remover_app_produto_view(produto_id):
         logger.info(f"[ADMIN-APPS] Produto #{produto_id} deixou de ser app por {current_user.email}")
         flash('O produto deixou de ser app. Licenças já vendidas continuam valendo.', 'success')
     return redirect(url_for('admin.produto_ebooks', produto_id=produto_id))
+
+
+# ---------------------------------------------------------------- desconto de oferta (popup / Estante)
+
+@admin_bp.route('/produto/<int:produto_id>/desconto-oferta', methods=['POST'])
+@requer_admin
+def salvar_desconto_oferta(produto_id):
+    """produtos.desconto_oferta (migration 083): vale para app e e-book; precisa ser menor que o preço."""
+    from database import get_ebook_principal_produto
+    destino = redirect(url_for('admin.produto_ebooks', produto_id=produto_id))
+    import math
+    try:
+        desconto = float((request.form.get('desconto_oferta') or '0').replace(',', '.'))
+        if not math.isfinite(desconto):
+            raise ValueError
+        desconto = round(desconto, 2)
+    except ValueError:
+        flash('O desconto precisa ser um número.', 'warning')
+        return destino
+    principal = get_ebook_principal_produto(produto_id)
+    preco = float(principal['preco_promocional']) if principal else 0.0
+    if desconto < 0 or (desconto > 0 and desconto >= preco):
+        flash(f'O desconto precisa ser maior ou igual a zero e menor que o preço (R$ {preco:.2f}).', 'warning')
+        return destino
+    db.execute_query("UPDATE produtos SET desconto_oferta = %s WHERE id = %s", (desconto, produto_id))
+    logger.info(f"[ADMIN-OFERTA] Produto #{produto_id}: desconto de oferta R$ {desconto:.2f} por {current_user.email}")
+    flash(f'Desconto de oferta salvo: R$ {desconto:.2f} (sai por R$ {preco - desconto:.2f}).' if desconto
+          else 'Oferta desligada (sem desconto).', 'success')
+    return destino

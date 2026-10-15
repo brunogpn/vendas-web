@@ -451,18 +451,26 @@ def fatia():
 def _planos_app_fatia(produto_basico_id):
     """(preço do Básico, Plano Guiado, desconto do popup) para a landing do Fatia.
 
-    Guiado = produto do tipo app do Fatia à venda no site (o mais caro); havendo outro mais barato,
-    ele vira o desconto do popup. Sem nenhum: (preço, None, None) e a landing mostra só o Básico."""
+    Guiado = produto do tipo app do Fatia à venda no site (o mais caro). O popup ("última tentativa"
+    ao clicar no Básico) aparece quando esse produto tem desconto de oferta cadastrado
+    (produtos.desconto_oferta, migration 083): leva para o mesmo produto com o token da oferta no link
+    (web/oferta.py). Sem app: (preço, None, None) e a landing mostra só o Básico."""
     preco_basico, guiado, desconto = 10.0, None, None
     try:
         from database import listar_apps_produto, get_ebook_principal_produto
+        from web.oferta import desconto_do_produto, gerar_token
         principal = get_ebook_principal_produto(produto_basico_id)
         if principal:
             preco_basico = float(principal['preco_promocional'])
         ofertas = listar_apps_produto('fatia', renovacao=False, so_venda_web=True)  # ordem: preço
         if ofertas:
             guiado = ofertas[-1]
-            desconto = ofertas[0] if len(ofertas) > 1 else None
+            preco = float(guiado['preco_promocional'])
+            valor_desconto = desconto_do_produto(guiado['produto_id'], preco)
+            if valor_desconto > 0:
+                desconto = {'produto_id': guiado['produto_id'], 'preco_cheio': preco,
+                            'preco_promocional': round(preco - valor_desconto, 2), 'economia': valor_desconto,
+                            'oferta': gerar_token(guiado['produto_id'])}
     except Exception as e:
         logger.error(f"[FATIA-E] Erro ao buscar os planos do app: {e}")
     return preco_basico, guiado, desconto

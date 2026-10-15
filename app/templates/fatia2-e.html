@@ -616,20 +616,24 @@ function confetti(){
   for(let i=0;i<54;i++){const el=document.createElement("i");el.style.left=Math.random()*100+"vw";el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.animationDelay=Math.random()*.6+"s";box.appendChild(el);setTimeout(()=>el.remove(),2400)}
 }
 // Checkout do sistema (produto 12), repassando a querystring (gclid/campanha) como no fatia-e.html.
-$("checkoutBasic").href=CHECKOUT_URL+window.location.search;
+$("checkoutBasic").href=CHECKOUT_URL+window.location.search.replace(/([?&])oferta=[^&]*&?/,"$1").replace(/[?&]$/,"");
 $("checkoutBasic").addEventListener("click",()=>track(17,"Clicou em comprar"));
 // Plano Guiado (produto do tipo app) e popup de desconto — só existem se houver produto de app à venda.
 // Cada link repassa a querystring (gclid/campanha) como o do Básico. Roda no DOMContentLoaded porque
 // o popup fica depois deste script no HTML.
 document.addEventListener("DOMContentLoaded",()=>{
-["checkoutGuided","checkoutGuidedDiscount"].forEach(id=>{const a=document.getElementById(id);if(!a)return;
-  a.href=a.getAttribute("href")+window.location.search;a.addEventListener("click",()=>track(17,"Clicou em comprar"))});
+// Junta a querystring da landing (gclid/campanha) com a do link (ex.: ?oferta=) sem duplicar o "?".
+const comCampanha=href=>{const u=new URL(href,location.origin);new URLSearchParams(location.search).forEach((v,k)=>{if(k!=="oferta"&&!u.searchParams.has(k))u.searchParams.set(k,v)});return u.pathname+u.search};
+const guiado=document.getElementById("checkoutGuided");
+if(guiado){guiado.href=comCampanha(guiado.getAttribute("href"));guiado.addEventListener("click",()=>track(17,"Clicou em comprar"))}
+const comDesconto=document.getElementById("checkoutGuidedDiscount");
+if(comDesconto){comDesconto.href=comCampanha(comDesconto.getAttribute("href"));comDesconto.addEventListener("click",()=>track(19,"Aceitou o app com desconto"))}
 (function(){
   const overlay=document.getElementById("upsellOverlay");if(!overlay)return;
   const basico=$("checkoutBasic");let mostrou=false;
   const fechar=()=>{overlay.classList.remove("show");document.body.style.overflow=""};
   basico.addEventListener("click",e=>{if(mostrou)return;e.preventDefault();mostrou=true;
-    overlay.classList.add("show");document.body.style.overflow="hidden"});
+    overlay.classList.add("show");document.body.style.overflow="hidden";track(18,"Viu o popup do app")});
   document.getElementById("upsellFechar").addEventListener("click",fechar);
   overlay.addEventListener("click",e=>{if(e.target===overlay)fechar()});
   window.addEventListener("keydown",e=>{if(e.key==="Escape")fechar()});
@@ -650,12 +654,12 @@ track(0,"Abriu a página");
       <div class="upsell-title">Plano Guiado com desconto</div>
       <p>Leve o plano mais completo com a ferramenta que mostra sua meta, sua semana e o próximo passo.</p>
       <div class="upsell-price-line">
-        <div class="upsell-old">{{ guiado.preco_promocional|brl }}</div>
+        <div class="upsell-old">{{ desconto.preco_cheio|brl }}</div>
         <div class="upsell-new">{{ desconto.preco_promocional|brl }}</div>
-        <div class="upsell-save">economize {{ (guiado.preco_promocional - desconto.preco_promocional)|brl }}</div>
+        <div class="upsell-save">economize {{ desconto.economia|brl }}</div>
       </div>
-      <div class="upsell-mini">Por apenas {{ ((desconto.preco_promocional|float) - preco_basico)|brl }} a mais que o Básico, você já leva a versão guiada.</div>
-      <a class="upsell-btn" id="checkoutGuidedDiscount" href="/pay/{{ desconto.produto_id }}">🎁 Sim, quero o Plano Guiado por {{ desconto.preco_promocional|brl }}</a>
+      {% if desconto.preco_promocional > preco_basico %}<div class="upsell-mini">Por apenas {{ (desconto.preco_promocional - preco_basico)|brl }} a mais que o Básico, você já leva a versão guiada.</div>{% endif %}
+      <a class="upsell-btn" id="checkoutGuidedDiscount" href="/pay/{{ desconto.produto_id }}?oferta={{ desconto.oferta }}">🎁 Sim, quero o Plano Guiado por {{ desconto.preco_promocional|brl }}</a>
     </div>
     <button class="upsell-link" type="button" id="upsellSoBasico">Não, quero só o plano básico</button>
   </div>
