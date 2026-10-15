@@ -21,9 +21,9 @@ CONFIG = AppConfig(
     cor_tema='#fafaf8',
     cor_fundo='#fafaf8',
     cor_botao_email='#c4402a',
-    # PILOTO (homologação do Bruno): os dois planos só aparecem em /fatia-e-piloto e a Estante não
-    # oferece o app. Para lançar: True (aí /fatia-e mostra Básico + Guiado e o cross-sell oferece o app).
-    publico=False,
+    # Lançado em 14/10/2026 (homologado pelo Bruno no piloto): /fatia-e mostra Básico + Plano Guiado e a
+    # Estante oferece o app no cross-sell. False = volta ao piloto (planos só em /fatia-e-piloto).
+    publico=True,
     # PENDENTE: ícones definitivos (o Bruno ainda vai mandar).
     icone_192='apps/fatia/icone-192.png',
     icone_512='apps/fatia/icone-512.png',
