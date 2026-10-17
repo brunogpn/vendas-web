@@ -28,32 +28,56 @@
 </div>
 
 <div class="card">
-    <form method="GET" style="display:flex;gap:8px;margin-bottom:16px">
-        <input type="search" name="q" value="{{ q }}" placeholder="Buscar por e-mail ou nome" style="flex:1">
+    <form method="GET" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="search" name="q" value="{{ q }}" placeholder="Buscar pelo começo do e-mail ou do nome" style="flex:1;min-width:240px">
         <button type="submit" class="btn btn-primary">Buscar</button>
+        {% if q %}<a class="btn btn-ghost" href="{{ url_for('admin.apps_clientes') }}">Limpar busca</a>{% endif %}
     </form>
-    {% if clientes %}
+    {% if not q %}
+    <form method="GET" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+        <div class="form-group" style="margin:0"><label>App</label>
+            <select name="app">{% for slug, cfg in apps.items() %}<option value="{{ slug }}"{% if slug == filtro.app %} selected{% endif %}>{{ cfg.nome }}</option>{% endfor %}</select></div>
+        <div class="form-group" style="margin:0"><label>1ª liberação de</label><input type="date" name="de" value="{{ filtro.de.isoformat() }}"></div>
+        <div class="form-group" style="margin:0"><label>até</label><input type="date" name="ate" value="{{ filtro.ate.isoformat() }}"></div>
+        <div class="form-group" style="margin:0"><label>Situação</label>
+            <select name="situacao">
+                <option value="">Todas</option>
+                <option value="ativa"{% if filtro.situacao == 'ativa' %} selected{% endif %}>Ativa</option>
+                <option value="vence7"{% if filtro.situacao == 'vence7' %} selected{% endif %}>Vence em 7 dias</option>
+                <option value="vencida"{% if filtro.situacao == 'vencida' %} selected{% endif %}>Vencida</option>
+            </select></div>
+        <button type="submit" class="btn btn-ghost">Filtrar</button>
+    </form>
+    <p style="font-size:12px;color:var(--muted);margin:-8px 0 12px">Com uma situação escolhida (ativa, vence em 7 dias, vencida) o período não vale: a lista sai pelo vencimento.</p>
+    {% endif %}
+    {% if linhas %}
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Cliente</th><th>Apps</th><th>Criada em</th><th></th></tr></thead>
+            <thead><tr><th>Cliente</th><th>App</th><th>1ª liberação</th><th>Vence em</th><th>Último acesso</th><th></th></tr></thead>
             <tbody>
-            {% for c in clientes %}
+            {% for l in linhas %}
                 <tr>
-                    <td><strong>{{ c.email }}</strong><br><span style="color:var(--muted);font-size:13px">{{ c.nome or '' }}</span></td>
-                    <td style="font-size:13px">
-                        {% for l in licencas.get(c.id, []) %}
-                        {{ apps[l.app_slug].nome if l.app_slug in apps else l.app_slug }} até {{ l.expira_em.strftime('%d/%m/%Y') }}{% if l.ultimo_acesso_em %} · último acesso {{ l.ultimo_acesso_em.strftime('%d/%m') }}{% else %} · <span style="color:var(--muted)">nunca entrou</span>{% endif %}<br>
-                        {% else %}<span style="color:var(--muted)">sem licença</span>{% endfor %}
-                    </td>
-                    <td style="font-size:13px;color:var(--muted)">{{ c.criado_em.strftime('%d/%m/%Y %H:%M') if c.criado_em else '' }}</td>
-                    <td style="text-align:right"><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.apps_cliente', cliente_id=c.id) }}">Abrir</a></td>
+                    <td><strong>{{ l.email }}</strong><br><span style="color:var(--muted);font-size:13px">{{ l.nome or '' }}</span></td>
+                    <td style="font-size:13px">{% if l.app_slug %}{{ apps[l.app_slug].nome if l.app_slug in apps else l.app_slug }}{% else %}<span style="color:var(--muted)">sem licença</span>{% endif %}</td>
+                    <td style="font-size:13px;color:var(--muted)">{{ l.criado_em.strftime('%d/%m/%Y') if l.criado_em else '' }}</td>
+                    <td style="font-size:13px">{{ l.expira_em.strftime('%d/%m/%Y') if l.expira_em else '' }}</td>
+                    <td style="font-size:13px">{% if l.ultimo_acesso_em %}{{ l.ultimo_acesso_em.strftime('%d/%m/%Y') }}{% elif l.app_slug %}<span style="color:var(--muted)">nunca entrou</span>{% endif %}</td>
+                    <td style="text-align:right"><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.apps_cliente', cliente_id=l.id) }}">Abrir</a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
+    {% if not q and (pagina > 1 or tem_mais) %}
+    {% set base = {'app': filtro.app, 'de': filtro.de.isoformat(), 'ate': filtro.ate.isoformat(), 'situacao': filtro.situacao} %}
+    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:12px;font-size:14px">
+        {% if pagina > 1 %}<a class="btn btn-ghost btn-sm" href="{{ url_for('admin.apps_clientes', pagina=pagina - 1, **base) }}">← Anteriores</a>{% endif %}
+        <span style="color:var(--muted)">Página {{ pagina }}</span>
+        {% if tem_mais %}<a class="btn btn-ghost btn-sm" href="{{ url_for('admin.apps_clientes', pagina=pagina + 1, **base) }}">Próximas →</a>{% endif %}
+    </div>
+    {% endif %}
     {% else %}
-    <p style="color:var(--muted);font-size:14px">{{ 'Nenhuma cliente encontrada.' if q else 'Nenhuma cliente ainda.' }}</p>
+    <p style="color:var(--muted);font-size:14px">{{ 'Nenhuma cliente com e-mail ou nome começando por "' ~ q ~ '".' if q else 'Nenhuma licença encontrada com esses filtros.' }}</p>
     {% endif %}
 </div>
 

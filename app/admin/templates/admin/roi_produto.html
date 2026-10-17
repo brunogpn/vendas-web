@@ -227,6 +227,55 @@
     'Recebido (PIX + Web)', pix_recebido_sem_duplicidade + web_total_recebido, pix_investido + web_investido, taxa_imposto, total_erro,
     custo_wpp=wpp) }}
 
+{% if vendas_planos %}
+{% set tot_qtd = vendas_planos|sum(attribute='site_qtd') + vendas_planos|sum(attribute='wpp_qtd') %}
+{% set tot_valor = (vendas_planos|map(attribute='site_valor')|map('float')|sum) + (vendas_planos|map(attribute='wpp_valor')|map('float')|sum) %}
+<div class="card">
+    <p style="font-weight:700;margin-bottom:8px">Vendas por plano <span style="font-weight:400;color:var(--muted);font-size:13px">— pedidos pagos no período (data do pagamento)</span></p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Plano</th>
+                    <th style="text-align:right;">Site (qtd)</th>
+                    <th style="text-align:right;">Site (R$)</th>
+                    <th style="text-align:right;">WhatsApp (qtd)</th>
+                    <th style="text-align:right;">WhatsApp (R$)</th>
+                    <th style="text-align:right;">Ticket médio</th>
+                    <th style="text-align:right;">Desconto de oferta</th>
+                    <th style="text-align:right;">% da receita</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vendas_planos %}
+                {% set qtd = (v.site_qtd or 0) + (v.wpp_qtd or 0) %}
+                {% set valor = (v.site_valor or 0)|float + (v.wpp_valor or 0)|float %}
+                <tr>
+                    <td>{{ v.nome }}{% if v.padrao %} <span class="badge badge-gray">padrão</span>{% endif %}{% if v.renovacao %} <span class="badge badge-blue">renovação</span>{% endif %}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ v.site_qtd or 0 }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (v.site_valor or 0)|float|brl }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ v.wpp_qtd or 0 }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (v.wpp_valor or 0)|float|brl }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (valor / qtd)|brl if qtd else '—' }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (v.desconto or 0)|float|brl }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ '%.0f'|format(valor / tot_valor * 100) ~ '%' if tot_valor else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td colspan="4" style="text-align:right;font-family:var(--mono);"><strong>{{ tot_qtd }} pedidos · {{ tot_valor|brl }}</strong></td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (tot_valor / tot_qtd)|brl if tot_qtd else '—' }}</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">WhatsApp e pedidos de antes dos planos contam no plano padrão. Valores do pedido (valor pago), não das transações — o Financeiro mostra os recebimentos.</p>
+</div>
+{% endif %}
+
 {% if rows %}
 <div class="card">
     <div class="table-wrap">

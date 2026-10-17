@@ -3,6 +3,7 @@
 Usado pelo atendimento ("paguei e não consigo entrar", "comprei com outro e-mail", "meu acesso
 venceu") e para criar clientes de teste no dev. Ver docs/APPS.md.
 """
+import datetime
 import logging
 
 from flask import flash, redirect, render_template, request, session, url_for
@@ -22,45 +23,87 @@ def _apps():
     return APPS
 
 
+POR_PAGINA = 50
+SITUACOES = {
+    'ativa': 'l.expira_em >= CURDATE()',
+    'vencida': 'l.expira_em < CURDATE()',
+    'vence7': 'l.expira_em BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)',
+}
+
+
 def _resumo_por_app():
+    """Números do topo, por app. Contas pelos índices (app_slug, expira_em) e (app_slug, data) — sem
+    subconsulta por licença, que pesaria com dezenas de milhares de clientes."""
     linhas = db.execute_query(
-        "SELECT l.app_slug, COUNT(*) AS total, SUM(l.expira_em >= CURDATE()) AS ativas, "
-        "SUM(l.ultimo_acesso_em IS NOT NULL) AS entraram, "
-        "SUM(EXISTS (SELECT 1 FROM apps_acessos_dia a WHERE a.cliente_id = l.cliente_id AND a.app_slug = l.app_slug "
-        "            AND a.data >= DATE_SUB(CURDATE(), INTERVAL 6 DAY))) AS ativas_7d "
-        "FROM apps_licencas l GROUP BY l.app_slug", fetch_all=True) or []
-    return {l['app_slug']: l for l in linhas}
+        "SELECT app_slug, COUNT(*) AS total, SUM(expira_em >= CURDATE()) AS ativas, "
+        "SUM(ultimo_acesso_em IS NOT NULL) AS entraram FROM apps_licencas GROUP BY app_slug",
+        fetch_all=True) or []
+    resumo = {l['app_slug']: dict(l) for l in linhas}
+    for l in db.execute_query(
+            "SELECT app_slug, COUNT(DISTINCT cliente_id) AS ativas_7d FROM apps_acessos_dia "
+            "WHERE data >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY app_slug", fetch_all=True) or []:
+        resumo.setdefault(l['app_slug'], {})['ativas_7d'] = l['ativas_7d']
+    return resumo
+
+
+def _data(valor, padrao):
+    try:
+        return datetime.date.fromisoformat(valor) if valor else padrao
+    except ValueError:
+        return padrao
 
 
 @admin_bp.route('/apps')
 @requer_admin
 def apps_clientes():
+    """Busca pelo começo do e-mail ou do nome (sem período, pelos índices) ou lista paginada por app e:
+    situação (ativa / vence em 7 dias / vencida — pelo vencimento, sem período) ou, em "Todas", o período
+    em que o app foi liberado pela primeira vez."""
+    apps = _apps()
     q = (request.args.get('q') or '').strip().lower()
+    hoje = datetime.date.today()
+    filtro = {
+        'app': request.args.get('app') if request.args.get('app') in apps else next(iter(apps), ''),
+        'de': _data(request.args.get('de'), hoje - datetime.timedelta(days=30)),
+        'ate': _data(request.args.get('ate'), hoje),
+        'situacao': request.args.get('situacao') if request.args.get('situacao') in SITUACOES else '',
+    }
+    pagina = max(1, request.args.get('pagina', 1, type=int))
+    linhas, tem_mais, resumo, erro_tabela = [], False, {}, None
     try:
         if q:
-            clientes = db.execute_query(
-                "SELECT c.id, c.email, c.nome, c.criado_em FROM apps_clientes c "
-                "WHERE c.email LIKE %s OR c.nome LIKE %s ORDER BY c.id DESC LIMIT 50",
-                (f'%{q}%', f'%{q}%'), fetch_all=True) or []
+            prefixo = q.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+            # Duas buscas por índice (e-mail único; nome — migration 088) em vez de um OR, que leria a tabela.
+            linhas = db.execute_query(
+                "SELECT c.id, c.email, c.nome, l.app_slug, l.expira_em, l.ultimo_acesso_em, l.criado_em "
+                "FROM (SELECT id FROM apps_clientes WHERE email LIKE %s "
+                "      UNION SELECT id FROM apps_clientes WHERE nome LIKE %s LIMIT 50) achados "
+                "JOIN apps_clientes c ON c.id = achados.id "
+                "LEFT JOIN apps_licencas l ON l.cliente_id = c.id ORDER BY c.email",
+                (prefixo, prefixo), fetch_all=True) or []
         else:
-            clientes = db.execute_query(
-                "SELECT c.id, c.email, c.nome, c.criado_em FROM apps_clientes c ORDER BY c.id DESC LIMIT 50",
-                fetch_all=True) or []
-        licencas = {}
-        if clientes:
-            ids = [c['id'] for c in clientes]
-            marcas = ', '.join(['%s'] * len(ids))
-            for l in db.execute_query(
-                    f"SELECT cliente_id, app_slug, expira_em, ultimo_acesso_em FROM apps_licencas WHERE cliente_id IN ({marcas})",
-                    tuple(ids), fetch_all=True) or []:
-                licencas.setdefault(l['cliente_id'], []).append(l)
+            sql = ("SELECT c.id, c.email, c.nome, l.app_slug, l.expira_em, l.ultimo_acesso_em, l.criado_em "
+                   "FROM apps_licencas l JOIN apps_clientes c ON c.id = l.cliente_id WHERE l.app_slug = %s")
+            params = [filtro['app']]
+            if filtro['situacao']:
+                # Pelo vencimento (índice app_slug, expira_em): quem vence esta semana liberou há ~3 meses,
+                # fora de qualquer período "recente" — combinar os dois esconderia justamente essas clientes.
+                sql += ' AND ' + SITUACOES[filtro['situacao']] + ' ORDER BY l.expira_em'
+            else:
+                sql += (" AND l.criado_em >= %s AND l.criado_em < DATE_ADD(%s, INTERVAL 1 DAY)"
+                        " ORDER BY l.criado_em DESC")
+                params += [filtro['de'], filtro['ate']]
+            linhas = db.execute_query(sql + ' LIMIT %s OFFSET %s',
+                                      (*params, POR_PAGINA + 1, (pagina - 1) * POR_PAGINA), fetch_all=True) or []
+            tem_mais = len(linhas) > POR_PAGINA
+            linhas = linhas[:POR_PAGINA]
         resumo = _resumo_por_app()
-        erro_tabela = None
     except Exception as e:  # migration 080 ainda não aplicada
         logger.error(f"[ADMIN-APPS] {e}")
-        clientes, licencas, resumo, erro_tabela = [], {}, {}, str(e)
-    return render_template('admin/apps_clientes.html', clientes=clientes, licencas=licencas, q=q,
-                           apps=_apps(), resumo=resumo, erro_tabela=erro_tabela)
+        erro_tabela = str(e)
+    return render_template('admin/apps_clientes.html', linhas=linhas, q=q, filtro=filtro, pagina=pagina,
+                           tem_mais=tem_mais, situacoes=SITUACOES, apps=apps, resumo=resumo,
+                           erro_tabela=erro_tabela)
 
 
 @admin_bp.route('/apps/cliente/<int:cliente_id>')

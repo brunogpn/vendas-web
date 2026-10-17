@@ -8,6 +8,20 @@ def guia_paes():
     return render_template('guia-paes-sem-gluten.html')
 
 
+def _redirecionar_produto_antigo(produto_id, v2=False):
+    """Link antigo de um produto que virou plano de outro (ex.: /pay/16?pedido=X → /pay/12?pedido=X&plano=completo).
+    Mantém pedido, ref e oferta. None = não há redirecionamento (a rota responde 404 como antes)."""
+    from database import get_redirecionamento_produto
+    from web.links import link_checkout
+    destino = get_redirecionamento_produto(produto_id)
+    if not destino:
+        return None
+    plano = {'slug': destino['plano_slug'], 'padrao': destino['plano_padrao']}
+    a = request.args
+    return redirect(link_checkout(destino['produto_destino_id'], plano, v2=v2, pedido=a.get('pedido'),
+                                  ref=a.get('ref'), oferta=a.get('oferta')))
+
+
 def _plano_da_pagina(produto_id):
     """O plano que esta página vende: ?plano=<slug> ou, sem ele, o padrão do produto (None = não está à
     venda: plano inexistente, inativo ou sem item principal)."""
@@ -57,7 +71,7 @@ def checkout(produto_id):
                                COOKIE_MAX_AGE_FUNIL)
     produto = get_produto_disponivel_web(produto_id)
     if not produto:
-        return 'Produto não encontrado', 404
+        return _redirecionar_produto_antigo(produto_id) or ('Produto não encontrado', 404)
 
     plano = _plano_da_pagina(produto_id)
     if not plano:
@@ -119,7 +133,7 @@ def checkout_v2(produto_id):
                                resolver_pedido_por_guid)
     produto = get_produto_disponivel_web(produto_id)
     if not produto:
-        return 'Produto não encontrado', 404
+        return _redirecionar_produto_antigo(produto_id, v2=True) or ('Produto não encontrado', 404)
 
     plano = _plano_da_pagina(produto_id)
     if not plano:

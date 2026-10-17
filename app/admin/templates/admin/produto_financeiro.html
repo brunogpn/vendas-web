@@ -143,21 +143,31 @@
 </div>
 
 <!-- Filtros -->
-{% set todas_transacoes = financeiro.transacoes %}
+{% set todas_transacoes = financeiro.transacoes_plano %}
 <div class="origem-filtro" style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
     {% for val, label in [('todos','Todos'), ('web','🌐 Web'), ('wpp','📱 WhatsApp')] %}
     {% set qtd = todas_transacoes|length if val == 'todos' else todas_transacoes|selectattr('fluxo_inicial', 'equalto', val)|list|length %}
-    <a href="{{ url_for('admin.financeiro_produto', produto_id=produto.id, data_ini=data_ini, data_fim=data_fim, fluxo_inicial=val, forma=forma) }}"
+    <a href="{{ url_for('admin.financeiro_produto', produto_id=produto.id, data_ini=data_ini, data_fim=data_fim, fluxo_inicial=val, forma=forma, plano=plano) }}"
        class="btn btn-sm {{ 'btn-primary' if fluxo_inicial == val else 'btn-outline-secondary' }}">{{ label }} ({{ qtd }})</a>
     {% endfor %}
 </div>
 <div class="forma-filtro" style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
     {% for val, label in [('todos','Todos'), ('pix','Pix'), ('cartao','Cartão'), ('devolucao','↩ Devolução')] %}
     {% set qtd = todas_transacoes|length if val == 'todos' else todas_transacoes|selectattr('forma', 'equalto', val)|list|length %}
-    <a href="{{ url_for('admin.financeiro_produto', produto_id=produto.id, data_ini=data_ini, data_fim=data_fim, fluxo_inicial=fluxo_inicial, forma=val) }}"
+    <a href="{{ url_for('admin.financeiro_produto', produto_id=produto.id, data_ini=data_ini, data_fim=data_fim, fluxo_inicial=fluxo_inicial, forma=val, plano=plano) }}"
        class="btn btn-sm {{ 'btn-primary' if forma == val else 'btn-outline-secondary' }}">{{ label }} ({{ qtd }})</a>
     {% endfor %}
 </div>
+
+{% if planos|length > 1 %}
+<div class="plano-filtro" style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+    {% for val, label in [('todos', 'Todos os planos')] + opcoes_plano %}
+    {% set qtd = financeiro.transacoes|length if val == 'todos' else financeiro.transacoes|selectattr('plano_id', 'equalto', val|int)|list|length %}
+    <a href="{{ url_for('admin.financeiro_produto', produto_id=produto.id, data_ini=data_ini, data_fim=data_fim, fluxo_inicial=fluxo_inicial, forma=forma, plano=val) }}"
+       class="btn btn-sm {{ 'btn-primary' if plano == val else 'btn-outline-secondary' }}">{{ label }} ({{ qtd }})</a>
+    {% endfor %}
+</div>
+{% endif %}
 
 <!-- Tabela de transações -->
 {% if transacoes %}
@@ -169,6 +179,7 @@
                     <th>Data/Hora</th>
                     <th>Origem</th>
                     <th>Forma</th>
+                    <th>Plano</th>
                     <th style="text-align:right;">Valor</th>
                     <th>Chave PIX</th>
                     <th>Pagador</th>
@@ -200,6 +211,7 @@
                         <span class="badge badge-green">Pix</span>
                         {% endif %}
                     </td>
+                    <td style="font-size:13px;">{{ nomes_planos.get(t.plano_id, '—') }}</td>
                     {% if t.forma == 'devolucao' %}
                     <td style="text-align:right; font-family:var(--mono); font-weight:600; color:var(--danger);">
                         - {{ t.valor|abs|brl }}

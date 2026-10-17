@@ -3032,8 +3032,32 @@ def roi_produto(produto_id):
         flash('Erro ao carregar ROI.', 'danger')
         rows = []
 
+    # Vendas por plano (Básico, Completo, Renovação...): pedidos pagos no período, site (1000) e WhatsApp (0).
+    # Pedido de antes dos planos (migration 085, plano_id NULL) e do WhatsApp contam no plano padrão.
+    try:
+        vendas_planos = db.execute_query(
+            """SELECT pp.id, pp.nome, pp.padrao, pp.renovacao,
+                      SUM(p.estado_id = 1000) AS site_qtd, SUM(IF(p.estado_id = 1000, p.valor_pago, 0)) AS site_valor,
+                      SUM(p.estado_id = 0) AS wpp_qtd, SUM(IF(p.estado_id = 0, p.valor_pago, 0)) AS wpp_valor,
+                      SUM(p.desconto) AS desconto
+               FROM pedidos p
+               JOIN produto_planos pp ON pp.id = COALESCE(p.plano_id,
+                    (SELECT pad.id FROM produto_planos pad WHERE pad.produto_id = %s AND pad.padrao = 1))
+               WHERE p.produto_id = %s AND p.estado_id IN (0, 1000) AND p.data_pagamento BETWEEN %s AND %s
+               GROUP BY pp.id, pp.nome, pp.padrao, pp.renovacao
+               ORDER BY pp.padrao DESC, pp.ordem, pp.id""",
+            (produto_id, produto_id, data_ini, data_fim), fetch_all=True) or []
+        for v in vendas_planos:  # SUM do MySQL vem Decimal: o template divide com float
+            for k in ('site_qtd', 'wpp_qtd'):
+                v[k] = int(v[k] or 0)
+            for k in ('site_valor', 'wpp_valor', 'desconto'):
+                v[k] = float(v[k] or 0)
+    except Exception as e:
+        logger.error(f"[ADMIN] ❌ Erro nas vendas por plano do produto #{produto_id}: {e}")
+        vendas_planos = []
+
     return render_template('admin/roi_produto.html',
-        produto=produto, rows=rows,
+        produto=produto, rows=rows, vendas_planos=vendas_planos,
         roi_real=roi_real, roi_real_erro=roi_real_erro,
         roi_real_web=roi_real_web, roi_real_web_erro=roi_real_web_erro,
         taxa_imposto=taxa_imposto, custo_wpp=custo_wpp,
@@ -3299,6 +3323,7 @@ def financeiro_produto(produto_id):
     data_fim_str = request.args.get('data_fim', hoje.isoformat())
     fluxo_inicial = request.args.get('fluxo_inicial', 'todos')
     forma         = request.args.get('forma', 'todos')
+    plano         = request.args.get('plano', 'todos')
 
     try:
         data_ini = datetime.datetime.fromisoformat(data_ini_str)
@@ -3308,8 +3333,12 @@ def financeiro_produto(produto_id):
         data_fim  = datetime.datetime.combine(hoje, datetime.time.max)
         data_ini_str = data_fim_str = hoje.isoformat()
 
+    from database import listar_planos_produto
+    planos = []
     try:
-        financeiro = busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial=fluxo_inicial, forma=forma)
+        planos = listar_planos_produto(produto_id)
+        financeiro = busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial=fluxo_inicial, forma=forma,
+                                              plano=plano)
     except Exception as e:
         logger.error(f"[ADMIN] ❌ Erro no financeiro produto #{produto_id}: {e}")
         flash('Erro ao carregar dados financeiros.', 'danger')
@@ -3319,6 +3348,7 @@ def financeiro_produto(produto_id):
                 'total_cartao': 0, 'total_devolucoes': 0,
             },
             'transacoes': [],
+            'transacoes_plano': [],
             'transacoes_filtradas': [],
         }
 
@@ -3329,6 +3359,10 @@ def financeiro_produto(produto_id):
         data_fim      = data_fim_str,
         fluxo_inicial = fluxo_inicial,
         forma         = forma,
+        plano         = plano,
+        planos        = planos,
+        nomes_planos  = {p['id']: p['nome'] for p in planos},
+        opcoes_plano  = [(str(p['id']), p['nome']) for p in planos],
     )
 
 

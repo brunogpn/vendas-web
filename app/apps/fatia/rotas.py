@@ -301,11 +301,17 @@ def medalhas():
 def acesso():
     from database import listar_planos_com_app
     from web.links import link_checkout
-    # Renovações = planos com este app marcados como renovação (cadastro no admin, "Planos e entregáveis").
+    from apps._nucleo import licenca as lic
+    # Renovações = planos de renovação deste app (admin, "Planos e entregáveis") SÓ do produto em que ela
+    # comprou o app (ex.: Completo do 12 → renovação do 12). Sem compra (licença manual) ou sem renovação
+    # cadastrada nesse produto: a tela mostra o contato do suporte.
     ref = estante.pedido_da_estante(g.cliente, CONFIG.slug)
+    produto_id = lic.produto_de_origem(g.cliente['id'], CONFIG.slug)
+    planos = (listar_planos_com_app(CONFIG.slug, renovacao=True, so_venda_web=True, produto_id=produto_id)
+              if produto_id else [])
     renovacoes = [{**r, 'meses': max(1, round(r['dias'] / 30)),
                    'href': link_checkout(r['produto_id'], r, v2=bool(ref), ref=ref['guid'] if ref else None)}
-                  for r in listar_planos_com_app(CONFIG.slug, renovacao=True, so_venda_web=True)]
+                  for r in planos]
     return _render('acesso.html', expira_em=g.licenca['expira_em'], renovacoes=renovacoes,
                    guid_estante=ref['guid'] if ref else None)
 

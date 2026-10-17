@@ -199,3 +199,39 @@ def test_estante_prefere_o_plano_com_app_do_produto_do_pedido(monkeypatch):
     monkeypatch.setattr(lic, 'buscar_cliente_por_email', lambda e: None)
     assert [o['plano_id'] for o in estante.apps_da_estante({'email': 'x@y', 'produto_id': 12})[1]] == [30]
     assert [o['plano_id'] for o in estante.apps_da_estante({'email': 'x@y', 'produto_id': 14})[1]] == [16]  # o mais caro
+
+
+def test_financeiro_filtra_por_plano(monkeypatch):
+    """O plano filtra resumo e lista, como a origem; 'todos' traz tudo."""
+    import datetime
+    t = lambda valor, forma, plano: {'horario': datetime.datetime(2026, 10, 1), 'valor': Decimal(valor), 'forma': forma,
+                                     'fluxo_inicial': 'web', 'plano_id': plano}
+    linhas = [t('10.00', 'pix', 8), t('22.00', 'cartao', 30), t('15.00', 'pix', 30)]
+    monkeypatch.setattr(database.db, 'execute_query',
+                        lambda sql, *a, **k: {'id': 8} if 'padrao = 1' in sql and 'UNION' not in sql else linhas)
+    todos = database.busca_financeiro_produto(12, None, None)
+    assert todos['resumo']['total_valor'] == 25.0 and todos['resumo']['total_cartao'] == 22.0
+    completo = database.busca_financeiro_produto(12, None, None, plano='30')
+    assert completo['resumo']['total_valor'] == 15.0 and completo['resumo']['total_cartao'] == 22.0
+    assert len(completo['transacoes_filtradas']) == 2
+    assert len(completo['transacoes']) == 3   # a lista completa continua (contadores dos botões)
+    assert len(completo['transacoes_plano']) == 2  # contadores de origem/forma: só o plano escolhido
+
+
+@pytest.mark.parametrize('url,esperado', [
+    ('/pay/16', '/pay/12?plano=completo'),
+    ('/pay/16?pedido=123&oferta=T.1', '/pay/12?pedido=123&plano=completo&oferta=T.1'),
+    ('/pay2/16?ref=abc', '/pay2/12?ref=abc&plano=completo'),
+])
+def test_link_de_produto_que_virou_plano_redireciona(monkeypatch, url, esperado):
+    """Produto 16 (Guiado) virou o Completo do 12 (migration 087): links antigos levam ao plano, com o pedido."""
+    import importlib
+    from flask import Flask
+    app = Flask(__name__)  # Flask mínimo só com o blueprint do site (o app inteiro carrega o .env do dev)
+    app.register_blueprint(importlib.import_module('web').web_bp)
+    monkeypatch.setattr(database, 'get_produto_disponivel_web', lambda pid: None)
+    monkeypatch.setattr(database, 'get_redirecionamento_produto',
+                        lambda pid: {'produto_destino_id': 12, 'plano_slug': 'completo', 'plano_padrao': 0} if pid == 16 else None)
+    r = app.test_client().get(url)
+    assert r.status_code == 302 and r.headers['Location'] == esperado
+    assert app.test_client().get('/pay/99').status_code == 404   # sem redirecionamento: como antes

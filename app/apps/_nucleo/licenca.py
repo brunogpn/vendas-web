@@ -175,6 +175,16 @@ def liberar_licencas_do_pedido(pedido_id: int) -> list[dict]:
     return liberadas
 
 
+def produto_de_origem(cliente_id: int, slug: str) -> int | None:
+    """O produto da primeira compra que liberou o app para a cliente (ex.: Completo do Fatia = produto 12).
+    A renovação é vendida só por esse produto (campanha, NF-e e funil continuam no mesmo produto).
+    None = licença sem compra (liberada à mão no admin)."""
+    linha = db.execute_query(
+        "SELECT produto_id FROM apps_licenca_pedidos WHERE cliente_id = %s AND app_slug = %s "
+        "ORDER BY criado_em, pedido_id LIMIT 1", (cliente_id, slug), fetch_one=True)
+    return linha['produto_id'] if linha else None
+
+
 def pedido_criou_a_conta(cliente_id: int, pedido_id: int, slug: str) -> bool:
     """True se este pedido foi o que CRIOU a conta da cliente: liberou a primeira licença dela (neste
     app, sem licença anterior), ela não tem licença de outro app nem ajuste manual.

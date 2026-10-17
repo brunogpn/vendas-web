@@ -50,6 +50,7 @@
             </div>
             {% endif %}
 
+            {% if entregavel.tipo != 'app' %}{# app: a capa vem do plano (checkout, Estante), não do catálogo #}
             <div class="form-group">
                 <label>Imagem grande (opcional)</label>
                 <select name="imagem_grande">
@@ -75,6 +76,7 @@
                     {% endfor %}
                 </select>
             </div>
+            {% endif %}
 
             <div class="form-group span-2">
                 <label>Descrição (opcional)</label>

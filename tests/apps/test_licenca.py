@@ -137,3 +137,13 @@ def test_entrada_sem_codigo_so_para_conta_nova(monkeypatch, banco, esperado):
     # Quem compra com o e-mail de outra pessoa não pode entrar, pela Estante, numa conta que já existia.
     monkeypatch.setattr(lic, 'db', banco)
     assert lic.pedido_criou_a_conta(5, 10, 'fatia') is esperado
+
+
+@pytest.mark.parametrize('linha,esperado', [({'produto_id': 12}, 12), (None, None)])
+def test_produto_de_origem_e_o_da_primeira_compra_do_app(monkeypatch, linha, esperado):
+    # A renovação só é oferecida pelo produto em que ela comprou o app; licença manual (sem compra) = None.
+    consultas = []
+    monkeypatch.setattr(lic, 'db', type('B', (), {'execute_query': staticmethod(
+        lambda sql, params=None, **k: consultas.append((sql, params)) or linha)}))
+    assert lic.produto_de_origem(5, 'fatia') == esperado
+    assert 'ORDER BY criado_em' in consultas[0][0] and consultas[0][1] == (5, 'fatia')

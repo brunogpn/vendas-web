@@ -1,6 +1,7 @@
 # Produto → planos → entregáveis
 
-O que o site vende, em três níveis (migrations 085/086, out/2026):
+O que o site vende, em três níveis (migrations 085/086, out/2026; a 087 transformou o antigo produto 16
+"App Fatias — Plano Guiado" no plano `completo` do 12, com pedidos, licenças e PIX):
 
 ```
 produtos             campanha, ISBN, NF-e, chave PIX, planilha do Google Ads, remetente do e-mail

@@ -79,6 +79,7 @@ def _dados_entregavel(form):
         dados['nome_arquivo'] = (form.get('nome_arquivo') or '').strip() or dados['path_arquivo']
     else:
         dados['app_slug'] = form.get('app_slug') or ''
+        dados['imagem_grande'] = dados['imagem_pequena'] = None  # app: a capa vem do plano
         if dados['app_slug'] not in _apps():
             return dados, 'Escolha o app.'
     return dados, None

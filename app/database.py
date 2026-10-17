@@ -1890,9 +1890,23 @@ def copiar_planos_produto(produto_origem_id, produto_destino_id):
     return copiados
 
 
-def listar_planos_com_app(app_slug=None, renovacao=None, so_venda_web=False):
+def get_redirecionamento_produto(produto_id):
+    """Produto que deixou de existir e virou plano de outro (produtos_redirecionados, migration 087): o
+    destino {produto_destino_id, plano_slug, plano_padrao} para redirecionar links antigos, ou None."""
+    try:
+        return db.execute_query(
+            """SELECT r.produto_destino_id, pp.slug AS plano_slug, pp.padrao AS plano_padrao
+               FROM produtos_redirecionados r JOIN produto_planos pp ON pp.id = r.plano_id
+               WHERE r.produto_id = %s AND pp.ativo = 1""", (produto_id,), fetch_one=True)
+    except Error as e:
+        if getattr(e, 'errno', None) == 1146:  # migration 087 ainda não aplicada
+            return None
+        raise
+
+
+def listar_planos_com_app(app_slug=None, renovacao=None, so_venda_web=False, produto_id=None):
     """Planos ativos que têm um app como principal (com os dias do vínculo): vitrine de apps da
-    Estante, renovações do "Meu acesso", reconciliação de licenças. Ordem: preço."""
+    Estante, landing, renovações do "Meu acesso" (só do produto de origem). Ordem: preço."""
     sql = """SELECT pp.*, pe.dias, e.app_slug, p.nome AS produto_nome, p.ativo AS produto_ativo,
                     p.disponivel_web
              FROM produto_planos pp
@@ -1909,6 +1923,9 @@ def listar_planos_com_app(app_slug=None, renovacao=None, so_venda_web=False):
         params.append(1 if renovacao else 0)
     if so_venda_web:
         sql += " AND p.ativo = TRUE AND p.disponivel_web = TRUE"
+    if produto_id is not None:
+        sql += " AND pp.produto_id = %s"
+        params.append(produto_id)
     return db.execute_query(sql + " ORDER BY pp.preco_promocional, pp.produto_id, pp.ordem",
                             tuple(params), fetch_all=True) or []
 
@@ -2855,7 +2872,8 @@ def desativar_chave_pix_produto(chave_id: int):
     )
 
 
-def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str = 'todos', forma: str = 'todos') -> dict:
+def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str = 'todos', forma: str = 'todos',
+                             plano: str = 'todos') -> dict:
     """
     Retorna resumo e lista de transações do produto no período.
 
@@ -2867,7 +2885,14 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
     Leg 2: PIX com pedido — fluxo_inicial do pedido (suporta web e wpp com QR estático)
     Leg 3: Cartão aprovado (status_cielo=2) — sempre web
     Leg 4: Devoluções PIX — valor negativo, filtradas por horario_liquidacao
+
+    `plano_id` de cada linha: o plano do pedido; sem pedido (PIX do WhatsApp) ou pedido de antes da
+    migration 085, o plano padrão do produto; devolução, o do PIX devolvido. `plano` ('todos' ou um id)
+    filtra o resumo e a lista, como a origem.
     """
+    padrao = db.execute_query("SELECT id FROM produto_planos WHERE produto_id = %s AND padrao = 1",
+                              (produto_id,), fetch_one=True)
+    padrao_id = padrao['id'] if padrao else None
     transacoes = db.execute_query(
         """SELECT pp.horario, pp.valor, pp.chave_pix, pp.cpf_cnpj, pp.nome_pagador,
                   pp.txid, pp.e2e_id,
@@ -2875,7 +2900,8 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
                   ne.c_stat       AS nfe_c_stat,
                   ne.chave_acesso AS nfe_chave_acesso,
                   'wpp'           AS fluxo_inicial,
-                  'pix'           AS forma
+                  'pix'           AS forma,
+                  %s AS plano_id
            FROM pagamento_pix pp
            LEFT JOIN nfe_emitidas ne ON ne.id = pp.nfe_emitida_id
            WHERE pp.produto_id = %s AND pp.horario BETWEEN %s AND %s
@@ -2889,7 +2915,8 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
                   ne.c_stat       AS nfe_c_stat,
                   ne.chave_acesso AS nfe_chave_acesso,
                   ped.fluxo_inicial,
-                  'pix'           AS forma
+                  'pix'           AS forma,
+                  COALESCE(ped.plano_id, %s) AS plano_id
            FROM pagamento_pix pp
            JOIN pedidos ped ON ped.id = pp.pedido_id
            LEFT JOIN nfe_emitidas ne ON ne.id = pp.nfe_emitida_id
@@ -2908,7 +2935,8 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
                   NULL AS nfe_c_stat,
                   NULL AS nfe_chave_acesso,
                   ped.fluxo_inicial,
-                  'cartao' AS forma
+                  'cartao' AS forma,
+                  COALESCE(ped.plano_id, %s) AS plano_id
            FROM pagamento_cartao pc
            JOIN pedidos ped ON ped.id = pc.pedido_id AND ped.estado_id = 1000
            WHERE ped.produto_id = %s
@@ -2924,18 +2952,20 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
                   NULL AS nfe_c_stat,
                   NULL AS nfe_chave_acesso,
                   'devolucao' AS fluxo_inicial,
-                  'devolucao' AS forma
+                  'devolucao' AS forma,
+                  COALESCE(pdev.plano_id, %s) AS plano_id
            FROM devolucoes_pix dp
            LEFT JOIN pagamento_pix pp ON pp.id = dp.pagamento_pix_id
+           LEFT JOIN pedidos pdev ON pdev.id = pp.pedido_id
            WHERE dp.produto_id = %s
              AND dp.horario_liquidacao BETWEEN %s AND %s
 
            ORDER BY horario DESC""",
         (
-            produto_id, data_ini, data_fim,
-            produto_id, data_ini, data_fim,
-            produto_id, data_ini, data_fim,
-            produto_id, data_ini, data_fim,
+            padrao_id, produto_id, data_ini, data_fim,
+            padrao_id, produto_id, data_ini, data_fim,
+            padrao_id, produto_id, data_ini, data_fim,
+            padrao_id, produto_id, data_ini, data_fim,
         ),
         fetch_all=True,
     ) or []
@@ -2943,9 +2973,12 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
     # Resumo respeita apenas o filtro de origem (fluxo_inicial), não o de forma —
     # senão filtrar por forma='pix' zeraria as linhas de Cartão/Devolução do
     # próprio card que existe pra mostrar a quebra por forma.
+    # Contadores dos botões de origem/forma: só o plano escolhido (os do plano usam a lista inteira).
+    transacoes_plano = [t for t in transacoes if plano == 'todos' or str(t['plano_id']) == str(plano)]
     transacoes_origem = [
         t for t in transacoes
-        if fluxo_inicial == 'todos' or t['fluxo_inicial'] == fluxo_inicial
+        if (fluxo_inicial == 'todos' or t['fluxo_inicial'] == fluxo_inicial)
+        and (plano == 'todos' or str(t['plano_id']) == str(plano))
     ]
     total_pix        = float(sum(t['valor'] for t in transacoes_origem if t['forma'] == 'pix'))
     total_cartao     = float(sum(t['valor'] for t in transacoes_origem if t['forma'] == 'cartao'))
@@ -2966,6 +2999,7 @@ def busca_financeiro_produto(produto_id, data_ini, data_fim, fluxo_inicial: str 
             'total_devolucoes': total_devolucoes,
         },
         'transacoes':           transacoes,
+        'transacoes_plano':     transacoes_plano,
         'transacoes_filtradas': transacoes_filtradas,
     }
 
