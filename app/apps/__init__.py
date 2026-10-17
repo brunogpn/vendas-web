@@ -22,18 +22,28 @@ def app_config(slug: str) -> AppConfig | None:
     return APPS.get(slug)
 
 
-def apps_do_produto(produto_id) -> list[tuple[AppConfig, int]]:
-    """Apps (e dias) que a compra de um produto libera: produto do tipo app (tabela apps_produto,
-    cadastrada no admin em "E-books do produto")."""
-    try:
-        pid = int(produto_id)
-    except (TypeError, ValueError):
-        return []
-    from database import get_app_produto
-    linha = get_app_produto(pid)
-    if not linha or linha['app_slug'] not in APPS:
-        return []
-    return [(APPS[linha['app_slug']], int(linha['dias']))]
+def apps_do_pedido(pedido_id) -> list[tuple[AppConfig, int]]:
+    """Apps (e dias de acesso) que um pedido libera: os itens app gravados no pedido (pedido_itens.app_slug,
+    vindos do plano comprado) com os dias do item no plano (plano_entregaveis.dias). O mesmo app duas vezes
+    no pedido conta uma vez, com o maior prazo. App que não está em APPS (desligado) fica de fora.
+
+    Item app sem o item do plano (ebook_produto_id NULL — gravado pelo código antigo na janela do deploy da
+    migration 085) usa os dias do app no plano padrão do produto: a licença não pode depender da hora do deploy."""
+    from database import db
+    linhas = db.execute_query(
+        """SELECT pi.app_slug,
+                  MAX(COALESCE(pe.dias, (
+                      SELECT MAX(pe2.dias) FROM plano_entregaveis pe2
+                      JOIN produto_planos pp2 ON pp2.id = pe2.plano_id AND pp2.padrao = 1
+                      JOIN entregaveis e2 ON e2.id = pe2.entregavel_id AND e2.tipo = 'app' AND e2.app_slug = pi.app_slug
+                      WHERE pe2.produto_id = p.produto_id))) AS dias
+           FROM pedido_itens pi
+           JOIN pedidos p ON p.id = pi.pedido_id
+           LEFT JOIN plano_entregaveis pe ON pe.id = pi.ebook_produto_id
+           WHERE pi.pedido_id = %s AND pi.app_slug IS NOT NULL
+           GROUP BY pi.app_slug""",
+        (pedido_id,), fetch_all=True) or []
+    return [(APPS[l['app_slug']], int(l['dias'])) for l in linhas if l['app_slug'] in APPS and l['dias']]
 
 
 def registrar(flask_app):

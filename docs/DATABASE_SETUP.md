@@ -70,7 +70,8 @@ A tabela `produtos` agora suporta campos de personalização por produto:
 - `url_imagem_complementar` (card do portfólio)
 
 Mensagens, áudios e arquivos de cada etapa do WhatsApp ficam em `acoes_fluxo_produto` (fluxos
-dinâmicos); o que é entregue (e-books, bônus, bumps) fica no catálogo (`ebooks` + `ebooks_produto`).
+dinâmicos); o que o site vende fica nos planos do produto (`produto_planos`) e o que cada plano entrega
+(e-books, apps, bônus, bumps) em `plano_entregaveis` + o catálogo `entregaveis` — ver `docs/PLANOS.md`.
 
 Esses campos permitem deixar os fluxos responsivos para diferentes produtos sem hardcode no Python.
 

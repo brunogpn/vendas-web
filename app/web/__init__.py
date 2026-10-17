@@ -8,27 +8,40 @@ def guia_paes():
     return render_template('guia-paes-sem-gluten.html')
 
 
-def _oferta_do_link(produto_id, ebook_principal):
+def _plano_da_pagina(produto_id):
+    """O plano que esta página vende: ?plano=<slug> ou, sem ele, o padrão do produto (None = não está à
+    venda: plano inexistente, inativo ou sem item principal)."""
+    from database import get_plano_venda
+    return get_plano_venda(produto_id, request.args.get('plano') or None)
+
+
+def _oferta_do_link(produto_id, plano):
     """(token, desconto) do link de oferta (?oferta=, popup/Estante — ver web/oferta.py), ou (None, 0).
     O desconto aqui é só para MOSTRAR no checkout; quem aplica no valor cobrado é gerar_pix/gerar_cartao,
     que validam o token de novo."""
     from web.oferta import desconto_da_oferta
-    from database import preco_cobrado_principal
+    from database import preco_cobrado_plano
     token = request.args.get('oferta') or None
     if not token:
         return None, 0.0
-    desconto = desconto_da_oferta(token, produto_id, preco_cobrado_principal(produto_id, ebook_principal))
+    desconto = desconto_da_oferta(token, plano, preco_cobrado_plano(produto_id, plano))
     return (token, desconto) if desconto > 0 else (None, 0.0)
 
 
-def _retomar_sem_perder_oferta(pedido_id, oferta):
+def _retomar_sem_perder_oferta(pedido_id, oferta, plano):
     """O cookie aponta para um pedido já iniciado deste produto; retomar reabre o PIX/cartão dele.
-    Se a cliente chegou agora por uma OFERTA (popup/Estante) e aquele pedido não tem desconto (e não
-    foi pago), não retoma — segue para um pedido novo, com o desconto."""
-    if pedido_id is None or not oferta:
-        return pedido_id
+    Não retoma (segue para um pedido novo) quando aquele pedido é de OUTRO plano (ex.: comprou o Básico
+    e agora abriu o Completo), ou quando a cliente chegou agora por uma OFERTA (popup/Estante) e aquele
+    pedido não tem desconto (e não foi pago)."""
+    if pedido_id is None:
+        return None
     from database import get_pedido
+    from web.checkout import pedido_do_plano
     pedido = get_pedido(pedido_id) or {}
+    if not pedido or not pedido_do_plano(pedido, plano):
+        return None
+    if not oferta:
+        return pedido_id
     # Só abandona pedido sem cobrança em andamento: 1001 (só identidade), 1002 (PIX gerado e não pago —
     # o novo leva o desconto), 1006/1007 (cartão negado / não processado). Nunca 1005 (autorização de
     # cartão em curso ou em timeout: pode já ter sido cobrado) nem 1000 (pago).
@@ -39,37 +52,33 @@ def _retomar_sem_perder_oferta(pedido_id, oferta):
 
 @web_bp.get('/pay/<int:produto_id>')
 def checkout(produto_id):
-    from database import (get_produto_disponivel_web, get_ebook_principal_produto,
-                          listar_ebooks_bonus_produto, listar_ebooks_bump_produto,
-                          get_config_cartao_produto)
+    from database import get_produto_disponivel_web, itens_do_plano, get_config_cartao_produto
     from web.checkout import (rastrear_visita_funil, get_pedido_finalizado_via_cookie,
                                COOKIE_MAX_AGE_FUNIL)
     produto = get_produto_disponivel_web(produto_id)
     if not produto:
         return 'Produto não encontrado', 404
 
-    ebook_principal = get_ebook_principal_produto(produto_id)
-    if not ebook_principal:
+    plano = _plano_da_pagina(produto_id)
+    if not plano:
         return 'Produto não encontrado', 404
 
     config_cartao = get_config_cartao_produto(produto_id)  # None = aba Cartão não aparece
-    oferta, desconto = _oferta_do_link(produto_id, ebook_principal)
+    oferta, desconto = _oferta_do_link(produto_id, plano)
 
     # Retorno do BB Pay / link salvo (?pedido=) é um caso à parte, já tratado no JS da própria
     # página (resume o pedido existente) — não faz sentido criar/reaproveitar um pedido 1003
     # novo nesse caso.
     pedido_id_inicial = None
     if not request.args.get('pedido'):
-        pedido_id_retomar = _retomar_sem_perder_oferta(get_pedido_finalizado_via_cookie(request, produto_id), oferta)
+        pedido_id_retomar = _retomar_sem_perder_oferta(get_pedido_finalizado_via_cookie(request, produto_id), oferta, plano)
         if pedido_id_retomar is not None:
             # Cliente já saiu de 1003/1004 nessa visita (pago, aguardando identidade, ou
             # aguardando pix) — reaproveita o fluxo já existente do link de retorno do BB Pay
             # (?pedido=<id>) em vez de duplicar em Python a lógica pago→downloads /
             # pendente→retomar pix, que o JS de checkout.html já sabe fazer.
-            url_retomar = f'/pay/{produto_id}?pedido={pedido_id_retomar}'
-            if oferta:
-                url_retomar += f'&oferta={oferta}'
-            resp = redirect(url_retomar)
+            from web.links import link_checkout
+            resp = redirect(link_checkout(produto_id, plano, pedido=pedido_id_retomar, oferta=oferta))
             resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
         pedido_id_inicial = rastrear_visita_funil(request, produto_id, estado_novo=1003)
@@ -77,9 +86,9 @@ def checkout(produto_id):
     resp = make_response(render_template(
         'checkout.html',
         produto=produto,
-        ebook_principal=ebook_principal,
-        bonus=listar_ebooks_bonus_produto(produto_id),
-        bumps=listar_ebooks_bump_produto(produto_id),
+        plano=plano,
+        bonus=itens_do_plano(plano, 'bonus'),
+        bumps=itens_do_plano(plano, 'bump'),
         pedido_id_inicial=pedido_id_inicial,
         config_cartao=config_cartao,
         oferta=oferta,
@@ -102,9 +111,7 @@ def checkout_v2(produto_id):
     completos como no checkout v1 — não tem como filtrar o que não se sabe de quem é. Usa um
     prefixo de cookie próprio (pedido_web_v2_<produto_id>) pra não colidir com o rascunho do
     checkout v1 do mesmo produto."""
-    from urllib.parse import quote
-    from database import (get_produto_disponivel_web, get_ebook_principal_produto,
-                          listar_ebooks_bonus_produto, listar_ebooks_bump_produto,
+    from database import (get_produto_disponivel_web, itens_do_plano,
                           get_config_cartao_produto, marcar_variante_pedido,
                           gravar_vinculo_pedido)
     from web.checkout import (rastrear_visita_funil, get_pedido_finalizado_via_cookie,
@@ -114,16 +121,16 @@ def checkout_v2(produto_id):
     if not produto:
         return 'Produto não encontrado', 404
 
-    ebook_principal = get_ebook_principal_produto(produto_id)
-    if not ebook_principal:
+    plano = _plano_da_pagina(produto_id)
+    if not plano:
         return 'Produto não encontrado', 404
 
     config_cartao = get_config_cartao_produto(produto_id)
-    oferta, desconto = _oferta_do_link(produto_id, ebook_principal)
+    oferta, desconto = _oferta_do_link(produto_id, plano)
 
     prefill = {}
-    bonus = listar_ebooks_bonus_produto(produto_id)
-    bumps = listar_ebooks_bump_produto(produto_id)
+    bonus = itens_do_plano(plano, 'bonus')
+    bumps = itens_do_plano(plano, 'bump')
     pedido_origem_id = None
     ref_guid = request.args.get('ref')
     if ref_guid:
@@ -144,24 +151,21 @@ def checkout_v2(produto_id):
             # not item.get('bloqueado'): um bônus do WhatsApp ainda não pago não conta como
             # "já possuído" — senão um item legítimo de bônus/bump em outro produto some do
             # cross-sell por engano (ver achado de code review).
-            ebook_ids_possuidos = {
-                item['ebook_id'] for item in itens_possuidos
-                if item.get('ebook_id') and not item.get('bloqueado')
+            possuidos = {
+                item['entregavel_id'] for item in itens_possuidos
+                if item.get('entregavel_id') and not item.get('bloqueado')
             }
-            bonus = [b for b in bonus if b['ebook_id'] not in ebook_ids_possuidos]
-            bumps = [b for b in bumps if b['ebook_id'] not in ebook_ids_possuidos]
+            bonus = [b for b in bonus if b['entregavel_id'] not in possuidos]
+            bumps = [b for b in bumps if b['entregavel_id'] not in possuidos]
 
     pedido_id_inicial = None
     if not request.args.get('pedido'):
         pedido_id_retomar = _retomar_sem_perder_oferta(
-            get_pedido_finalizado_via_cookie(request, produto_id, cookie_prefixo='pedido_web_v2'), oferta)
+            get_pedido_finalizado_via_cookie(request, produto_id, cookie_prefixo='pedido_web_v2'), oferta, plano)
         if pedido_id_retomar is not None:
-            url_retomar = f'/pay2/{produto_id}?pedido={pedido_id_retomar}'
-            if ref_guid:
-                url_retomar += f'&ref={quote(ref_guid)}'
-            if oferta:
-                url_retomar += f'&oferta={oferta}'
-            resp = redirect(url_retomar)
+            from web.links import link_checkout
+            resp = redirect(link_checkout(produto_id, plano, v2=True, pedido=pedido_id_retomar, ref=ref_guid,
+                                          oferta=oferta))
             resp.set_cookie(f'pedido_web_v2_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
         pedido_id_inicial = rastrear_visita_funil(request, produto_id, estado_novo=1003, cookie_prefixo='pedido_web_v2')
@@ -178,7 +182,7 @@ def checkout_v2(produto_id):
     resp = make_response(render_template(
         'checkout-2.html',
         produto=produto,
-        ebook_principal=ebook_principal,
+        plano=plano,
         bonus=bonus,
         bumps=bumps,
         pedido_id_inicial=pedido_id_inicial,
@@ -361,16 +365,15 @@ def pedido_publico_v2(guid):
     # not item.get('bloqueado'): um bônus do WhatsApp ainda não pago não conta como "já
     # possuído" pro cross-sell — senão um produto legítimo some da lista por engano (ver
     # mesma correção em checkout_v2).
-    ebook_ids_possuidos = {
-        item['ebook_id'] for item in itens
-        if item.get('ebook_id') and not item.get('bloqueado')
+    possuidos = {
+        item['entregavel_id'] for item in itens
+        if item.get('entregavel_id') and not item.get('bloqueado')
     }
-    cross_sell = listar_produtos_cross_sell_cliente(ebook_ids_possuidos)
-    # Desconto de oferta (migration 083) também nos e-books do cross-sell: preço com desconto + token no link.
+    cross_sell = listar_produtos_cross_sell_cliente(possuidos)
+    # Desconto de oferta do plano também nos e-books do cross-sell: preço com desconto + token no link.
     try:
-        from web.oferta import aplicar_na_vitrine, descontos_dos_produtos
-        descontos = descontos_dos_produtos(c['produto_id'] for c in cross_sell)
-        cross_sell = [aplicar_na_vitrine(dict(c), descontos) for c in cross_sell]
+        from web.oferta import aplicar_na_vitrine
+        cross_sell = [aplicar_na_vitrine(dict(c)) for c in cross_sell]
     except Exception as e:
         import logging
         logging.getLogger(__name__).error(f"[ESTANTE] Erro ao aplicar ofertas no cross-sell: {e}")
@@ -391,6 +394,12 @@ def pedido_publico_v2(guid):
         import logging
         logging.getLogger(__name__).error(f"[ESTANTE] Erro ao listar apps do pedido #{pedido['id']}: {e}")
         meus_apps = []
+
+    # Link de cada card (e-book ou app): o checkout v2 do plano, com a Estante de origem e o token da oferta.
+    from web.links import link_checkout
+    for c in cross_sell:
+        c['href'] = link_checkout(c['produto_id'], {'slug': c['plano_slug'], 'padrao': c['plano_padrao']},
+                                  v2=True, ref=guid, oferta=c.get('oferta'))
 
     return render_template('pedido-2.html', primeiro_nome=primeiro_nome, itens=itens,
                             cross_sell=cross_sell, guid=guid, meus_apps=meus_apps)

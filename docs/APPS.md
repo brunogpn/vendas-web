@@ -6,7 +6,7 @@ Next.js), que serviu de especificação. Regras e telas do Fatia: [APP_FATIA_ESP
 
 ## Como funciona para a cliente
 
-1. Compra no nosso checkout um produto que dá o app (ex.: Plano Guiado).
+1. Compra no nosso checkout um plano que tem o app (ex.: Fatias que Vendem — Completo).
 2. O pagamento é confirmado → a licença é liberada (dias somados) → o e-mail de entrega leva o botão
    **"Abrir meu App Fatias"**, e a Estante 2 ganha a seção **"Meus apps"**.
 3. O botão entra no app **já logada** (link de uso único). Depois, ela entra com o e-mail e um
@@ -19,7 +19,7 @@ Next.js), que serviu de especificação. Regras e telas do Fatia: [APP_FATIA_ESP
 
 ```
 app/apps/
-  __init__.py          lista de apps ativos (_MODULOS), APPS, apps_do_produto(), registrar(flask)
+  __init__.py          lista de apps ativos (_MODULOS), APPS, apps_do_pedido(), registrar(flask)
   _nucleo/             comum a todo app
     config_base.py     AppConfig (configuração em arquivo, por decisão: só vai p/ banco se validar)
     licenca.py         clientes (e-mail), licenças, liberar_licencas_do_pedido, reconciliar, ajustes do admin
@@ -47,40 +47,41 @@ migrations/080_apps_nucleo.sql, 081_app_fatia.sql
 - **PWA:** `manifest.webmanifest` e `sw.js` são rotas Flask dentro de `/app/<slug>/` (em `/static`
   o escopo do service worker ficaria errado). O SW só permite instalar; não há modo offline.
 
-## Venda e liberação: o app é um produto
+## Venda e liberação: o app é um item de plano
 
-- **Produto do tipo app** (migration 082, tabela `apps_produto`): no admin, em *Produto → E-books do
-  produto → "Tipo do produto"*, escolha o app, os dias, o nome de venda, os preços e a imagem. Sem
-  linha em `apps_produto` o produto é de e-book (o padrão). Um produto é um OU outro.
-- O app é o **principal**; os e-books (ex.: os do Fatia) entram como **bônus/order bump** normais.
-  `get_ebook_principal_produto` devolve o app no lugar do e-book, então checkout (`/pay`, `/pay2`),
-  PIX/cartão, `pedido_itens` (item principal com `app_slug` e sem arquivo) e NF-e seguem o mesmo caminho.
-- **Ofertas:** cada combinação é um produto (Plano Guiado R$ 22, desconto R$ 15, só o app…).
-  `renovacao = 1` marca as ofertas de renovação: aparecem em "Meu acesso" dentro do app; as demais
-  aparecem no cross-sell da Estante 2 para quem ainda não tem o app (um card por app, o mais barato).
-- **Depois do pagamento:** o checkout leva direto para o app, já logada (`/pedido2/<guid>/abrir-app/<slug>`);
-  produto de e-book continua indo para a Estante.
-- **Renovação = pedido novo** (pagamento e NF-e próprios). Renovou antes de vencer → os dias somam a
-  partir do vencimento atual; depois → a partir de hoje. O progresso no app é da cliente, não do pedido.
-- Ponto único de liberação: início de `tasks.enviar_email_entrega` (todo pagamento web passa por lá).
+O app é vendido como **item de um plano** do produto (ex.: plano Completo do Fatia = App Fatias + e-book +
+bônus). Modelo, regras e admin: **[PLANOS.md](PLANOS.md)**. O que é específico do app:
+
+- **Catálogo:** um entregável `tipo = 'app'` por app (`app_slug` = pasta em `app/apps/`). Os **dias** de
+  acesso ficam no item do plano (`plano_entregaveis.dias`): o mesmo app pode dar 90 dias no Completo e
+  365 numa renovação anual.
+- **Liberação:** pelos itens app do pedido (`apps.apps_do_pedido`), nunca pelo produto — Básico não libera,
+  Completo libera. Ponto único: início de `tasks.enviar_email_entrega` (todo pagamento web passa por lá).
   Idempotente pela PK `(pedido_id, app_slug)` de `apps_licenca_pedidos`. Redes de segurança: a rota
-  "abrir app" também libera; `tasks.apps_reconciliar_licencas` (de hora em hora, :47) pega o que faltou.
-- **Só no site:** produto de app não deve ser vendido pelo WhatsApp (lá entrega antes de cobrar).
-- **Landing do Fatia** (`/fatia-e`): se houver produto de app do Fatia à venda (e não renovação), a
-  página mostra Básico + Plano Guiado (o mais caro); se o Guiado tiver desconto de oferta cadastrado,
-  o clique no Básico abre o popup com o Guiado por esse preço (ver "Desconto de oferta"). Sem nenhum
-  app, fica só o Básico, como antes.
+  "abrir app" também libera; `tasks.apps_reconciliar_licencas` (de hora em hora, :47) pega pedido pago com
+  item app que ainda não liberou.
+- **Depois do pagamento:** plano com app leva direto para o app, já logada
+  (`/pedido2/<guid>/abrir-app/<slug>`); os outros continuam indo para a Estante.
+- **Renovação = plano com `renovacao = 1`** (fora da vitrine): aparece em "Meu acesso" dentro do app. É um
+  pedido novo (pagamento e NF-e próprios). Renovou antes de vencer → os dias somam a partir do vencimento
+  atual; depois → a partir de hoje. O progresso no app é da cliente, não do pedido.
+- **Só no site:** o plano padrão (o do WhatsApp, que entrega antes de cobrar) de produto com número de
+  WhatsApp não pode ter app — o admin recusa.
+- **Estante 2:** quem não tem o app vê um card dele no cross-sell (o plano com app mais caro, de preferência
+  do mesmo produto do pedido); quem tem vê em "Meus apps".
+- **Landing do Fatia** (`/fatia-e`): Básico = plano padrão do 12; Guiado = o plano com o App Fatias à venda
+  (de vitrine, não renovação, de preferência do produto 12). Se ele tiver desconto de oferta, o clique no
+  Básico abre o popup com o Guiado por esse preço. Sem plano com app, fica só o Básico.
 
 ### Desconto de oferta (popup do Básico e Estante 2)
 
-Migration 083. O desconto fica no produto (`produtos.desconto_oferta`, admin → E-books do produto →
-"Desconto de oferta"; vale para app e e-book). Quem mostra a oferta gera um link com **token assinado**
-(`?oferta=`, `app/web/oferta.py`, vale 24 h e só para aquele produto): o popup "última tentativa" ao
-clicar no Básico do `/fatia-e` (aparece quando o Plano Guiado tem desconto) e o card do app no
-cross-sell da Estante 2. `gerar_pix`/`gerar_cartao` validam o token e buscam o desconto no banco — sem
+O desconto fica no **plano** (`produto_planos.desconto_oferta`, admin → Planos e entregáveis → Editar plano).
+Quem mostra a oferta gera um link com **token assinado** (`?oferta=`, `app/web/oferta.py`, vale 24 h e só
+para aquele produto e plano): o popup "última tentativa" ao clicar no Básico do `/fatia-e` e o card do app
+no cross-sell da Estante 2. `gerar_pix`/`gerar_cartao` validam o token e buscam o desconto no banco — sem
 token, preço cheio. O checkout mostra "🎁 Desconto especial −R$ X" e o selo "Oferta aplicada"; o pedido
 grava `pedidos.desconto` e o item principal já com desconto. NF-e, ROI e conversão do Ads usam o valor
-pago, então já saem certos. O quiz registra as etapas 18 (viu o popup) e 19 (aceitou) no Analytics Web.
+pago. O quiz registra as etapas 18 (viu o popup) e 19/20 (recusou/aceitou) no Analytics Web.
 
 ### Piloto (antes de lançar)
 
@@ -89,15 +90,14 @@ continua só com o Básico e a Estante não oferece o app; os dois planos aparec
 **`/fatia-e-piloto`** (fora do funil e dos buscadores) para homologação. Quem compra no piloto usa
 tudo normalmente (e-mail, "Meus apps", app). Para lançar: `publico=True` e deploy.
 
-### Checklist ao criar um produto de app em produção
+### Checklist ao vender um app num produto
 
-1. Criar o produto (pode clonar o 12) e marcar *disponível web* quando estiver pronto.
-2. *E-books do produto*: remover o e-book principal (se clonou) → "Tornar este produto um app" → vincular
-   os e-books como bônus/bump.
-3. **Chave PIX de venda web** e **planilhas do Google Ads** (por domínio) — a clonagem NÃO copia; a tela
-   do produto de app mostra um aviso vermelho enquanto faltarem. Sem planilha, a venda não vira conversão.
-4. Valor da conversão: `fluxo_upload_google_ads.py` ainda manda valor fixo (20 para o produto 12, 10 para
-   os demais) — decidir se o app usa o valor real.
+1. Catálogo de entregáveis: o app já existe? (o App Fatias sim). Senão, cadastrar `tipo = app`.
+2. Produto → Planos e entregáveis: criar o plano (ex.: `completo`), "Copiar itens" do Básico e incluir o
+   app como principal com os dias. Desconto de oferta, se houver popup/Estante.
+3. **Chave PIX de venda web** e **planilhas do Google Ads** (por domínio) do produto — a tela de planos
+   avisa em vermelho enquanto faltarem. Sem planilha, a venda não vira conversão.
+4. Landing: link do botão para `/pay/<produto>?plano=<slug>` (no Fatia, `_planos_app_fatia` monta sozinho).
 
 ## Domínio
 

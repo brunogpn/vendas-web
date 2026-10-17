@@ -12,7 +12,7 @@ import datetime
 import logging
 
 from database import db
-from apps import APPS, apps_do_produto
+from apps import APPS, apps_do_pedido
 from apps._nucleo import datas
 
 logger = logging.getLogger(__name__)
@@ -133,7 +133,7 @@ def _somar_dias(cursor, cliente_id: int, slug: str, dias: int):
 
 
 def liberar_licencas_do_pedido(pedido_id: int) -> list[dict]:
-    """Libera (ou soma dias) os apps que o produto do pedido dá. Idempotente.
+    """Libera (ou soma dias) os apps que o pedido comprou (itens app do plano — ver apps_do_pedido). Idempotente.
 
     Chamada no início da entrega por e-mail (tasks.enviar_email_entrega) — por onde passam todos os
     caminhos que confirmam pagamento web — e de novo na rota "abrir app" da Estante, para não
@@ -144,7 +144,7 @@ def liberar_licencas_do_pedido(pedido_id: int) -> list[dict]:
         (pedido_id,), fetch_one=True)
     if not pedido or pedido['estado_id'] != ESTADO_PAGO_WEB:
         return []
-    apps = apps_do_produto(pedido['produto_id'])
+    apps = apps_do_pedido(pedido_id)
     if not apps:
         return []
     email = normalizar_email(pedido.get('email'))
@@ -197,18 +197,13 @@ def pedido_criou_a_conta(cliente_id: int, pedido_id: int, slug: str) -> bool:
 
 
 def reconciliar_licencas(dias: int = 7) -> int:
-    """Rede de segurança (Celery, de hora em hora): pedidos pagos nos últimos `dias` de um produto
-    que libera app e que ainda não liberaram. Devolve quantas licenças liberou."""
-    from database import listar_apps_produto
-    produtos = sorted({l['produto_id'] for l in listar_apps_produto() if l['app_slug'] in APPS})
-    if not produtos:
-        return 0
-    marcas = ', '.join(['%s'] * len(produtos))
+    """Rede de segurança (Celery, de hora em hora): pedidos pagos nos últimos `dias` com item app que
+    ainda não liberaram. Devolve quantas licenças liberou."""
     pendentes = db.execute_query(
-        f"SELECT p.id FROM pedidos p WHERE p.produto_id IN ({marcas}) AND p.estado_id = 1000 "
-        "AND p.data_pagamento >= DATE_SUB(NOW(), INTERVAL %s DAY) "
+        "SELECT DISTINCT p.id FROM pedidos p JOIN pedido_itens pi ON pi.pedido_id = p.id AND pi.app_slug IS NOT NULL "
+        "WHERE p.estado_id = 1000 AND p.data_pagamento >= DATE_SUB(NOW(), INTERVAL %s DAY) "
         "AND NOT EXISTS (SELECT 1 FROM apps_licenca_pedidos lp WHERE lp.pedido_id = p.id)",
-        (*produtos, dias), fetch_all=True) or []
+        (dias,), fetch_all=True) or []
     total = 0
     for linha in pendentes:
         try:

@@ -352,9 +352,9 @@
   <div class="panel">
     <div class="step">Seu próximo passo</div>
     <h2>Aprenda a fazer suas fatias e dar os primeiros passos nas vendas.</h2>
-    {# Com produto do tipo app do Fatia à venda (admin → E-books do produto → tipo app): dois planos
-       (Básico + Guiado) e, se houver um segundo produto de app mais barato, o popup de desconto ao
-       clicar no Básico (como na v8). Sem nenhum: só o plano Básico, como antes. #}
+    {# Com um plano com o App Fatias à venda (admin → Planos e entregáveis): dois planos (Básico +
+       Guiado) e, se o Guiado tem desconto de oferta, o popup ao clicar no Básico. Sem nenhum: só o
+       plano Básico, como antes. #}
     {% if guiado %}
     <div class="plans">
       <div class="plan">
@@ -383,7 +383,7 @@
           <li>Controle das vendas</li>
           <li>{{ guiado.dias }} dias de acesso ao app</li>
         </ul>
-        <a class="cta" id="checkoutGuided" href="/pay/{{ guiado.produto_id }}">QUERO O PLANO GUIADO →</a>
+        <a class="cta" id="checkoutGuided" href="{{ guiado.href }}">QUERO O PLANO GUIADO →</a>
       </div>
     </div>
     {% else %}
@@ -659,7 +659,7 @@ track(0,"Abriu a página");
         <div class="upsell-save">economize {{ desconto.economia|brl }}</div>
       </div>
       {% if desconto.preco_promocional > preco_basico %}<div class="upsell-mini">Por apenas {{ (desconto.preco_promocional - preco_basico)|brl }} a mais que o Básico, você já leva a versão guiada.</div>{% endif %}
-      <a class="upsell-btn" id="checkoutGuidedDiscount" href="/pay/{{ desconto.produto_id }}?oferta={{ desconto.oferta }}">🎁 Sim, quero o Plano Guiado por {{ desconto.preco_promocional|brl }}</a>
+      <a class="upsell-btn" id="checkoutGuidedDiscount" href="{{ desconto.href }}">🎁 Sim, quero o Plano Guiado por {{ desconto.preco_promocional|brl }}</a>
     </div>
     <button class="upsell-link" type="button" id="upsellSoBasico">Não, quero só o plano básico</button>
   </div>

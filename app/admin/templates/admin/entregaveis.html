@@ -1,43 +1,45 @@
 {% extends "admin/base.html" %}
-{% block title %}Catálogo de E-books{% endblock %}
+{% block title %}Catálogo de entregáveis{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">Catálogo de E-books</h1>
-        <p class="page-subtitle">Cadastre cada e-book uma única vez aqui e vincule ao produto (principal, bônus ou order bump)</p>
+        <h1 class="page-title">Catálogo de entregáveis</h1>
+        <p class="page-subtitle">Cadastre cada e-book ou app uma única vez aqui e inclua nos planos dos produtos (em "Planos e entregáveis")</p>
     </div>
 </div>
 
 <div class="card">
-    {% if ebooks %}
+    {% if entregaveis %}
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
+                    <th>Tipo</th>
                     <th>Nome de venda</th>
-                    <th>Arquivo</th>
+                    <th>Arquivo / app</th>
                     <th>Imagens</th>
                     <th>Descrição</th>
                     {% if current_user.is_admin() %}<th></th>{% endif %}
                 </tr>
             </thead>
             <tbody>
-                {% for e in ebooks %}
+                {% for e in entregaveis %}
                 <tr>
+                    <td style="font-size: 13px;">{{ '📱 App' if e.tipo == 'app' else '📖 E-book' }}</td>
                     <td style="font-size: 14px;">{{ e.nome_venda }}</td>
-                    <td style="font-family: var(--mono); font-size: 13px; color: var(--muted);">{{ e.path_arquivo }}</td>
+                    <td style="font-family: var(--mono); font-size: 13px; color: var(--muted);">{{ e.app_slug if e.tipo == 'app' else e.path_arquivo }}</td>
                     <td style="font-family: var(--mono); font-size: 12px; color: var(--muted);">
                         {{ e.imagem_grande or '—' }} / {{ e.imagem_pequena or '—' }}
                     </td>
                     <td style="font-size: 13px; color: var(--muted);">{{ e.descricao or '' }}</td>
                     {% if current_user.is_admin() %}
                     <td style="text-align: right; white-space: nowrap;">
-                        <a href="{{ url_for('admin.editar_ebook', ebook_id=e.id) }}"
+                        <a href="{{ url_for('admin.editar_entregavel', entregavel_id=e.id) }}"
                            class="btn btn-ghost btn-sm">Editar</a>
                         <form method="POST" style="display: inline;"
-                              action="{{ url_for('admin.remover_ebook_view', ebook_id=e.id) }}"
-                              onsubmit="return confirm('Remover este e-book do catálogo? Só funciona se ele não estiver vinculado a nenhum produto.')">
+                              action="{{ url_for('admin.remover_entregavel_view', entregavel_id=e.id) }}"
+                              onsubmit="return confirm('Remover este item do catálogo? Só funciona se ele não estiver em nenhum plano.')">
                             <button type="submit" class="btn btn-danger btn-sm">Remover</button>
                         </form>
                     </td>
@@ -49,7 +51,7 @@
     </div>
     {% else %}
     <p style="color: var(--muted); font-size: 14px; padding: 8px 0 20px;">
-        Nenhum e-book cadastrado ainda.
+        Nenhum item cadastrado ainda.
     </p>
     {% endif %}
 
@@ -57,18 +59,32 @@
     <div style="margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);">
         <p style="font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
                   color: var(--muted); font-family: var(--mono); margin-bottom: 12px;">
-            Adicionar e-book
+            Adicionar ao catálogo
         </p>
-        <form method="POST" action="{{ url_for('admin.adicionar_ebook_view') }}" class="form-grid">
+        <form method="POST" action="{{ url_for('admin.adicionar_entregavel_view') }}" class="form-grid" id="formEntregavel">
+            <div class="form-group">
+                <label for="tipo">Tipo</label>
+                <select id="tipo" name="tipo">
+                    <option value="ebook">📖 E-book (arquivo PDF)</option>
+                    <option value="app">📱 App (acesso por dias)</option>
+                </select>
+            </div>
+            <div class="form-group so-app">
+                <label for="app_slug">App</label>
+                <select id="app_slug" name="app_slug">
+                    {% for slug, cfg in apps.items() %}<option value="{{ slug }}">{{ cfg.nome }}</option>{% endfor %}
+                </select>
+                <small class="form-text text-muted">Os dias de acesso ficam no item de cada plano (ex.: 90 no Completo, 365 na renovação anual).</small>
+            </div>
             <div class="form-group">
                 <label for="nome_venda">Nome de venda</label>
                 <input type="text" id="nome_venda" name="nome_venda"
                        placeholder="ex: Guia Completo das Orquídeas"
                        maxlength="255" required autocomplete="off">
             </div>
-            <div class="form-group">
+            <div class="form-group so-ebook">
                 <label for="path_arquivo">Arquivo (já enviado em /admin/arquivos)</label>
-                <select id="path_arquivo" name="path_arquivo" required>
+                <select id="path_arquivo" name="path_arquivo">
                     <option value="">— selecione —</option>
                     {% for pdf in pdfs %}
                     <option value="{{ pdf.nome }}">{{ pdf.nome }} ({{ pdf.tamanho_fmt }})</option>
@@ -76,14 +92,14 @@
                 </select>
                 <small class="form-text text-muted">Não achou o arquivo? Suba primeiro em <a href="{{ url_for('admin.listar_arquivos') }}">Arquivos</a>.</small>
             </div>
-            <div class="form-group">
+            <div class="form-group so-ebook">
                 <label for="nome_arquivo">Nome do arquivo no download (opcional)</label>
                 <input type="text" id="nome_arquivo" name="nome_arquivo"
                        placeholder="se vazio, usa o mesmo nome do arquivo selecionado"
                        maxlength="255" autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="imagem_grande">Imagem grande (usada quando é o principal)</label>
+                <label for="imagem_grande">Imagem grande (opcional)</label>
                 <select id="imagem_grande" name="imagem_grande">
                     <option value="">— nenhuma —</option>
                     {% for img in imagens %}
@@ -92,7 +108,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="imagem_pequena">Imagem pequena (usada quando é bônus/order bump)</label>
+                <label for="imagem_pequena">Imagem pequena (bônus/order bump no checkout)</label>
                 <select id="imagem_pequena" name="imagem_pequena">
                     <option value="">— nenhuma —</option>
                     {% for img in imagens %}
@@ -114,4 +130,18 @@
     </div>
     {% endif %}
 </div>
+<script>
+(function () {
+    var form = document.getElementById('formEntregavel');
+    if (!form) return;
+    var tipo = form.querySelector('#tipo');
+    function atualizar() {
+        var app = tipo.value === 'app';
+        form.querySelectorAll('.so-app').forEach(function (el) { el.style.display = app ? '' : 'none'; });
+        form.querySelectorAll('.so-ebook').forEach(function (el) { el.style.display = app ? 'none' : ''; });
+    }
+    tipo.addEventListener('change', atualizar);
+    atualizar();
+})();
+</script>
 {% endblock %}

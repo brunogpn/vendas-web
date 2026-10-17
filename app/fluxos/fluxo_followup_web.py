@@ -81,7 +81,10 @@ def _enviar_followup(pedido: dict) -> None:
     )
 
     base_url = os.getenv('APP_BASE_URL', '').rstrip('/')
-    link_pagamento = pedido.get('url_bbpay') or f"{base_url}/pay/{produto_id}?pedido={pedido_id}"
+    # O link reabre o pedido no plano dele (Completo reaberto como Básico viraria um pedido novo do Básico).
+    from web.links import link_checkout
+    plano = db.get_plano(pedido['plano_id']) if pedido.get('plano_id') else None
+    link_pagamento = pedido.get('url_bbpay') or f"{base_url}{link_checkout(produto_id, plano, pedido=pedido_id)}"
 
     subject = f'🎁 {nome_cliente}, seu {nome_produto} ainda está te esperando!'
 

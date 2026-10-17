@@ -1,10 +1,10 @@
-"""Desconto de oferta (migration 083): o popup "última tentativa" da landing e o cross-sell da
-Estante 2 oferecem um produto com desconto.
+"""Desconto de oferta: o popup "última tentativa" da landing e o cross-sell da Estante 2 oferecem um
+plano com desconto.
 
-O desconto fica cadastrado no produto (`produtos.desconto_oferta`); quem mostra a oferta gera um
-**token assinado** para o link (`?oferta=<token>`), ligado ao produto e com validade. O checkout
-repassa o token e o backend (gerar_pix / gerar_cartao) valida e busca o desconto no banco — nunca
-um valor vindo do navegador. Sem token válido, o preço é o cheio (padrão).
+O desconto fica cadastrado no plano (`produto_planos.desconto_oferta`, migration 085); quem mostra a
+oferta gera um **token assinado** para o link (`?oferta=<token>`), ligado ao produto, ao plano e com
+validade. O checkout repassa o token e o backend (gerar_pix / gerar_cartao) valida e busca o desconto
+no banco — nunca um valor vindo do navegador. Sem token válido, o preço é o cheio (padrão).
 """
 import hashlib
 import hmac
@@ -19,27 +19,38 @@ logger = logging.getLogger(__name__)
 VALIDADE_SEGUNDOS = 24 * 3600  # o link da oferta vale 24 h (a cliente pode voltar ao checkout)
 
 
-def _assinatura(produto_id: int, expira: int) -> str:
+def _assinatura(produto_id: int, plano_id: int, expira: int) -> str:
+    segredo = (os.getenv('SECRET_KEY') or 'troque-em-producao').encode()
+    msg = f'oferta:{int(produto_id)}:{int(plano_id)}:{int(expira)}'.encode()
+    return hmac.new(segredo, msg, hashlib.sha256).hexdigest()[:24]
+
+
+def gerar_token(produto_id: int, plano_id: int, agora: float | None = None) -> str:
+    expira = int((agora if agora is not None else time.time()) + VALIDADE_SEGUNDOS)
+    return f'{expira}.{_assinatura(produto_id, plano_id, expira)}'
+
+
+def _assinatura_sem_plano(produto_id: int, expira: int) -> str:
+    """Formato de antes da migration 085 (só produto). Links emitidos antes do deploy valem 24 h."""
     segredo = (os.getenv('SECRET_KEY') or 'troque-em-producao').encode()
     return hmac.new(segredo, f'oferta:{int(produto_id)}:{int(expira)}'.encode(), hashlib.sha256).hexdigest()[:24]
 
 
-def gerar_token(produto_id: int, agora: float | None = None) -> str:
-    expira = int((agora if agora is not None else time.time()) + VALIDADE_SEGUNDOS)
-    return f'{expira}.{_assinatura(produto_id, expira)}'
-
-
-def validar_token(token, produto_id, agora: float | None = None) -> bool:
-    """True se o token foi gerado por nós para ESTE produto e ainda vale."""
+def validar_token(token, produto_id, plano_id, agora: float | None = None, plano_padrao: bool = False) -> bool:
+    """True se o token foi gerado por nós para ESTE produto e plano e ainda vale. Token do formato antigo
+    (sem plano, emitido antes da migration 085) vale para o plano padrão — era o único que existia."""
     try:
         expira_txt, assinatura = str(token or '').split('.', 1)
         expira = int(expira_txt)
-        pid = int(produto_id)
+        pid, plid = int(produto_id), int(plano_id)
     except (TypeError, ValueError):
         return False
     if expira < (agora if agora is not None else time.time()):
         return False
-    return hmac.compare_digest(assinatura, _assinatura(pid, expira))
+    if hmac.compare_digest(assinatura, _assinatura(pid, plid, expira)):
+        return True
+    # TODO(depois de 19/10/2026): remover — todo token sem plano já venceu (validade de 24 h).
+    return plano_padrao and hmac.compare_digest(assinatura, _assinatura_sem_plano(pid, expira))
 
 
 def desconto_valido(desconto, preco, produto_id=None, avisar: bool = False) -> float:
@@ -56,21 +67,16 @@ def desconto_valido(desconto, preco, produto_id=None, avisar: bool = False) -> f
     return round(desconto, 2)
 
 
-def desconto_do_produto(produto_id: int, preco: float, avisar: bool = False) -> float:
-    """Desconto de oferta cadastrado no produto, já pela regra única (desconto_valido)."""
-    try:
-        linha = db.execute_query("SELECT desconto_oferta FROM produtos WHERE id = %s", (produto_id,), fetch_one=True)
-    except Exception as e:  # migration 083 ainda não aplicada: sem desconto, checkout segue igual
-        logger.error(f"[OFERTA] Erro ao ler o desconto do produto #{produto_id}: {e}")
-        return 0.0
-    return desconto_valido((linha or {}).get('desconto_oferta'), preco, produto_id, avisar)
+def desconto_do_plano(plano: dict, preco: float, avisar: bool = False) -> float:
+    """Desconto de oferta cadastrado no plano, já pela regra única (desconto_valido)."""
+    return desconto_valido(plano.get('desconto_oferta'), preco, plano.get('produto_id'), avisar)
 
 
-def desconto_da_oferta(token, produto_id: int, preco: float) -> float:
-    """O desconto a aplicar neste checkout: o do produto, se o token da oferta for válido; senão 0."""
-    if not token or not validar_token(token, produto_id):
+def desconto_da_oferta(token, plano: dict, preco: float) -> float:
+    """O desconto a aplicar neste checkout: o do plano, se o token da oferta for válido para ele; senão 0."""
+    if not token or not validar_token(token, plano['produto_id'], plano['id'], plano_padrao=bool(plano.get('padrao'))):
         return 0.0
-    return desconto_do_produto(produto_id, preco, avisar=True)
+    return desconto_do_plano(plano, preco, avisar=True)
 
 
 def oferta_divergente(body: dict, desconto: float) -> dict | None:
@@ -101,35 +107,21 @@ def gravar_desconto_pedido(pedido_id: int, desconto: float, sempre: bool = False
 
 
 def sincronizar_item_principal(pedido_id: int, valor_principal: float) -> None:
-    """Nova tentativa de cartão no MESMO pedido (os itens não são regravados): ajusta o valor do item
-    principal ao que será cobrado agora (com ou sem desconto)."""
+    """Nova tentativa de cartão no MESMO pedido (os itens não são regravados): ajusta o valor do
+    primeiro item principal (o que leva o preço do plano) ao que será cobrado agora (com ou sem desconto)."""
     try:
-        db.execute_query("UPDATE pedido_itens SET valor = %s WHERE pedido_id = %s AND tipo = 'principal'",
-                         (round(valor_principal, 2), pedido_id))
+        db.execute_query("UPDATE pedido_itens SET valor = %s WHERE pedido_id = %s AND tipo = 'principal' "
+                         "ORDER BY id LIMIT 1", (round(valor_principal, 2), pedido_id))
     except Exception as e:
         logger.error(f"[OFERTA] Erro ao ajustar o item principal do pedido #{pedido_id}: {e}")
 
 
-def descontos_dos_produtos(produto_ids) -> dict:
-    """{produto_id: desconto_oferta} dos que têm oferta — uma consulta só (cross-sell da Estante)."""
-    ids = sorted({int(i) for i in produto_ids if i})
-    if not ids:
-        return {}
-    try:
-        linhas = db.execute_query(
-            f"SELECT id, desconto_oferta FROM produtos WHERE id IN ({', '.join(['%s'] * len(ids))}) AND desconto_oferta > 0",
-            tuple(ids), fetch_all=True) or []
-    except Exception as e:
-        logger.error(f"[OFERTA] Erro ao ler descontos: {e}")
-        return {}
-    return {l['id']: float(l['desconto_oferta']) for l in linhas}
-
-
-def aplicar_na_vitrine(item: dict, descontos: dict) -> dict:
-    """Card de cross-sell com oferta: preço com desconto, preço cheio riscado e token no link."""
+def aplicar_na_vitrine(item: dict) -> dict:
+    """Card de cross-sell (um plano: produto_id, plano_id, preco_promocional, desconto_oferta) com
+    oferta: preço com desconto, preço cheio riscado e token no link."""
     preco = float(item['preco_promocional'])
-    desconto = desconto_valido(descontos.get(item['produto_id'], 0), preco, item['produto_id'])
+    desconto = desconto_valido(item.get('desconto_oferta'), preco, item['produto_id'])
     if desconto <= 0:
         return item
     return {**item, 'preco_promocional': round(preco - desconto, 2), 'preco_cheio': preco,
-            'oferta': gerar_token(item['produto_id'])}
+            'oferta': gerar_token(item['produto_id'], item['plano_id'])}

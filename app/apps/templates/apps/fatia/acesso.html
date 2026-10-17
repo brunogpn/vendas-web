@@ -25,9 +25,9 @@
   {% set destaque = renovacoes|length > 1 and o.dias == maior %}
   <section class="cartao" style="{{ 'border:2px solid var(--tinta)' if destaque }}">
     {% if destaque %}<span class="pilula">Mais econômico</span>{% endif %}
-    <div class="linha-entre mt-2"><h3>{{ o.nome_venda }}</h3><p class="valor-grande numeros" style="font-size:1.9rem">{{ fmt.reais(o.preco_promocional) }}</p></div>
+    <div class="linha-entre mt-2"><h3>{{ o.nome }}</h3><p class="valor-grande numeros" style="font-size:1.9rem">{{ fmt.reais(o.preco_promocional) }}</p></div>
     {% if o.meses > 1 %}<p class="suave mt-1">Sai por {{ fmt.reais(o.preco_promocional / o.meses) }} por mês.</p>{% endif %}
-    <a class="{{ 'botao' if destaque or renovacoes|length == 1 else 'botao-sec' }} mt-4" href="{{ ('/pay2/' ~ o.produto_id ~ '?ref=' ~ guid_estante) if guid_estante else ('/pay/' ~ o.produto_id) }}">Renovar {{ ui.ic('ArrowRight', 'ic-sm') }}</a>
+    <a class="{{ 'botao' if destaque or renovacoes|length == 1 else 'botao-sec' }} mt-4" href="{{ o.href }}">Renovar {{ ui.ic('ArrowRight', 'ic-sm') }}</a>
   </section>
   {% endfor %}
 </div>

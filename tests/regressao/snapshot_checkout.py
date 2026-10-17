@@ -69,7 +69,8 @@ def main():
             r = c.get(f'{rota}/{pid}')
             reg[rota] = {'status': r.status_code, 'html': normalizar(r.get_data(as_text=True))}
         bumps = db.execute_query(
-            "SELECT id FROM ebooks_produto WHERE produto_id = %s AND papel = 'bump' ORDER BY ordem, id LIMIT 1",
+            "SELECT pe.id FROM plano_entregaveis pe JOIN produto_planos pp ON pp.id = pe.plano_id AND pp.padrao = 1 "
+            "WHERE pe.produto_id = %s AND pe.papel = 'bump' ORDER BY pe.ordem, pe.id LIMIT 1",
             (pid,), fetch_one=True)
         reg['pix_sem_bump'] = pix(c, pid, [])
         reg['pix_com_bump'] = pix(c, pid, [bumps['id']]) if bumps else None

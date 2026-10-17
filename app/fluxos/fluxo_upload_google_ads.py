@@ -97,32 +97,25 @@ def enviar_gclid_ads(client, customer_id, conversion_action_id, gclid, conversio
         return False
 
 
-def _produtos_app() -> set:
-    """Ids dos produtos do tipo app (apps_produto). Falha aqui não pode travar o envio das vendas."""
-    try:
-        from database import listar_apps_produto
-        return {p['produto_id'] for p in listar_apps_produto()}
-    except Exception as e:
-        logger.error(f"[FLUXO-GOOGLE-SHEETS] Erro ao listar produtos de app (usa o valor fixo): {e}")
-        return set()
+VALOR_CONVERSAO_FIXO = "10.00"
 
 
-def valor_conversao(venda, produtos_app: set) -> str:
-    """Valor da conversão mandado ao Google Ads.
+def valor_conversao(venda) -> str:
+    """Valor da conversão mandado ao Google Ads (decisão do Leo em 16/10/2026):
 
-    Produto do tipo app (ex.: App Fatias — Plano Guiado): o valor REAL pago no pedido (principal +
-    bumps), decisão do Leo em 14/10/2026 — senão a venda mais cara (R$ 22) contaria menos que o Básico.
-    Demais produtos: a regra de sempre (20 para o produto 12, 10 para os outros). Pedido sem valor
-    pago registrado cai na regra fixa.
+    - Venda pelo site (estado 1000): o valor REAL pago (plano + bumps, com desconto) — o PIX/cartão
+      é casado com o pedido, então o valor é confiável e o Completo conta mais que o Básico.
+    - Venda pelo WhatsApp (estado 0) e qualquer pedido sem valor pago: R$ 10 fixo (o comprovante do
+      WhatsApp não é validado, o valor digitado pode não ser o pago).
     """
-    if venda.produto_id in produtos_app:
+    if getattr(venda, 'estado_id', None) == 1000:
         try:
             pago = float(getattr(venda, 'valor_pago', 0) or 0)
         except (TypeError, ValueError):
             pago = 0.0
         if pago > 0:
             return f"{pago:.2f}"
-    return "20.00" if venda.produto_id == 12 else "10.00"
+    return VALOR_CONVERSAO_FIXO
 
 
 def exportar_para_google_sheets():
@@ -148,7 +141,6 @@ def exportar_para_google_sheets():
 
     sp_tz = pytz.timezone("America/Sao_Paulo")
     now_sp = datetime.now(sp_tz)
-    produtos_app = _produtos_app()
 
     for (produto_id, spreadsheet_id, sheet_name, conversion_name, sa_env_var), grupo_vendas in grupos.items():
         sa_json = os.getenv(sa_env_var)
@@ -178,7 +170,7 @@ def exportar_para_google_sheets():
                     dp = now_sp
 
                 conversion_time = dp.strftime("%Y-%m-%d %H:%M:%S") + " America/Sao_Paulo"
-                conversion_value = valor_conversao(venda, produtos_app)
+                conversion_value = valor_conversao(venda)
                 rows.append([venda.gclid or '', conversion_name, conversion_time, conversion_value, "BRL", getattr(venda, 'wbraid', '') or '', getattr(venda, 'gbraid', '') or ''])
                 ids.append(venda.id)
 

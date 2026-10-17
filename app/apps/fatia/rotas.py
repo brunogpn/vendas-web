@@ -299,11 +299,13 @@ def medalhas():
 @bp.get('/acesso')
 @tela(menu='mais')
 def acesso():
-    from database import listar_apps_produto
-    # Renovações = produtos do tipo app deste app marcados como renovação (cadastro no admin).
-    renovacoes = [{**r, 'meses': max(1, round(r['dias'] / 30))}
-                  for r in listar_apps_produto(CONFIG.slug, renovacao=True, so_venda_web=True)]
+    from database import listar_planos_com_app
+    from web.links import link_checkout
+    # Renovações = planos com este app marcados como renovação (cadastro no admin, "Planos e entregáveis").
     ref = estante.pedido_da_estante(g.cliente, CONFIG.slug)
+    renovacoes = [{**r, 'meses': max(1, round(r['dias'] / 30)),
+                   'href': link_checkout(r['produto_id'], r, v2=bool(ref), ref=ref['guid'] if ref else None)}
+                  for r in listar_planos_com_app(CONFIG.slug, renovacao=True, so_venda_web=True)]
     return _render('acesso.html', expira_em=g.licenca['expira_em'], renovacoes=renovacoes,
                    guid_estante=ref['guid'] if ref else None)
 

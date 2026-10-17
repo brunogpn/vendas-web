@@ -66,6 +66,16 @@ def rastrear_visita_funil(request_obj, produto_id: int, estado_novo: int, cookie
     )
 
 
+def pedido_do_plano(pedido: dict, plano: dict) -> bool:
+    """O pedido pode ser retomado/reaproveitado neste plano? Rascunho (1003/1004) ainda não tem plano:
+    serve para qualquer um. Pedido de antes da migration 085 (plano_id NULL) conta como do plano padrão."""
+    if pedido['estado_id'] in (1003, 1004):
+        return True
+    if pedido.get('plano_id') is None:
+        return bool(plano.get('padrao'))
+    return pedido['plano_id'] == plano['id']
+
+
 def get_pedido_finalizado_via_cookie(request_obj, produto_id: int, cookie_prefixo: str = 'pedido_web'):
     """
     Verifica se o cookie pedido_web_<produto_id> aponta pra um pedido que já saiu da
@@ -131,7 +141,7 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
       (ou fallback=True em caso de falha no BB Pay)
     """
     from web.bb_pay import criar_solicitacao
-    from database import (get_produto_disponivel_web, resolver_valor_principal_produto,
+    from database import (get_produto_disponivel_web, resolver_plano_checkout,
                           criar_pedido_web_unificado, atualizar_pedido_solicitacao_bb,
                           get_phone_number_id_produto, criar_itens_pedido_web,
                           listar_bumps_validos, get_pedido_nao_finalizado, finalizar_pedido_web)
@@ -142,26 +152,26 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
 
     produto_id = int(body.get('produto_id', 1))
     produto = get_produto_disponivel_web(produto_id)
-    ebook_principal, valor_principal = resolver_valor_principal_produto(produto_id)
-    if not produto or not ebook_principal:
-        # Defesa: a página de checkout já bloqueia produto sem e-book principal vinculado antes
-        # de chegar aqui — isso só acontece numa corrida rara (ex: admin desvincula entre o
-        # carregamento da página e o envio do form).
-        logger.error(f'[WEB-CHECKOUT] Produto #{produto_id} sem e-book principal vinculado ao gerar Pix.')
+    plano, valor_principal = resolver_plano_checkout(produto_id, body.get('plano') or None)
+    if not produto or not plano:
+        # Defesa: a página de checkout já bloqueia plano que não está à venda antes de chegar
+        # aqui — isso só acontece numa corrida rara (ex: admin desativa o plano entre o
+        # carregamento da página e o envio do form) ou com payload adulterado.
+        logger.error(f'[WEB-CHECKOUT] Produto #{produto_id} sem o plano {body.get("plano")!r} à venda ao gerar Pix.')
         return {'fallback': True}
     numero_convenio = int(produto.get('numero_convenio_bb', 0)) if produto else 0
 
     # Desconto de oferta (popup/Estante, migration 083): só com o token assinado do link, e o valor
     # vem do banco — nunca do cliente. Sem token, preço cheio.
     from web.oferta import desconto_da_oferta, gravar_desconto_pedido, oferta_divergente
-    desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    desconto = desconto_da_oferta(body.get('oferta'), plano, valor_principal)
     divergente = oferta_divergente(body, desconto)
     if divergente:
         return divergente
     valor_principal = round(valor_principal - desconto, 2)
 
     # Bumps: nunca confiar em preço vindo do cliente — releitura pelos ids escolhidos.
-    bump_rows = listar_bumps_validos(produto_id, body.get('bump_ids'))
+    bump_rows = listar_bumps_validos(plano, body.get('bump_ids'))
     valor = valor_principal + sum(float(b['preco_promocional']) for b in bump_rows)
     phone_number_id = get_phone_number_id_produto(produto_id) or os.getenv('WHATSAPP_PHONE_NUMBER_ID', '')
 
@@ -209,7 +219,7 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
         )
     gravar_desconto_pedido(pedido_id, desconto)
     try:
-        criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_principal, bump_rows)
+        criar_itens_pedido_web(pedido_id, plano, valor_principal, bump_rows)
     except Exception as e:
         # Snapshot informativo — uma falha aqui não pode derrubar o checkout em si.
         logger.error(f'[WEB-CHECKOUT] Erro ao gravar itens do pedido #{pedido_id}: {e}')
@@ -459,7 +469,7 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     from web import cielo
     from web.parcelamento_cartao import calcular_total, parcelas_maximas_efetivas
     from database import (get_produto_disponivel_web, get_config_cartao_produto,
-                          resolver_valor_principal_produto, garantir_guid_pedido,
+                          resolver_plano_checkout, garantir_guid_pedido,
                           criar_pedido_web_unificado, get_pedido_cartao_para_retry, finalizar_pedido_web,
                           atualizar_identidade_pedido,
                           criar_itens_pedido_web, listar_bumps_validos, listar_itens_pedido,
@@ -478,23 +488,28 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
         # Defesa: o front não deveria nem mostrar a aba Cartão nesse caso.
         return {'aprovado': False, 'mensagem': 'Cartão de crédito não disponível para este produto no momento.'}
 
-    ebook_principal, valor_principal = resolver_valor_principal_produto(produto_id)
-    if not ebook_principal:
-        # Defesa: a página de checkout já bloqueia produto sem e-book principal vinculado antes
-        # de chegar aqui — isso só acontece numa corrida rara (ex: admin desvincula entre o
-        # carregamento da página e o envio do form).
-        logger.error(f'[WEB-CHECKOUT] Produto #{produto_id} sem e-book principal vinculado ao gerar cartão.')
+    plano, valor_principal = resolver_plano_checkout(produto_id, body.get('plano') or None)
+    if not plano:
+        # Defesa: a página de checkout já bloqueia plano que não está à venda (ver gerar_pix).
+        logger.error(f'[WEB-CHECKOUT] Produto #{produto_id} sem o plano {body.get("plano")!r} à venda ao gerar cartão.')
         return {'aprovado': False, 'mensagem': 'Produto não disponível no momento.'}
+
+    # Pedido de uma tentativa anterior (1006/1007) só é reaproveitado se for do MESMO plano: os itens
+    # gravados nele são os daquele plano (pedido de antes da migration 085, sem plano, conta como o
+    # padrão). Rascunho (1003/1004) ainda não tem plano — serve para qualquer um.
+    pedido_id_body = body.get('pedido_id')
+    pedido_existente = (get_pedido_cartao_para_retry(int(pedido_id_body), produto_id)
+                        if pedido_id_body and str(pedido_id_body).isdigit() else None)
+    if pedido_existente and not pedido_do_plano(pedido_existente, plano):
+        pedido_existente = None
 
     # Desconto de oferta (ver gerar_pix): juros do parcelamento incidem sobre o valor já com desconto.
     from web.oferta import desconto_da_oferta, desconto_valido, gravar_desconto_pedido, oferta_divergente
-    desconto = desconto_da_oferta(body.get('oferta'), produto_id, valor_principal)
+    desconto = desconto_da_oferta(body.get('oferta'), plano, valor_principal)
     # Nova tentativa (1006/1007) de um pedido que JÁ ganhou o desconto: mantém o desconto concedido,
     # mesmo que a cliente tenha voltado por um link sem ?oferta= (ex.: retomada ?pedido=).
-    _pid = body.get('pedido_id')
-    _anterior = get_pedido_cartao_para_retry(int(_pid), produto_id) if _pid and str(_pid).isdigit() else None
-    _ja_concedido = float((_anterior or {}).get('desconto') or 0)
-    if desconto <= 0 and _anterior and _anterior['estado_id'] in (1006, 1007) and _ja_concedido > 0:
+    _ja_concedido = float((pedido_existente or {}).get('desconto') or 0)
+    if desconto <= 0 and pedido_existente and pedido_existente['estado_id'] in (1006, 1007) and _ja_concedido > 0:
         desconto = desconto_valido(_ja_concedido, valor_principal, produto_id)
     else:
         divergente = oferta_divergente(body, desconto)
@@ -502,7 +517,7 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
             return {'aprovado': False, **divergente}
     valor_principal = round(valor_principal - desconto, 2)
 
-    bump_rows = listar_bumps_validos(produto_id, body.get('bump_ids'))
+    bump_rows = listar_bumps_validos(plano, body.get('bump_ids'))
     valor_original = valor_principal + sum(float(b['preco_promocional']) for b in bump_rows)
 
     max_efetivo = parcelas_maximas_efetivas(valor_original, config_cartao['max_parcelas'])
@@ -511,10 +526,8 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
                                  float(config_cartao['taxa_juros_mensal']))
     valor_centavos = round(valor_total * 100)
 
-    # Cria/reaproveita pedido — mesma ideia do Pix, mas também aceita 1006 (negado numa
-    # tentativa anterior), pra tentar outro cartão não criar um pedido novo a cada vez.
-    pedido_id_body = body.get('pedido_id')
-    pedido_existente = get_pedido_cartao_para_retry(int(pedido_id_body), produto_id) if pedido_id_body else None
+    # Cria/reaproveita pedido (pedido_existente, acima) — mesma ideia do Pix, mas também aceita 1006
+    # (negado numa tentativa anterior), pra tentar outro cartão não criar um pedido novo a cada vez.
     # 1006 (negado) e 1007 (não processado): nova tentativa no MESMO pedido, cujos itens já foram
     # gravados na primeira — não regravar (duplicaria pedido_itens).
     eh_retry_de_negado = bool(pedido_existente and pedido_existente['estado_id'] in (1006, 1007))
@@ -548,7 +561,7 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     # pedido_itens (afeta downloads e qualquer soma de receita sobre essa tabela).
     if not eh_retry_de_negado:
         try:
-            criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_principal, bump_rows)
+            criar_itens_pedido_web(pedido_id, plano, valor_principal, bump_rows)
         except Exception as e:
             logger.error(f'[WEB-CHECKOUT] Erro ao gravar itens do pedido cartão #{pedido_id}: {e}')
 
@@ -856,8 +869,7 @@ def resolver_pedido_por_guid(guid: str, item_id: int = None):
 
     if item_id is not None:
         item = get_item_pedido_ebook(item_id, pedido['id'])
-        # Item sem arquivo = item principal de um produto do tipo app (migration 082): não há o
-        # que ler/baixar (o app abre por "Meus apps").
+        # Item sem arquivo = item app do plano: não há o que ler/baixar (o app abre por "Meus apps").
         if not item or not item.get('path_arquivo'):
             return pedido, None, 'item_invalido'
         if not canal_web and item['tipo'] == 'bonus' and not pago:
@@ -931,21 +943,21 @@ def listar_itens_ebook_do_cliente(pedido):
             item['bloqueado'] = False  # já filtrado por estado_id IN (0,1000) na query
             linhas.append(item)
 
-    # O item principal de um produto do tipo app (migration 082) não tem arquivo: ele aparece em
-    # "Meus apps" (pela licença), não como livro.
+    # Item app (do plano comprado) não tem arquivo: ele aparece em "Meus apps" (pela licença), não
+    # como livro.
     linhas = [l for l in linhas if l.get('path_arquivo')]
     return _consolidar_itens_ebook(linhas)
 
 
 def _consolidar_itens_ebook(linhas):
-    """Deduplica itens pelo e-book real (ebook_id; cai pra path_arquivo nos itens antigos sem
+    """Deduplica itens pelo e-book real (entregavel_id; cai pra path_arquivo nos itens antigos sem
     ebook_produto_id, de antes da migration 061), preservando a ordem de primeira aparição
     (já vem ordenada por data de pagamento mais recente primeiro). Quando a mesma chave aparece
     mais de uma vez, prevalece a versão não-bloqueada — ver regra em listar_itens_ebook_do_cliente."""
     escolhidos = {}
     ordem = []
     for item in linhas:
-        chave = item['ebook_id'] if item.get('ebook_id') else f"legacy:{item['path_arquivo']}"
+        chave = item['entregavel_id'] if item.get('entregavel_id') else f"legacy:{item['path_arquivo']}"
         atual = escolhidos.get(chave)
         if atual is None:
             escolhidos[chave] = item

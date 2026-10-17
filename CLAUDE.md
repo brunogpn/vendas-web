@@ -11,9 +11,11 @@
 1. **WhatsApp — entrega primeiro, cobra depois.** O cliente recebe o e-book *antes* de pagar e paga (PIX) se gostar. Isso é proposital: `static/arquivos/` é público de propósito — nunca restringir/mover. Fluxos em `app/fluxos/`, orquestrados por `app/whatsapp_orquestrador.py`; follow-ups de cobrança via Celery beat. Uma IA (`agente_resposta_produto.py`) responde dúvidas.
 2. **Site — paga antes de receber.** Landing + checkout PIX/cartão (`app/web/`, estilo Hotmart com bônus e order bump). Depois do pagamento o cliente acessa a **Estante 2** (`/pedido2/<guid>`, para onde o checkout redireciona e o e-mail de entrega aponta), onde baixa/lê os e-books e vê o **cross-sell** (`/pay2/<id>`) dos produtos que ainda não tem. A Estante 1 (`/pedido/<guid>`, sem cross-sell) continua no ar para links antigos e fluxos do WhatsApp sem `url='v2'`.
 
-**Apps das clientes** (`app/apps/`, PWA em `/app/<slug>/`, ex.: App Fatias): ferramentas com licença por dias, vendidas como produto do tipo app (tabela `apps_produto`, no admin) com os e-books como bônus. Núcleo comum (login por código no e-mail, licença, Estante) + um módulo por app. Detalhes em `docs/APPS.md`.
+**Produto → planos → entregáveis:** o produto é a campanha/ISBN/NF-e; o site vende **planos** do produto (Básico, Completo, Renovação — preço e desconto de oferta próprios, `/pay/<id>?plano=<slug>`; sem `?plano=` e no WhatsApp vale o plano padrão); cada plano entrega itens do catálogo (e-book ou app) como principal, bônus ou order bump. Detalhes em `docs/PLANOS.md`.
 
-Conversões voltam pro Google Ads via Google Sheets (GCLID) — mexer em atribuição/GCLID afeta o ROI das campanhas.
+**Apps das clientes** (`app/apps/`, PWA em `/app/<slug>/`, ex.: App Fatias): ferramentas com licença por dias, vendidas como item de um plano (ex.: Completo do Fatia), liberadas pelos itens app do pedido. Núcleo comum (login por código no e-mail, licença, Estante) + um módulo por app. Detalhes em `docs/APPS.md`.
+
+Conversões voltam pro Google Ads via Google Sheets (GCLID) — venda do site com o valor real pago, WhatsApp com R$ 10 fixo; mexer em atribuição/GCLID afeta o ROI das campanhas.
 
 **Atendimento por e-mail:** a caixa `admin@lsnlivros.com.br` é lida a cada 10 min (`app/fluxos/fluxo_email_conversas.py`); cada e-mail é ligado ao pedido e ganha resposta pronta na fila `/admin/atendimento-email`, que um humano aprova. Detalhes em `docs/ATENDIMENTO_EMAIL.md`.
 
@@ -44,4 +46,4 @@ Hooks em `.claude/hooks/` automatizam duas dessas regras: bloqueiam comandos par
 
 ## Documentação
 
-`docs/` — `FLUXO_MENSAGENS.md`, `WEBHOOK_WHATSAPP.md`, `PLAYBOOK_SITE_VENDA_WEB.md`, `INTEGRACAO.md` (gateway WhatsApp Web), `ATENDIMENTO_EMAIL.md` (fila de e-mail, Gmail, DKIM/DMARC), `SEGURANCA*.md`. SSL/certbot: `infra/certbot/README.md`.
+`docs/` — `PLANOS.md` (produto → planos → entregáveis), `APPS.md`, `FLUXO_MENSAGENS.md`, `WEBHOOK_WHATSAPP.md`, `PLAYBOOK_SITE_VENDA_WEB.md`, `INTEGRACAO.md` (gateway WhatsApp Web), `ATENDIMENTO_EMAIL.md` (fila de e-mail, Gmail, DKIM/DMARC), `SEGURANCA*.md`. SSL/certbot: `infra/certbot/README.md`.

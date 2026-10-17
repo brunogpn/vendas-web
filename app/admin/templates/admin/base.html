@@ -534,9 +534,9 @@
             <span class="icon">🗑️</span> Limpar Pedidos
         </a>
         {% if current_user.is_admin() %}
-        <a href="{{ url_for('admin.listar_ebooks_view') }}"
-           class="nav-link {% if request.endpoint in ['admin.listar_ebooks_view','admin.editar_ebook'] %}active{% endif %}">
-            <span class="icon">📚</span> Catálogo de E-books
+        <a href="{{ url_for('admin.listar_entregaveis_view') }}"
+           class="nav-link {% if request.endpoint in ['admin.listar_entregaveis_view','admin.editar_entregavel'] %}active{% endif %}">
+            <span class="icon">📚</span> Catálogo de entregáveis
         </a>
         <a href="{{ url_for('admin.apps_clientes') }}"
            class="nav-link {% if request.endpoint and request.endpoint.startswith('admin.apps_') %}active{% endif %}">
@@ -656,9 +656,9 @@
            class="nav-link {% if request.endpoint in ['admin.fluxos_overview','admin.fluxo_acoes','admin.editar_acao_fluxo'] %}active{% endif %}">
             <span class="icon">⚙️</span> Fluxos
         </a>
-        <a href="{{ url_for('admin.produto_ebooks', produto_id=produto_ativo.id) }}"
-           class="nav-link {% if request.endpoint == 'admin.produto_ebooks' %}active{% endif %}">
-            <span class="icon">📚</span> E-books
+        <a href="{{ url_for('admin.produto_planos', produto_id=produto_ativo.id) }}"
+           class="nav-link {% if request.endpoint in ['admin.produto_planos','admin.editar_plano','admin.editar_item_plano'] %}active{% endif %}">
+            <span class="icon">📚</span> Planos e entregáveis
         </a>
         {% endif %}
 

@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+{% block title %}Editar item do catálogo{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="page-title">Editar {{ 'app' if entregavel.tipo == 'app' else 'e-book' }} do catálogo</div>
+        <div class="page-subtitle">{{ entregavel.nome_venda }}</div>
+    </div>
+    <a href="{{ url_for('admin.listar_entregaveis_view') }}" class="btn btn-ghost btn-sm">← Voltar</a>
+</div>
+
+<div class="card" style="max-width: 760px;">
+    <form method="POST">
+        <div class="form-grid">
+
+            <div class="form-group span-2">
+                <label>Nome de venda</label>
+                <input type="text" name="nome_venda" maxlength="255"
+                       value="{{ entregavel.nome_venda }}" required>
+            </div>
+
+            {% if entregavel.tipo == 'app' %}
+            <div class="form-group span-2">
+                <label>App</label>
+                <select name="app_slug" required>
+                    {% for slug, cfg in apps.items() %}<option value="{{ slug }}" {% if slug == entregavel.app_slug %}selected{% endif %}>{{ cfg.nome }}</option>{% endfor %}
+                </select>
+            </div>
+            {% else %}
+            <div class="form-group span-2">
+                <label>Arquivo (já enviado em /admin/arquivos)</label>
+                <select name="path_arquivo" required>
+                    {% if entregavel.path_arquivo not in pdfs|map(attribute='nome')|list %}
+                    <option value="{{ entregavel.path_arquivo }}" selected>{{ entregavel.path_arquivo }} (não encontrado em /admin/arquivos)</option>
+                    {% endif %}
+                    {% for pdf in pdfs %}
+                    <option value="{{ pdf.nome }}" {% if pdf.nome == entregavel.path_arquivo %}selected{% endif %}>
+                        {{ pdf.nome }} ({{ pdf.tamanho_fmt }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group span-2">
+                <label>Nome do arquivo no download</label>
+                <input type="text" name="nome_arquivo" maxlength="255"
+                       value="{{ entregavel.nome_arquivo }}">
+                <small class="form-text text-muted">Se vazio, usa o mesmo nome do arquivo selecionado.</small>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Imagem grande (opcional)</label>
+                <select name="imagem_grande">
+                    <option value="">— nenhuma —</option>
+                    {% if entregavel.imagem_grande and entregavel.imagem_grande not in imagens|map(attribute='nome')|list %}
+                    <option value="{{ entregavel.imagem_grande }}" selected>{{ entregavel.imagem_grande }} (não encontrada em /admin/arquivos)</option>
+                    {% endif %}
+                    {% for img in imagens %}
+                    <option value="{{ img.nome }}" {% if img.nome == entregavel.imagem_grande %}selected{% endif %}>{{ img.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Imagem pequena (bônus/order bump no checkout)</label>
+                <select name="imagem_pequena">
+                    <option value="">— nenhuma —</option>
+                    {% if entregavel.imagem_pequena and entregavel.imagem_pequena not in imagens|map(attribute='nome')|list %}
+                    <option value="{{ entregavel.imagem_pequena }}" selected>{{ entregavel.imagem_pequena }} (não encontrada em /admin/arquivos)</option>
+                    {% endif %}
+                    {% for img in imagens %}
+                    <option value="{{ img.nome }}" {% if img.nome == entregavel.imagem_pequena %}selected{% endif %}>{{ img.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group span-2">
+                <label>Descrição (opcional)</label>
+                <input type="text" name="descricao" maxlength="500"
+                       value="{{ entregavel.descricao or '' }}">
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.listar_entregaveis_view') }}" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

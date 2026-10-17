@@ -376,10 +376,30 @@ def criar_pedido(pedido: Pedido):
     # informativo — uma falha aqui não pode derrubar a criação do lead, que é um caminho de
     # muito mais tráfego (todo clique de anúncio) e não deveria ficar acoplado a essa feature.
     try:
-        ebook_principal = get_ebook_principal_produto(produto_id)
-        criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_pago)
+        plano = get_plano_venda(produto_id)  # WhatsApp: plano padrão
+        if not plano:
+            # Produto sem plano padrão à venda: o pedido nasce sem itens (Estante vazia). Avisa o admin — uma
+            # vez por produto (o notificador não repete a mesma mensagem e tem limite por hora).
+            logger.warning(f"[CRIAR-PEDIDO] Produto #{produto_id} sem plano padrão à venda — pedido #{pedido_id} sem itens")
+            try:
+                from notificacoes import notificador
+                notificador.enviar_notificacao(
+                    f"⚠️ *Produto sem plano*\n\nO produto {produto_id} não tem plano padrão à venda (ativo e com "
+                    f"item principal): os pedidos do WhatsApp ficam sem itens e a Estante vazia. Ajuste em "
+                    f"Planos e entregáveis no admin.")
+            except Exception as erro_aviso:
+                logger.error(f"[CRIAR-PEDIDO] Erro ao avisar o admin do produto #{produto_id}: {erro_aviso}")
+        criar_itens_pedido_web(pedido_id, plano, valor_pago)
     except Exception as e:
         logger.error(f"[CRIAR-PEDIDO] Erro ao gravar itens do pedido #{pedido_id}: {e}")
+        # Sem itens, a Estante desse pedido fica vazia: além do log, avisa o admin (com limite de envio).
+        try:
+            from notificacoes import notificador
+            notificador.enviar_notificacao(
+                f"⚠️ *Pedido sem itens*\n\nPedido #{pedido_id} (produto {produto_id}) ficou sem os itens do plano "
+                f"({type(e).__name__}). A Estante dele fica vazia — verifique os planos do produto no admin.")
+        except Exception as erro_aviso:
+            logger.error(f"[CRIAR-PEDIDO] Erro ao avisar o admin do pedido #{pedido_id}: {erro_aviso}")
 
     return pedido_id
 
@@ -688,9 +708,10 @@ def _sincronizar_valor_principal_pedido_itens(pedido_id: int, valor_pago: float)
     pedido do WhatsApp é confirmado como pago. Sem isso, o valor ficaria congelado no 0.00
     gravado em criar_pedido() (na criação do lead, antes de qualquer pagamento) pra sempre —
     subestimando qualquer relatório futuro que somar pedido_itens.valor. Não-op se o pedido não
-    tiver item 'principal' (produto ainda não migrado pro catálogo de e-books)."""
+    tiver item 'principal' (produto ainda não migrado pro catálogo de e-books). Só o primeiro
+    principal leva o valor (ver criar_itens_pedido_web: num plano com vários, os outros ficam 0)."""
     db.execute_query(
-        "UPDATE pedido_itens SET valor = %s WHERE pedido_id = %s AND tipo = 'principal'",
+        "UPDATE pedido_itens SET valor = %s WHERE pedido_id = %s AND tipo = 'principal' ORDER BY id LIMIT 1",
         (valor_pago, pedido_id)
     )
 
@@ -1573,258 +1594,323 @@ def selecionar_e_avancar_variante(phone_number_id, produto_id, fluxo, condicao, 
     return proximo
 
 
-def listar_bumps_validos(produto_id, bump_ids):
-    """
-    Retorna os vínculos 'bump' de `ebooks_produto` (com dados do catálogo via JOIN) cujo `id`
-    esteja em `bump_ids` E que pertençam a `produto_id` — nunca confie em preço/nome vindo do
-    cliente, sempre releia do banco a partir só dos ids escolhidos.
-    """
-    bump_ids = [int(b) for b in (bump_ids or []) if str(b).isdigit()]
-    if not bump_ids:
-        return []
-    placeholders = ','.join(['%s'] * len(bump_ids))
-    return db.execute_query(
-        _SELECT_EBOOKS_PRODUTO +
-        f" WHERE ep.produto_id = %s AND ep.papel = 'bump' AND ep.id IN ({placeholders})",
-        (produto_id, *bump_ids), fetch_all=True
-    ) or []
-
-
 # ============================================================
-# Catálogo de e-books (base única) e vínculo com produto
+# Produto → planos → entregáveis (migration 085) — ver docs/PLANOS.md
+#
+# produto_planos: as ofertas do produto (Básico, Completo, Renovação...), cada uma com nome,
+#   descrição, imagens, preço e desconto de oferta próprios. 1 plano padrão por produto: o do
+#   WhatsApp e do link /pay/<produto> sem ?plano=.
+# plano_entregaveis: o que cada plano entrega — entregável (e-book ou app) + papel
+#   (principal/bonus/bump). Preço próprio só no bump; o preço da oferta é o do plano. `dias` só
+#   vale para app. Os ids vieram de ebooks_produto: pedido_itens.ebook_produto_id aponta para cá.
+# entregaveis: catálogo único (tipo 'ebook' com arquivo, ou 'app' com app_slug).
 # ============================================================
 
-def listar_ebooks():
-    """Lista todos os e-books do catálogo, ordenados por nome de venda."""
-    return db.execute_query(
-        "SELECT * FROM ebooks ORDER BY nome_venda", fetch_all=True
-    ) or []
-
-
-def get_ebook(ebook_id):
-    """Retorna um e-book do catálogo pelo ID."""
-    return db.execute_query(
-        "SELECT * FROM ebooks WHERE id = %s", (ebook_id,), fetch_one=True
-    )
-
-
-def criar_ebook(nome_venda, descricao, path_arquivo, nome_arquivo, imagem_grande=None, imagem_pequena=None):
-    """Cria um e-book no catálogo. Retorna o ID criado."""
-    return db.execute_query(
-        """INSERT INTO ebooks (nome_venda, descricao, path_arquivo, nome_arquivo, imagem_grande, imagem_pequena)
-           VALUES (%s, %s, %s, %s, %s, %s)""",
-        (nome_venda, descricao or None, path_arquivo, nome_arquivo, imagem_grande or None, imagem_pequena or None)
-    )
-
-
-def atualizar_ebook(ebook_id, nome_venda, descricao, path_arquivo, nome_arquivo, imagem_grande=None, imagem_pequena=None):
-    """Atualiza um e-book existente do catálogo pelo ID."""
-    db.execute_query(
-        """UPDATE ebooks SET nome_venda=%s, descricao=%s, path_arquivo=%s, nome_arquivo=%s,
-               imagem_grande=%s, imagem_pequena=%s
-           WHERE id=%s""",
-        (nome_venda, descricao or None, path_arquivo, nome_arquivo, imagem_grande or None, imagem_pequena or None, ebook_id)
-    )
-
-
-def remover_ebook(ebook_id):
-    """Remove um e-book do catálogo. Retorna True se algo foi removido (False se o id já não
-    existia mais — evita reportar sucesso num clique duplicado ou link obsoleto). Falha (FK) se
-    ainda houver vínculo em ebooks_produto — o chamador deve tratar a exceção e orientar a
-    remover os vínculos primeiro."""
-    return db.execute_query("DELETE FROM ebooks WHERE id = %s", (ebook_id,), return_rowcount=True) > 0
-
-
-# Projeção comum de ebooks_produto+ebooks reaproveitada por toda leitura do catálogo vinculado
-# a um produto (listagem admin, checkout) — mantém as mesmas colunas disponíveis em todo lugar
-# que usa "linhas de vínculo", evitando editar N queries em lockstep a cada campo novo.
-_SELECT_EBOOKS_PRODUTO = """
-    SELECT ep.id, ep.produto_id, ep.ebook_id, ep.papel, ep.ordem,
-           ep.preco_original, ep.preco_promocional,
-           e.nome_venda, e.descricao, e.path_arquivo, e.nome_arquivo,
+_SELECT_PLANO_ENTREGAVEIS = """
+    SELECT pe.id, pe.produto_id, pe.plano_id, pe.entregavel_id, pe.papel, pe.ordem, pe.dias,
+           pe.preco_original, pe.preco_promocional,
+           e.tipo, e.app_slug, e.nome_venda, e.descricao, e.path_arquivo, e.nome_arquivo,
            e.imagem_grande, e.imagem_pequena
-    FROM ebooks_produto ep JOIN ebooks e ON e.id = ep.ebook_id
+    FROM plano_entregaveis pe JOIN entregaveis e ON e.id = pe.entregavel_id
 """
 
 
-def listar_ebooks_produto(produto_id):
-    """Lista os e-books vinculados a um produto (com dados do catálogo via JOIN), ordenados
-    por papel e ordem."""
+def get_plano(plano_id, produto_id=None):
+    """Um plano pelo id (restrito ao produto, quando informado), ativo ou não."""
+    sql = "SELECT * FROM produto_planos WHERE id = %s"
+    params = [plano_id]
+    if produto_id is not None:
+        sql += " AND produto_id = %s"
+        params.append(produto_id)
+    return db.execute_query(sql, tuple(params), fetch_one=True)
+
+
+def listar_planos_produto(produto_id):
+    """Todos os planos do produto (admin), o padrão primeiro."""
     return db.execute_query(
-        _SELECT_EBOOKS_PRODUTO + " WHERE ep.produto_id = %s ORDER BY ep.papel, ep.ordem, ep.id",
+        "SELECT * FROM produto_planos WHERE produto_id = %s ORDER BY padrao DESC, ordem, id",
         (produto_id,), fetch_all=True
     ) or []
 
 
-def vincular_ebook_produto(produto_id, ebook_id, papel, preco_original, preco_promocional, ordem=1):
-    """Vincula um e-book do catálogo a um produto com um papel (principal/bonus/bump) e o preço
-    que esse vínculo tem (o mesmo e-book pode valer preços diferentes em produtos diferentes).
-    Só permite um 'principal' por produto — a unique key uk_ebooks_produto_principal garante isso
-    no banco (sem essa garantia, dois cliques quase simultâneos poderiam passar por um SELECT de
-    checagem antes de qualquer INSERT confirmar); levanta ValueError com mensagem amigável se
-    já existir um principal pro produto."""
+def get_plano_venda(produto_id, slug=None):
+    """O plano que o checkout vende: o de `slug` ou, sem slug, o padrão do produto — só se ativo e
+    com ao menos um item principal (senão None = 'produto não configurado', o checkout recusa em vez
+    de cobrar um preço arbitrário). Vem com `itens` (todos, numa consulta só — é a página de mais tráfego),
+    `principais` (lista ordenada) e `app_slug` (o do primeiro principal que é app, ou None). Use
+    itens_do_plano(plano, papel) para os bônus/bumps."""
+    if slug:
+        plano = db.execute_query(
+            "SELECT * FROM produto_planos WHERE produto_id = %s AND slug = %s AND ativo = 1",
+            (produto_id, slug), fetch_one=True)
+    else:
+        plano = db.execute_query(
+            "SELECT * FROM produto_planos WHERE produto_id = %s AND padrao = 1 AND ativo = 1",
+            (produto_id,), fetch_one=True)
+    if not plano:
+        return None
+    plano['itens'] = listar_entregaveis_plano(plano['id'])
+    principais = itens_do_plano(plano, 'principal')
+    if not principais:
+        return None
+    plano['principais'] = principais
+    plano['app_slug'] = next((p['app_slug'] for p in principais if p['tipo'] == 'app'), None)
+    return plano
+
+
+def itens_do_plano(plano, papel):
+    """Os itens de um papel do plano devolvido por get_plano_venda (sem nova consulta)."""
+    return [i for i in plano['itens'] if i['papel'] == papel]
+
+
+def listar_entregaveis_plano(plano_id, papel=None):
+    """Os itens do plano (com os dados do catálogo), por papel e ordem."""
+    sql = _SELECT_PLANO_ENTREGAVEIS + " WHERE pe.plano_id = %s"
+    params = [plano_id]
+    if papel:
+        sql += " AND pe.papel = %s"
+        params.append(papel)
+    return db.execute_query(
+        sql + " ORDER BY FIELD(pe.papel, 'principal', 'bonus', 'bump'), pe.ordem, pe.id",
+        tuple(params), fetch_all=True
+    ) or []
+
+
+def listar_bumps_validos(plano, bump_ids):
+    """
+    Os order bumps do plano (get_plano_venda, lido do banco nesta requisição) cujo `id` (do vínculo) está
+    em `bump_ids` — nunca confie em preço/nome vindo do cliente: só os ids escolhidos valem, e o resto vem
+    do banco. Bump de outro plano (ou de outro produto) é ignorado.
+    """
+    ids = {int(b) for b in (bump_ids or []) if str(b).isdigit()}
+    return [i for i in itens_do_plano(plano, 'bump') if i['id'] in ids]
+
+
+def resolver_plano_checkout(produto_id, slug=None):
+    """(plano, valor a cobrar pelo plano) — (None, None) se o plano não está à venda (ver
+    get_plano_venda). A checagem de existência SEMPRE roda antes do override de teste, para ele não
+    mascarar um produto mal configurado."""
+    plano = get_plano_venda(produto_id, slug)
+    if not plano:
+        return None, None
+    return plano, preco_cobrado_plano(produto_id, plano)
+
+
+def preco_cobrado_plano(produto_id, plano) -> float:
+    """Preço que o checkout cobra pelo plano: o cadastrado ou o override de teste
+    CHECKOUT_VALOR_TESTE_PRODUTO_<id>. Fonte única para o backend e para a tela (oferta)."""
+    _teste = os.getenv(f'CHECKOUT_VALOR_TESTE_PRODUTO_{produto_id}')
+    return float(_teste) if _teste else float(plano['preco_promocional'])
+
+
+# ------------------------------------------------------------ catálogo de entregáveis (admin)
+
+def listar_entregaveis(tipo=None):
+    """O catálogo (e-books e apps), por nome de venda."""
+    if tipo:
+        return db.execute_query("SELECT * FROM entregaveis WHERE tipo = %s ORDER BY nome_venda",
+                                (tipo,), fetch_all=True) or []
+    return db.execute_query("SELECT * FROM entregaveis ORDER BY tipo, nome_venda", fetch_all=True) or []
+
+
+def get_entregavel(entregavel_id):
+    return db.execute_query("SELECT * FROM entregaveis WHERE id = %s", (entregavel_id,), fetch_one=True)
+
+
+def salvar_entregavel(entregavel_id, tipo, nome_venda, descricao, path_arquivo=None, nome_arquivo=None,
+                      imagem_grande=None, imagem_pequena=None, app_slug=None):
+    """Cria (entregavel_id None) ou atualiza um item do catálogo. E-book tem arquivo; app tem
+    app_slug (pasta app/apps/<slug>). Retorna o id."""
+    if tipo == 'app':
+        path_arquivo = nome_arquivo = None
+    else:
+        app_slug = None
+    valores = (tipo, app_slug, nome_venda, descricao or None, path_arquivo, nome_arquivo,
+               imagem_grande or None, imagem_pequena or None)
+    if entregavel_id:
+        db.execute_query(
+            """UPDATE entregaveis SET tipo=%s, app_slug=%s, nome_venda=%s, descricao=%s, path_arquivo=%s,
+                   nome_arquivo=%s, imagem_grande=%s, imagem_pequena=%s
+               WHERE id=%s""", (*valores, entregavel_id))
+        return entregavel_id
+    return db.execute_query(
+        """INSERT INTO entregaveis (tipo, app_slug, nome_venda, descricao, path_arquivo, nome_arquivo,
+                                    imagem_grande, imagem_pequena)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", valores)
+
+
+def remover_entregavel(entregavel_id):
+    """Remove um item do catálogo. True se removeu (False se o id já não existia — clique duplicado ou
+    link obsoleto). Falha (FK) se ainda estiver em algum plano — o chamador orienta a tirar antes."""
+    return db.execute_query("DELETE FROM entregaveis WHERE id = %s", (entregavel_id,), return_rowcount=True) > 0
+
+
+# ------------------------------------------------------------ planos e seus itens (admin)
+
+_CAMPOS_PLANO = ('slug', 'nome', 'descricao', 'imagem_grande', 'imagem_pequena', 'preco_original',
+                 'preco_promocional', 'desconto_oferta', 'vitrine', 'renovacao', 'ordem', 'ativo')
+
+
+def salvar_plano(produto_id, plano_id, dados: dict):
+    """Cria (plano_id None) ou atualiza um plano do produto com os campos de _CAMPOS_PLANO. Slug
+    repetido no produto vira ValueError com mensagem amigável. Retorna o id."""
+    valores = [dados.get(c) for c in _CAMPOS_PLANO]
+    try:
+        if plano_id:
+            db.execute_query(
+                f"UPDATE produto_planos SET {', '.join(c + '=%s' for c in _CAMPOS_PLANO)} "
+                "WHERE id = %s AND produto_id = %s", (*valores, plano_id, produto_id))
+            return plano_id
+        return db.execute_query(
+            f"INSERT INTO produto_planos (produto_id, {', '.join(_CAMPOS_PLANO)}) "
+            f"VALUES (%s, {', '.join(['%s'] * len(_CAMPOS_PLANO))})", (produto_id, *valores))
+    except IntegrityError as e:
+        if e.errno == 1062 and 'uk_produto_planos_slug' in str(e):
+            raise ValueError(f"Já existe um plano com o identificador '{dados.get('slug')}' neste produto.")
+        raise
+
+
+def definir_plano_padrao(produto_id, plano_id):
+    """Torna o plano o padrão do produto (o do WhatsApp e do link sem ?plano=). Numa transação: tira o
+    padrão atual e marca o novo (a unique de padrao_produto não deixa dois)."""
+    with db.get_cursor() as cursor:
+        cursor.execute("SELECT id FROM produto_planos WHERE id = %s AND produto_id = %s", (plano_id, produto_id))
+        if not cursor.fetchone():
+            return False
+        cursor.execute("UPDATE produto_planos SET padrao = 0 WHERE produto_id = %s AND padrao = 1", (produto_id,))
+        cursor.execute("UPDATE produto_planos SET padrao = 1 WHERE id = %s", (plano_id,))
+    return True
+
+
+def remover_plano(produto_id, plano_id):
+    """Remove um plano que nunca foi vendido, com seus itens. O padrão não sai (troque o padrão antes) e
+    plano com pedido também não (os pedidos apontam para ele — desative em vez de remover). Retorna
+    None se removeu, ou o motivo."""
+    plano = get_plano(plano_id, produto_id)
+    if not plano:
+        return 'Plano não encontrado.'
+    if plano['padrao']:
+        return 'O plano padrão não pode ser removido — defina outro como padrão antes.'
+    vendido = db.execute_query(
+        """SELECT 1 FROM pedidos WHERE plano_id = %s
+           UNION SELECT 1 FROM pedido_itens pi JOIN plano_entregaveis pe ON pe.id = pi.ebook_produto_id
+                 WHERE pe.plano_id = %s LIMIT 1""", (plano_id, plano_id), fetch_one=True)
+    if vendido:
+        return 'Este plano já tem pedidos — desative-o em vez de remover.'
+    with db.get_cursor() as cursor:
+        cursor.execute("DELETE FROM plano_entregaveis WHERE plano_id = %s", (plano_id,))
+        cursor.execute("DELETE FROM produto_planos WHERE id = %s AND produto_id = %s", (plano_id, produto_id))
+    return None
+
+
+def vincular_entregavel_plano(produto_id, plano_id, entregavel_id, papel, preco_original=0, preco_promocional=0,
+                              ordem=1, dias=None):
+    """Põe um entregável no plano com um papel. Preço só conta no bump; `dias` só no app (obrigatório
+    quando o app é principal/bônus — é quanto tempo de acesso o plano dá). Levanta ValueError com
+    mensagem amigável se o plano não é do produto, se o app vier sem dias ou se o item já está no plano."""
+    if not get_plano(plano_id, produto_id):
+        raise ValueError('Plano não encontrado neste produto.')
+    entregavel = get_entregavel(entregavel_id)
+    if not entregavel:
+        raise ValueError('Item do catálogo não encontrado.')
+    if entregavel['tipo'] == 'app':
+        if not dias or int(dias) <= 0:
+            raise ValueError('Informe os dias de acesso do app.')
+    else:
+        dias = None
     try:
         return db.execute_query(
-            """INSERT INTO ebooks_produto (produto_id, ebook_id, papel, preco_original, preco_promocional, ordem)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (produto_id, ebook_id, papel, preco_original, preco_promocional, ordem)
-        )
-    except IntegrityError as e:
-        if e.errno == 1062 and 'uk_ebooks_produto_principal' in str(e):
-            raise ValueError('Este produto já tem um e-book principal vinculado.')
+            """INSERT INTO plano_entregaveis (produto_id, plano_id, entregavel_id, papel, preco_original,
+                                              preco_promocional, ordem, dias)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+            (produto_id, plano_id, entregavel_id, papel, preco_original or 0, preco_promocional or 0, ordem, dias))
+    except IntegrityError as e:  # uk_plano_entregaveis_item: o banco garante, mesmo com dois cliques juntos
+        if e.errno == 1062 and 'uk_plano_entregaveis_item' in str(e):
+            raise ValueError('Este item já está no plano.')
         raise
 
 
-def atualizar_vinculo_ebook_produto(vinculo_id, produto_id, preco_original, preco_promocional, ordem=1):
-    """Atualiza preço/ordem de um vínculo e-book/produto existente, restrito ao produto informado
-    (evita editar vínculo de outro produto). Não permite trocar o papel nem o e-book vinculado —
-    pra isso, remove e cria de novo."""
+def get_vinculo_plano(vinculo_id, produto_id):
+    """Um item de plano pelo id, restrito ao produto informado."""
+    return db.execute_query(_SELECT_PLANO_ENTREGAVEIS + " WHERE pe.id = %s AND pe.produto_id = %s",
+                            (vinculo_id, produto_id), fetch_one=True)
+
+
+def atualizar_vinculo_plano(vinculo_id, produto_id, preco_original, preco_promocional, ordem=1, dias=None):
+    """Atualiza preço/ordem/dias de um item do plano, restrito ao produto. Papel e entregável não
+    mudam — para isso, remova e inclua de novo."""
     db.execute_query(
-        """UPDATE ebooks_produto SET preco_original=%s, preco_promocional=%s, ordem=%s
+        """UPDATE plano_entregaveis SET preco_original=%s, preco_promocional=%s, ordem=%s, dias=%s
            WHERE id=%s AND produto_id=%s""",
-        (preco_original, preco_promocional, ordem, vinculo_id, produto_id)
-    )
+        (preco_original, preco_promocional, ordem, dias, vinculo_id, produto_id))
 
 
-def get_vinculo_ebook_produto(vinculo_id, produto_id):
-    """Retorna um vínculo e-book/produto pelo ID, restrito ao produto informado."""
+def remover_vinculo_plano(vinculo_id, produto_id):
+    """Tira um item do plano, restrito ao produto. True se removeu. Itens já vendidos continuam abrindo
+    na Estante pela cópia gravada no próprio item do pedido (nome/arquivo)."""
+    return db.execute_query("DELETE FROM plano_entregaveis WHERE id = %s AND produto_id = %s",
+                            (vinculo_id, produto_id), return_rowcount=True) > 0
+
+
+def copiar_itens_plano(produto_id, plano_origem_id, plano_destino_id):
+    """Copia para o plano destino os itens do plano origem (do mesmo produto) que ele ainda não tem.
+    Retorna quantos copiou."""
+    if not (get_plano(plano_origem_id, produto_id) and get_plano(plano_destino_id, produto_id)):
+        raise ValueError('Plano não encontrado neste produto.')
     return db.execute_query(
-        """SELECT ep.*, e.nome_venda, e.path_arquivo
-           FROM ebooks_produto ep JOIN ebooks e ON e.id = ep.ebook_id
-           WHERE ep.id = %s AND ep.produto_id = %s""",
-        (vinculo_id, produto_id), fetch_one=True
-    )
+        """INSERT INTO plano_entregaveis (produto_id, plano_id, entregavel_id, papel, preco_original,
+                                          preco_promocional, ordem, dias)
+           SELECT produto_id, %s, entregavel_id, papel, preco_original, preco_promocional, ordem, dias
+           FROM plano_entregaveis o
+           WHERE o.plano_id = %s AND NOT EXISTS (
+               SELECT 1 FROM plano_entregaveis d WHERE d.plano_id = %s AND d.entregavel_id = o.entregavel_id)""",
+        (plano_destino_id, plano_origem_id, plano_destino_id), return_rowcount=True)
 
 
-def remover_vinculo_ebook_produto(vinculo_id, produto_id):
-    """Remove um vínculo e-book/produto pelo ID, restrito ao produto informado (evita apagar
-    vínculo de outro produto). Retorna True se algo foi removido (False se o vínculo já não
-    existia mais ou pertencia a outro produto — evita reportar sucesso num clique duplicado ou
-    link obsoleto)."""
-    return db.execute_query(
-        "DELETE FROM ebooks_produto WHERE id = %s AND produto_id = %s", (vinculo_id, produto_id),
-        return_rowcount=True
-    ) > 0
+def copiar_planos_produto(produto_origem_id, produto_destino_id):
+    """Clonagem de produto: copia os planos (com slug, preços, desconto, padrão...) e os itens de cada
+    um para o produto novo. Retorna quantos planos copiou."""
+    copiados = 0
+    with db.get_cursor() as cursor:
+        cursor.execute("SELECT * FROM produto_planos WHERE produto_id = %s ORDER BY id", (produto_origem_id,))
+        for plano in cursor.fetchall():
+            colunas = _CAMPOS_PLANO + ('padrao',)
+            cursor.execute(
+                f"INSERT INTO produto_planos (produto_id, {', '.join(colunas)}) "
+                f"VALUES (%s, {', '.join(['%s'] * len(colunas))})",
+                (produto_destino_id, *[plano[c] for c in colunas]))
+            novo_plano_id = cursor.lastrowid
+            cursor.execute(
+                """INSERT INTO plano_entregaveis (produto_id, plano_id, entregavel_id, papel, preco_original,
+                                                  preco_promocional, ordem, dias)
+                   SELECT %s, %s, entregavel_id, papel, preco_original, preco_promocional, ordem, dias
+                   FROM plano_entregaveis WHERE plano_id = %s""",
+                (produto_destino_id, novo_plano_id, plano['id']))
+            copiados += 1
+    return copiados
 
 
-def get_ebook_principal_produto(produto_id):
-    """Retorna o vínculo 'principal' (com dados do catálogo via JOIN) de um produto, ou None se
-    o produto ainda não tem e-book principal cadastrado — usado pelo checkout web como sinal de
-    'produto não configurado', pra recusar a venda em vez de usar um preço/arquivo arbitrário.
-
-    Produto do tipo app (linha em apps_produto, migration 082) não tem e-book principal: devolve
-    o app no mesmo formato (id/ebook_id/path_arquivo None, app_slug preenchido), para o checkout,
-    o PIX/cartão e o pedido_itens seguirem pelo mesmo caminho dos e-books."""
-    principal = db.execute_query(
-        _SELECT_EBOOKS_PRODUTO + " WHERE ep.produto_id = %s AND ep.papel = 'principal'",
-        (produto_id,), fetch_one=True
-    )
-    if principal:
-        return principal
-    app = get_app_produto(produto_id)
-    if not app:
-        return None
-    return {
-        'id': None, 'produto_id': produto_id, 'ebook_id': None, 'papel': 'principal', 'ordem': 0,
-        'preco_original': app['preco_original'], 'preco_promocional': app['preco_promocional'],
-        'nome_venda': app['nome_venda'], 'descricao': app['descricao'],
-        'path_arquivo': None, 'nome_arquivo': None,
-        'imagem_grande': app['imagem_grande'], 'imagem_pequena': app['imagem_pequena'],
-        'app_slug': app['app_slug'],
-    }
-
-
-# ============================================================
-# Produto do tipo app (apps_produto, migration 082) — ver docs/APPS.md
-# ============================================================
-
-def get_app_produto(produto_id):
-    """A configuração de app do produto (None = produto de e-book, o padrão). Tolera a migration
-    082 ainda não aplicada (devolve None), para o checkout de e-book nunca depender dela."""
-    try:
-        return db.execute_query("SELECT * FROM apps_produto WHERE produto_id = %s", (produto_id,), fetch_one=True)
-    except Error as e:
-        if getattr(e, 'errno', None) == 1146:  # tabela não existe
-            return None
-        raise
-
-
-def salvar_app_produto(produto_id, app_slug, dias, renovacao, nome_venda, descricao, imagem_grande,
-                       imagem_pequena, preco_original, preco_promocional):
-    db.execute_query(
-        """INSERT INTO apps_produto (produto_id, app_slug, dias, renovacao, nome_venda, descricao, imagem_grande,
-                                     imagem_pequena, preco_original, preco_promocional)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-           ON DUPLICATE KEY UPDATE app_slug=VALUES(app_slug), dias=VALUES(dias), renovacao=VALUES(renovacao),
-               nome_venda=VALUES(nome_venda), descricao=VALUES(descricao), imagem_grande=VALUES(imagem_grande),
-               imagem_pequena=VALUES(imagem_pequena), preco_original=VALUES(preco_original),
-               preco_promocional=VALUES(preco_promocional)""",
-        (produto_id, app_slug, dias, 1 if renovacao else 0, nome_venda, descricao or None, imagem_grande or None,
-         imagem_pequena or None, preco_original, preco_promocional))
-
-
-def remover_app_produto(produto_id):
-    return db.execute_query("DELETE FROM apps_produto WHERE produto_id = %s", (produto_id,),
-                            return_rowcount=True) > 0
-
-
-def listar_apps_produto(app_slug=None, renovacao=None, so_venda_web=False):
-    """Produtos do tipo app (opcionalmente de um app / só renovações / só os vendáveis no site)."""
-    sql = ("SELECT ap.*, p.nome AS produto_nome, p.ativo, p.disponivel_web FROM apps_produto ap "
-           "JOIN produtos p ON p.id = ap.produto_id WHERE 1=1")
+def listar_planos_com_app(app_slug=None, renovacao=None, so_venda_web=False):
+    """Planos ativos que têm um app como principal (com os dias do vínculo): vitrine de apps da
+    Estante, renovações do "Meu acesso", reconciliação de licenças. Ordem: preço."""
+    sql = """SELECT pp.*, pe.dias, e.app_slug, p.nome AS produto_nome, p.ativo AS produto_ativo,
+                    p.disponivel_web
+             FROM produto_planos pp
+             JOIN plano_entregaveis pe ON pe.plano_id = pp.id AND pe.papel = 'principal'
+             JOIN entregaveis e ON e.id = pe.entregavel_id AND e.tipo = 'app'
+             JOIN produtos p ON p.id = pp.produto_id
+             WHERE pp.ativo = 1"""
     params = []
     if app_slug is not None:
-        sql += " AND ap.app_slug = %s"
+        sql += " AND e.app_slug = %s"
         params.append(app_slug)
     if renovacao is not None:
-        sql += " AND ap.renovacao = %s"
+        sql += " AND pp.renovacao = %s"
         params.append(1 if renovacao else 0)
     if so_venda_web:
         sql += " AND p.ativo = TRUE AND p.disponivel_web = TRUE"
-    try:
-        return db.execute_query(sql + " ORDER BY ap.preco_promocional, ap.produto_id", tuple(params), fetch_all=True) or []
-    except Error as e:
-        if getattr(e, 'errno', None) == 1146:
-            return []
-        raise
-
-
-def listar_ebooks_bonus_produto(produto_id):
-    """Lista os e-books vinculados como 'bonus' a um produto (com dados do catálogo via JOIN),
-    ordenados por ordem. Usado pelo checkout web no lugar de listar_bonus_produto."""
-    return db.execute_query(
-        _SELECT_EBOOKS_PRODUTO + " WHERE ep.produto_id = %s AND ep.papel = 'bonus' ORDER BY ep.ordem, ep.id",
-        (produto_id,), fetch_all=True
-    ) or []
-
-
-def listar_ebooks_bump_produto(produto_id):
-    """Lista os e-books vinculados como 'bump' a um produto (com dados do catálogo via JOIN),
-    ordenados por ordem. Usado pelo checkout web no lugar de listar_bump_produto."""
-    return db.execute_query(
-        _SELECT_EBOOKS_PRODUTO + " WHERE ep.produto_id = %s AND ep.papel = 'bump' ORDER BY ep.ordem, ep.id",
-        (produto_id,), fetch_all=True
-    ) or []
-
-
-def resolver_valor_principal_produto(produto_id):
-    """Resolve o e-book principal de um produto e o valor a cobrar por ele. Retorna
-    (ebook_principal, valor) — (None, None) se o produto não tiver vínculo 'principal', sinal
-    pro chamador tratar como 'produto não disponível' em vez de usar um valor arbitrário (a
-    checagem de existência SEMPRE roda antes do override de teste, pra este último não mascarar
-    um produto mal configurado). `CHECKOUT_VALOR_TESTE_PRODUTO_<id>` do ambiente (mecanismo de
-    teste, mantido) só substitui o valor cobrado, nunca dispensa o vínculo existir."""
-    ebook_principal = get_ebook_principal_produto(produto_id)
-    if not ebook_principal:
-        return None, None
-    return ebook_principal, preco_cobrado_principal(produto_id, ebook_principal)
-
-
-def preco_cobrado_principal(produto_id, ebook_principal) -> float:
-    """Preço que o checkout cobra pelo principal: o cadastrado ou o override de teste
-    CHECKOUT_VALOR_TESTE_PRODUTO_<id>. Fonte única para o backend e para a tela (oferta)."""
-    _teste = os.getenv(f'CHECKOUT_VALOR_TESTE_PRODUTO_{produto_id}')
-    return float(_teste) if _teste else float(ebook_principal['preco_promocional'])
+    return db.execute_query(sql + " ORDER BY pp.preco_promocional, pp.produto_id, pp.ordem",
+                            tuple(params), fetch_all=True) or []
 
 
 def listar_itens_pedido(pedido_id):
@@ -1855,7 +1941,7 @@ def get_pedido_by_guid(guid: str):
 def garantir_guid_pedido(pedido_id: int) -> str:
     """Retorna o guid do pedido, gerando um na hora se ele ainda não tiver. Pedidos web criados
     antes da migration 062 (ou de qualquer futura lacuna) ficam com guid NULL pra sempre — o
-    backfill em massa (scripts/backfill_pedido_guid_itens.py) só cobre pedidos pagos via
+    backfill em massa (o antigo scripts/backfill_pedido_guid_itens.py) só cobriu pedidos pagos via
     WhatsApp, não os web antigos parados em estados intermediários (1001-1006). Chamada nos
     pontos que respondem 'pago'/'aprovado' pro checkout, pra garantir que o cliente sempre
     receba um guid válido antes do redirect pra /pedido/<guid> — sem isso, um pedido web antigo
@@ -1922,23 +2008,24 @@ def listar_itens_pedido_ebook_multiplos(pedido_ids: list):
     ) or []
 
 
-# Nome/imagens/descrição/arquivo de cada item vêm do catálogo (ebooks/ebooks_produto), não do
-# snapshot congelado em pedido_itens no momento da compra — assim a página /pedido/<guid>
+# Nome/imagens/descrição/arquivo de cada item vêm do catálogo (entregaveis/plano_entregaveis), não
+# do snapshot congelado em pedido_itens no momento da compra — assim a página /pedido/<guid>
 # sempre mostra a versão atual cadastrada no catálogo (ex: se o admin corrigir um PDF ou
 # renomear um e-book depois da venda).
 #
 # Itens antigos (anteriores à migration 061, com ebook_produto_id NULL) tentam resolver o
 # mesmo jeito por um segundo caminho: e_legacy casa por path_arquivo direto contra o catálogo.
-# Sem isso, (a) esses itens nunca teriam ebook_id preenchido, então nunca bateriam a mesma
+# Sem isso, (a) esses itens nunca teriam entregavel_id preenchido, então nunca bateriam a mesma
 # chave de deduplicação de um item novo do mesmo e-book em _consolidar_itens_ebook
 # (web/checkout.py) — mostrando o mesmo e-book duas vezes (uma bloqueada, uma liberada) na
 # "Minha Estante" em vez de aplicar a regra 'liberado prevalece'; e (b) continuariam mostrando
 # nome/imagem do snapshot congelado em vez da versão atual do catálogo, só por não terem um
 # ebook_produto_id salvo. Só cai pro snapshot puro (pi.nome etc) quando nem o vínculo nem o
 # path_arquivo batem com nada no catálogo (arquivo renomeado/removido do catálogo depois).
+# `ebook_produto_id` é o id do vínculo em plano_entregaveis (nome mantido da migration 061).
 _SELECT_ITEM_PEDIDO_EBOOK = """
-    SELECT pi.id, pi.pedido_id, pi.tipo,
-           COALESCE(ep.ebook_id, e_legacy.id) AS ebook_id,
+    SELECT pi.id, pi.pedido_id, pi.tipo, pi.app_slug,
+           COALESCE(pe.entregavel_id, e_legacy.id) AS entregavel_id,
            COALESCE(e.nome_venda, e_legacy.nome_venda, pi.nome) AS nome,
            COALESCE(e.path_arquivo, e_legacy.path_arquivo, pi.path_arquivo) AS path_arquivo,
            COALESCE(e.nome_arquivo, e_legacy.nome_arquivo, pi.nome_arquivo) AS nome_arquivo,
@@ -1946,9 +2033,9 @@ _SELECT_ITEM_PEDIDO_EBOOK = """
            COALESCE(e.imagem_grande, e_legacy.imagem_grande) AS imagem_grande,
            COALESCE(e.imagem_pequena, e_legacy.imagem_pequena) AS imagem_pequena
     FROM pedido_itens pi
-    LEFT JOIN ebooks_produto ep ON ep.id = pi.ebook_produto_id
-    LEFT JOIN ebooks e ON e.id = ep.ebook_id
-    LEFT JOIN ebooks e_legacy ON e_legacy.path_arquivo = pi.path_arquivo AND ep.id IS NULL
+    LEFT JOIN plano_entregaveis pe ON pe.id = pi.ebook_produto_id
+    LEFT JOIN entregaveis e ON e.id = pe.entregavel_id
+    LEFT JOIN entregaveis e_legacy ON e_legacy.path_arquivo = pi.path_arquivo AND pe.id IS NULL
 """
 
 
@@ -1974,74 +2061,43 @@ def get_item_pedido_ebook(item_id: int, pedido_id: int):
     )
 
 
-def criar_itens_pedido_web(pedido_id, produto_id, ebook_principal, valor_principal, bump_rows=None):
+def criar_itens_pedido_web(pedido_id, plano, valor_plano, bump_rows=None):
     """
-    Grava em `pedido_itens` o snapshot do que foi incluído no pedido web no momento da
-    compra: uma linha 'principal' (o e-book vinculado como principal do produto, pelo valor
-    efetivamente cobrado) + uma linha 'bonus' para cada e-book vinculado como bônus + uma linha
-    'bump' para cada order bump aceito (já validado pelo chamador via listar_bumps_validos).
-    Cada linha grava `ebook_produto_id` (o vínculo de origem em `ebooks_produto`).
+    Grava em `pedido_itens` o snapshot do que o pedido inclui no momento da compra e marca
+    `pedidos.plano_id`: uma linha por item principal do plano (o primeiro leva o valor do plano
+    efetivamente cobrado; os demais 0.00 — ex.: Completo = e-book + app), uma linha 'bonus' por
+    bônus do plano (0.00) e uma linha 'bump' por order bump aceito (já validado pelo chamador via
+    listar_bumps_validos, com o preço do bump). Cada linha grava `ebook_produto_id` (o vínculo de
+    origem em plano_entregaveis) e, quando o item é app, `app_slug` — é por ele que a licença é
+    liberada (dias do vínculo).
 
-    Recebe `ebook_principal` e `valor_principal` já resolvidos pelo chamador (ver
-    resolver_valor_principal_produto) em vez de rebuscar — evita uma query redundante e garante
-    que o valor gravado bate com o que foi de fato cobrado (que pode divergir do
-    preco_promocional por causa do override CHECKOUT_VALOR_TESTE_PRODUTO_<id>). Se
-    `ebook_principal` vier vazio (produto sem vínculo 'principal'), não grava nada e apenas loga
-    um aviso — o chamador (gerar_pix/gerar_cartao) já deve ter recusado o pedido antes de chegar
-    aqui, isso é só uma rede de segurança.
-
-    Bônus sempre grava valor 0.00, independente do `preco_promocional` cadastrado no vínculo —
-    bônus nunca entra na soma cobrada do cliente (só principal + bumps, ver gerar_pix/
-    gerar_cartao), então gravar aqui o preco_promocional do vínculo inflaria pedido_itens.valor
-    com um valor que o cliente nunca pagou. Bump usa o preco_promocional normalmente, porque
-    esse sim é somado no total cobrado.
+    Recebe `plano` (get_plano_venda) e `valor_plano` já resolvidos pelo chamador em vez de
+    rebuscar — garante que o valor gravado bate com o que foi de fato cobrado (que pode divergir do
+    preco_promocional por desconto de oferta ou pelo override CHECKOUT_VALOR_TESTE_PRODUTO_<id>).
+    Plano vazio (None) não grava nada e só loga um aviso — o chamador (gerar_pix/gerar_cartao) já
+    deve ter recusado o pedido antes, isso é só uma rede de segurança.
 
     Nota para quem for somar `pedido_itens.valor` em relatórios: esta função grava o item
     assim que o lead é criado (estado 1001), antes da confirmação de pagamento — pedidos
     nunca pagos também geram linhas aqui. Para receita real, sempre faça JOIN com
     `pedidos.estado_id` (só conta pago quando estado_id = 1000).
     """
-    if not ebook_principal:
-        logger.warning(
-            f"[PEDIDO-ITENS] ⚠️ Produto #{produto_id} sem e-book principal vinculado — pedido "
-            f"#{pedido_id} ficará sem registro em pedido_itens."
-        )
+    if not plano:
+        logger.warning(f"[PEDIDO-ITENS] ⚠️ Pedido #{pedido_id} sem plano à venda — ficará sem pedido_itens.")
         return
 
-    if ebook_principal.get('app_slug'):
-        # Produto do tipo app: o item principal é o acesso ao app (sem PDF).
-        db.execute_query(
-            """INSERT INTO pedido_itens (pedido_id, tipo, app_slug, nome, valor)
-               VALUES (%s, 'principal', %s, %s, %s)""",
-            (pedido_id, ebook_principal['app_slug'], ebook_principal['nome_venda'], valor_principal)
-        )
-    else:
-        db.execute_query(
-            """INSERT INTO pedido_itens (pedido_id, tipo, ebook_produto_id, nome, path_arquivo, nome_arquivo, valor)
-               VALUES (%s, 'principal', %s, %s, %s, %s, %s)""",
-            (pedido_id, ebook_principal['id'], ebook_principal['nome_venda'],
-             ebook_principal['path_arquivo'], ebook_principal['nome_arquivo'], valor_principal)
-        )
-
-    bonus_rows = listar_ebooks_bonus_produto(produto_id)
-    if bonus_rows:
-        db.execute_many(
-            """INSERT INTO pedido_itens
-                   (pedido_id, tipo, ebook_produto_id, nome, path_arquivo, nome_arquivo, valor)
-               VALUES (%s, 'bonus', %s, %s, %s, %s, 0.00)""",
-            [(pedido_id, bonus['id'], bonus['nome_venda'], bonus['path_arquivo'], bonus['nome_arquivo'])
-             for bonus in bonus_rows]
-        )
-
-    if bump_rows:
-        db.execute_many(
-            """INSERT INTO pedido_itens
-                   (pedido_id, tipo, ebook_produto_id, nome, path_arquivo, nome_arquivo, valor)
-               VALUES (%s, 'bump', %s, %s, %s, %s, %s)""",
-            [(pedido_id, bump['id'], bump['nome_venda'], bump['path_arquivo'], bump['nome_arquivo'],
-              bump['preco_promocional'])
-             for bump in bump_rows]
-        )
+    linhas = [('principal', item, valor_plano if i == 0 else 0.00) for i, item in enumerate(plano['principais'])]
+    linhas += [('bonus', item, 0.00) for item in itens_do_plano(plano, 'bonus')]
+    linhas += [('bump', item, item['preco_promocional']) for item in (bump_rows or [])]
+    db.execute_many(
+        """INSERT INTO pedido_itens
+               (pedido_id, tipo, ebook_produto_id, app_slug, nome, path_arquivo, nome_arquivo, valor)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+        [(pedido_id, tipo, item['id'], item['app_slug'] if item['tipo'] == 'app' else None,
+          item['nome_venda'], item['path_arquivo'], item['nome_arquivo'], valor)
+         for tipo, item, valor in linhas]
+    )
+    db.execute_query("UPDATE pedidos SET plano_id = %s WHERE id = %s", (plano['id'], pedido_id))
 
 
 def buscar_todas_mensagens_pedido(pedido_id: int) -> list:
@@ -2106,26 +2162,31 @@ def busca_produtos_disponiveis_web():
     ) or []
 
 
-def listar_produtos_cross_sell_cliente(ebook_ids_possuidos):
-    """Produtos com venda web habilitada cujo e-book 'principal' o cliente ainda não possui —
-    usado pela seção de cross-sell da estante v2 (/pedido2/<guid>). `ebook_ids_possuidos` é o
-    conjunto de ebook_id que o cliente já tem (calculado pelo chamador a partir do retorno de
-    listar_itens_ebook_do_cliente, que já resolve isso pra tela da estante).
+def listar_produtos_cross_sell_cliente(entregaveis_possuidos):
+    """Planos de e-book para a seção de cross-sell da Estante 2 (/pedido2/<guid>): o plano padrão
+    (ativo, de vitrine) de cada produto com venda web cujo e-book principal a cliente ainda não tem.
+    `entregaveis_possuidos` = ids dos entregáveis que ela já tem (o chamador tira de
+    listar_itens_ebook_do_cliente). Planos com app ficam com a vitrine de apps (apps/_nucleo/estante.py).
 
-    Só considera papel='principal' (produto vendável sozinho, com preço/NF-e próprios) — e-books
-    que só existem como bônus/bump de outros produtos ficam de fora de propósito (não têm preço
-    nem configuração fiscal independentes, ver contexto do plano)."""
+    Só planos padrão: e-books que só existem como bônus/bump de outros produtos ficam de fora de
+    propósito (não têm preço nem configuração fiscal independentes)."""
     rows = db.execute_query(
-        """SELECT ep.produto_id, ep.ebook_id, ep.preco_promocional,
-                  e.nome_venda, e.imagem_pequena, e.imagem_grande
-           FROM ebooks_produto ep
-           JOIN ebooks e ON e.id = ep.ebook_id
-           JOIN produtos p ON p.id = ep.produto_id
-           WHERE ep.papel = 'principal' AND p.disponivel_web = TRUE AND p.ativo = TRUE
+        """SELECT pp.produto_id, pp.id AS plano_id, pp.slug AS plano_slug, pp.padrao AS plano_padrao,
+                  pp.preco_promocional, pp.desconto_oferta, pp.nome AS nome_venda,
+                  pp.imagem_pequena, pp.imagem_grande,
+                  GROUP_CONCAT(pe.entregavel_id) AS principais, MAX(e.tipo = 'app') AS tem_app
+           FROM produto_planos pp
+           JOIN produtos p ON p.id = pp.produto_id
+           JOIN plano_entregaveis pe ON pe.plano_id = pp.id AND pe.papel = 'principal'
+           JOIN entregaveis e ON e.id = pe.entregavel_id
+           WHERE pp.padrao = 1 AND pp.ativo = 1 AND pp.vitrine = 1
+             AND p.disponivel_web = TRUE AND p.ativo = TRUE
+           GROUP BY pp.id
            ORDER BY p.id""",
         fetch_all=True
     ) or []
-    return [r for r in rows if r['ebook_id'] not in ebook_ids_possuidos]
+    return [r for r in rows
+            if not r['tem_app'] and not {int(i) for i in r['principais'].split(',')} & set(entregaveis_possuidos)]
 
 
 def registrar_visualizacao_estante(pedido_id: int, variante: str) -> None:

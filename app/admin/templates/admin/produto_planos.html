@@ -1,0 +1,168 @@
+{% extends "admin/base.html" %}
+{% block title %}Planos — {{ produto.nome }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Planos e entregáveis</h1>
+        <p class="page-subtitle">{{ produto.nome }} — cada plano é uma oferta (ex.: Básico, Completo, Renovação) com preço próprio
+            e os itens do <a href="{{ url_for('admin.listar_entregaveis_view') }}">catálogo</a> que ele entrega</p>
+    </div>
+</div>
+
+<div class="alert alert-warning" style="margin-bottom: 20px;">
+    ⚠️ O <strong>checkout do site</strong> cobra e entrega exatamente o que está aqui: o preço é o do plano, os itens
+    principais e bônus vão juntos e os order bumps são opcionais (com preço próprio). O <strong>plano padrão</strong> é o
+    do link <code>/pay/{{ produto.id }}</code> sem <code>?plano=</code> e o dos pedidos do WhatsApp (que entrega o arquivo
+    pelas ações do fluxo, não por esta tela).
+</div>
+{% for pend in pendencias %}<div class="alert alert-danger" style="margin-bottom:12px">⚠️ {{ pend }}</div>{% endfor %}
+
+{% for plano in planos %}
+{% set principais = plano.itens | selectattr('papel', 'equalto', 'principal') | list %}
+<div class="card" id="plano-{{ plano.id }}" style="{{ 'border:2px solid var(--accent)' if plano.padrao }}">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div>
+            <p style="font-weight:700;font-size:17px">{{ plano.nome }}
+                {% if plano.padrao %}<span class="badge badge-success">Padrão</span>{% endif %}
+                {% if plano.renovacao %}<span class="badge badge-info">Renovação</span>{% endif %}
+                {% if not plano.ativo %}<span class="badge badge-danger">Inativo</span>{% endif %}
+                {% if plano.ativo and not plano.vitrine and not plano.renovacao %}<span class="badge">Fora da vitrine</span>{% endif %}
+            </p>
+            <p style="font-size:14px;color:var(--muted);margin-top:4px">
+                <code>{{ plano.slug }}</code> ·
+                <strong>R$ {{ '%.2f'|format(plano.preco_promocional) }}</strong>{% if plano.preco_original > plano.preco_promocional %} (de R$ {{ '%.2f'|format(plano.preco_original) }}){% endif %}
+                {% if plano.desconto_oferta > 0 %}· 🎁 oferta: R$ {{ '%.2f'|format(plano.preco_promocional - plano.desconto_oferta) }}{% endif %}
+                · link: <code>/pay/{{ produto.id }}{% if not plano.padrao %}?plano={{ plano.slug }}{% endif %}</code>
+            </p>
+            {% if plano.ativo and not principais %}<p class="text-danger" style="font-size:14px;margin-top:4px">⚠️ Sem item principal: este plano não está à venda (o checkout responde "Produto não encontrado").</p>{% endif %}
+        </div>
+        {% if current_user.is_admin() %}
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <a href="{{ url_for('admin.editar_plano', produto_id=produto.id, plano_id=plano.id) }}" class="btn btn-ghost btn-sm">Editar plano</a>
+            {% if not plano.padrao %}
+            <form method="POST" action="{{ url_for('admin.definir_plano_padrao_view', produto_id=produto.id, plano_id=plano.id) }}"
+                  onsubmit="return confirm('Tornar este o plano padrão? Ele passa a ser o do link sem ?plano= e o dos pedidos do WhatsApp.')">
+                <button type="submit" class="btn btn-ghost btn-sm">Tornar padrão</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.remover_plano_view', produto_id=produto.id, plano_id=plano.id) }}"
+                  onsubmit="return confirm('Remover este plano e seus itens? Só funciona se ele nunca foi vendido.')">
+                <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if plano.itens %}
+    <div class="table-wrap" style="margin-top:14px">
+        <table>
+            <thead><tr><th>Papel</th><th>Ordem</th><th>Item</th><th>Arquivo / app</th><th>Preço (bump)</th><th>Dias (app)</th>{% if current_user.is_admin() %}<th></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for v in plano.itens %}
+            <tr>
+                <td style="font-size:13px">{% if v.papel == 'principal' %}🏆 Principal{% elif v.papel == 'bonus' %}🎁 Bônus{% else %}🛒 Order bump{% endif %}</td>
+                <td style="color:var(--muted);font-family:var(--mono);font-size:13px;width:60px">{{ v.ordem }}</td>
+                <td style="font-size:14px">{{ '📱' if v.tipo == 'app' else '📖' }} {{ v.nome_venda }}</td>
+                <td style="font-family:var(--mono);font-size:13px;color:var(--muted)">{{ v.app_slug if v.tipo == 'app' else v.path_arquivo }}</td>
+                <td style="font-size:13px">{% if v.papel == 'bump' %}R$ {{ '%.2f'|format(v.preco_promocional) }}{% if v.preco_original > v.preco_promocional %} <s style="color:var(--muted)">R$ {{ '%.2f'|format(v.preco_original) }}</s>{% endif %}{% else %}—{% endif %}</td>
+                <td style="font-size:13px">{{ v.dias or '—' }}</td>
+                {% if current_user.is_admin() %}
+                <td style="text-align:right;white-space:nowrap">
+                    <a href="{{ url_for('admin.editar_item_plano', produto_id=produto.id, vinculo_id=v.id) }}" class="btn btn-ghost btn-sm">Editar</a>
+                    <form method="POST" style="display:inline" action="{{ url_for('admin.remover_item_plano', produto_id=produto.id, vinculo_id=v.id) }}"
+                          onsubmit="return confirm('Tirar este item do plano?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Tirar</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--muted);font-size:14px;padding:12px 0">Nenhum item neste plano ainda.</p>
+    {% endif %}
+
+    {% if current_user.is_admin() %}
+    <details style="margin-top:16px">
+        <summary style="cursor:pointer;font-weight:600">+ Incluir item neste plano</summary>
+        {% if catalogo %}
+        <form method="POST" action="{{ url_for('admin.incluir_item_plano', produto_id=produto.id, plano_id=plano.id) }}" class="form-grid form-item-plano" style="margin-top:12px">
+            <div class="form-group"><label>Item do catálogo</label>
+                <select name="entregavel_id" required class="sel-entregavel">
+                    <option value="">— selecione —</option>
+                    {% for e in catalogo %}<option value="{{ e.id }}" data-tipo="{{ e.tipo }}">{{ '📱' if e.tipo == 'app' else '📖' }} {{ e.nome_venda }}</option>{% endfor %}
+                </select></div>
+            <div class="form-group"><label>Papel</label>
+                <select name="papel" required class="sel-papel">
+                    <option value="principal">Principal</option>
+                    <option value="bonus">Bônus</option>
+                    <option value="bump">Order bump</option>
+                </select>
+                <small class="form-text text-muted">Principal e bônus vão no preço do plano; order bump é opcional, com preço próprio.</small></div>
+            <div class="form-group so-bump"><label>Preço original do bump (R$)</label><input type="number" name="preco_original" min="0" step="0.01" value="0.00"></div>
+            <div class="form-group so-bump"><label>Preço do bump (R$)</label><input type="number" name="preco_promocional" min="0" step="0.01" value="0.00"></div>
+            <div class="form-group so-app"><label>Dias de acesso ao app</label><input type="number" name="dias" min="1" value="90"></div>
+            <div class="form-group"><label>Ordem</label><input type="number" name="ordem" min="1" max="99" value="1"></div>
+            <div class="form-actions" style="grid-column:1 / -1"><button type="submit" class="btn btn-primary">+ Incluir</button></div>
+        </form>
+        {% else %}
+        <p style="color:var(--muted);font-size:14px;margin-top:8px">Catálogo vazio. <a href="{{ url_for('admin.listar_entregaveis_view') }}">Cadastre um item primeiro</a>.</p>
+        {% endif %}
+        {% if planos|length > 1 %}
+        <form method="POST" action="{{ url_for('admin.copiar_itens_plano_view', produto_id=produto.id, plano_id=plano.id) }}"
+              style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;flex-wrap:wrap">
+            <div class="form-group" style="margin:0"><label>Copiar os itens de outro plano</label>
+                <select name="origem_id" required>
+                    {% for outro in planos if outro.id != plano.id %}<option value="{{ outro.id }}">{{ outro.nome }}</option>{% endfor %}
+                </select></div>
+            <button type="submit" class="btn btn-ghost">Copiar itens</button>
+        </form>
+        {% endif %}
+    </details>
+    {% endif %}
+</div>
+{% else %}
+<div class="card"><p style="color:var(--muted);font-size:14px">Este produto ainda não tem plano: o site não vende nada dele.
+    Crie o primeiro abaixo (ele já nasce como padrão).</p></div>
+{% endfor %}
+
+{% if current_user.is_admin() %}
+<div class="card">
+    <p style="font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Novo plano</p>
+    <form method="POST" action="{{ url_for('admin.novo_plano', produto_id=produto.id) }}" class="form-grid">
+        <div class="form-group"><label>Nome (aparece no checkout)</label><input type="text" name="nome" maxlength="255" required placeholder="ex: Fatias que Vendem — Completo"></div>
+        <div class="form-group"><label>Identificador (no link)</label><input type="text" name="slug" maxlength="30" required pattern="[a-z0-9-]{1,30}" placeholder="ex: completo"></div>
+        <div class="form-group"><label>Preço original (R$)</label><input type="number" name="preco_original" min="0" step="0.01" value="0.00"></div>
+        <div class="form-group"><label>Preço cobrado (R$)</label><input type="number" name="preco_promocional" min="0.01" step="0.01" required></div>
+        <div class="form-group"><label>Desconto de oferta (R$)</label><input type="number" name="desconto_oferta" min="0" step="0.01" value="0.00">
+            <small class="form-text text-muted">Popup da landing e cross-sell da Estante. 0 = sem oferta.</small></div>
+        <div class="form-group"><label>Ordem</label><input type="number" name="ordem" min="1" max="99" value="{{ planos|length + 1 }}"></div>
+        <div class="form-group"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="vitrine" value="1" checked> Mostrar na vitrine</label>
+            <small class="form-text text-muted">Landing e cross-sell da Estante.</small></div>
+        <div class="form-group"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="renovacao" value="1"> É renovação do app</label>
+            <small class="form-text text-muted">Aparece só em "Meu acesso" dentro do app.</small></div>
+        <div class="form-actions" style="grid-column:1 / -1"><button type="submit" class="btn btn-primary">+ Criar plano</button>
+            <small class="form-text text-muted" style="margin-left:8px">Descrição e imagens: em "Editar plano", depois de criar.</small></div>
+    </form>
+</div>
+{% endif %}
+
+<script>
+// Mostra só os campos que valem: preço só no order bump, dias só no app.
+document.querySelectorAll('.form-item-plano').forEach(function (form) {
+    var entregavel = form.querySelector('.sel-entregavel'), papel = form.querySelector('.sel-papel');
+    function atualizar() {
+        var opcao = entregavel.options[entregavel.selectedIndex];
+        var app = opcao && opcao.dataset.tipo === 'app';
+        form.querySelectorAll('.so-bump').forEach(function (el) { el.style.display = papel.value === 'bump' ? '' : 'none'; });
+        form.querySelectorAll('.so-app').forEach(function (el) { el.style.display = app ? '' : 'none'; });
+    }
+    entregavel.addEventListener('change', atualizar);
+    papel.addEventListener('change', atualizar);
+    atualizar();
+});
+</script>
+{% endblock %}

@@ -36,17 +36,22 @@ def app_teste(monkeypatch):
                     cor_botao_email='#000')
     monkeypatch.setattr(apps, 'APPS', {'teste': cfg})
     monkeypatch.setattr(lic, 'APPS', {'teste': cfg})
-    # Produto 77 é do tipo app (apps_produto): 90 dias do app "teste".
-    monkeypatch.setattr(database, 'get_app_produto',
-                        lambda pid: {'produto_id': 77, 'app_slug': 'teste', 'dias': 90} if int(pid) == 77 else None)
+    # Pedidos do plano com o app "teste" (90 dias): os de produto 77. Os outros não têm item app.
+    monkeypatch.setattr(lic, 'apps_do_pedido', lambda pid: [(cfg, 90)] if int(pid) in (10, 1, 3, 4) else [])
     return cfg
 
 
-def test_apps_do_produto(app_teste):
-    assert apps.apps_do_produto(77) == [(app_teste, 90)]
-    assert apps.apps_do_produto('77') == [(app_teste, 90)]
-    assert apps.apps_do_produto(1) == []
-    assert apps.apps_do_produto(None) == []
+def test_apps_do_pedido_vem_dos_itens_app_com_os_dias_do_plano(monkeypatch):
+    import database
+    cfg = AppConfig(slug='teste', nome='App Teste', nome_curto='T', descricao='', dominio='', email_suporte='s@x',
+                    email_remetente='s@x', nome_remetente='T', cor_tema='#fff', cor_fundo='#fff',
+                    cor_botao_email='#000')
+    monkeypatch.setattr(apps, 'APPS', {'teste': cfg})
+    consultas = []
+    linhas = [{'app_slug': 'teste', 'dias': 90}, {'app_slug': 'desligado', 'dias': 30}, {'app_slug': 'teste', 'dias': None}]
+    monkeypatch.setattr(database.db, 'execute_query', lambda sql, p=None, **k: consultas.append(p) or linhas)
+    assert apps.apps_do_pedido(10) == [(cfg, 90)]   # app fora de APPS e item sem dias ficam de fora
+    assert consultas == [(10,)]
 
 
 class CursorFalso:
@@ -101,7 +106,7 @@ def test_liberar_pedido_pago_soma_uma_vez_so(app_teste, monkeypatch):
 @pytest.mark.parametrize('pedido', [
     {'id': 1, 'produto_id': 77, 'email': 'a@b.com', 'contact_name': '', 'estado_id': 1002, 'valor_pago': 0},  # não pago
     {'id': 4, 'produto_id': 77, 'email': 'a@b.com', 'contact_name': '', 'estado_id': 0, 'valor_pago': 22},  # WhatsApp: não libera
-    {'id': 2, 'produto_id': 12, 'email': 'a@b.com', 'contact_name': '', 'estado_id': 1000, 'valor_pago': 10},  # não dá app
+    {'id': 2, 'produto_id': 12, 'email': 'a@b.com', 'contact_name': '', 'estado_id': 1000, 'valor_pago': 10},  # Básico: sem app
     {'id': 3, 'produto_id': 77, 'email': '', 'contact_name': '', 'estado_id': 1000, 'valor_pago': 22},  # sem e-mail
 ])
 def test_liberar_ignora_pedido_que_nao_libera(app_teste, monkeypatch, pedido):

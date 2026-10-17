@@ -1,4 +1,4 @@
-"""Valor da conversão no Google Ads: produto de app manda o valor real pago; os demais, a regra fixa."""
+"""Valor da conversão no Google Ads: venda do site manda o valor real pago; WhatsApp, R$ 10 fixo."""
 import sys
 import types
 from types import SimpleNamespace
@@ -14,23 +14,26 @@ except ImportError:
 
 from fluxos.fluxo_upload_google_ads import valor_conversao  # noqa: E402
 
-APPS = {16}
+
+def v(estado_id, valor_pago, produto_id=12):
+    return SimpleNamespace(produto_id=produto_id, estado_id=estado_id, valor_pago=valor_pago)
 
 
-def v(produto_id, valor_pago):
-    return SimpleNamespace(produto_id=produto_id, valor_pago=valor_pago)
+def test_venda_do_site_manda_o_valor_real_pago():
+    assert valor_conversao(v(1000, 22.0)) == '22.00'      # Completo
+    assert valor_conversao(v(1000, '28.90')) == '28.90'   # plano + um bump
+    assert valor_conversao(v(1000, 10.0)) == '10.00'      # Básico (antes: 20 fixo no produto 12)
+    assert valor_conversao(v(1000, 6.9, produto_id=14)) == '6.90'
 
 
-def test_produto_app_manda_o_valor_real_pago():
-    assert valor_conversao(v(16, 22.0), APPS) == '22.00'
-    assert valor_conversao(v(16, '28.90'), APPS) == '28.90'  # Guiado + um bump
+def test_venda_do_whatsapp_manda_10_fixo():
+    # O comprovante do WhatsApp não é validado: o valor digitado pode não ser o pago.
+    assert valor_conversao(v(0, 16.9)) == '10.00'
+    assert valor_conversao(v(0, 10.0, produto_id=8)) == '10.00'
 
 
-def test_produtos_de_ebook_continuam_com_a_regra_fixa():
-    assert valor_conversao(v(12, 10.0), APPS) == '20.00'
-    assert valor_conversao(v(8, 16.9), APPS) == '10.00'
-
-
-def test_app_sem_valor_pago_cai_na_regra_fixa():
-    assert valor_conversao(v(16, None), APPS) == '10.00'
-    assert valor_conversao(v(16, 0), APPS) == '10.00'
+def test_venda_sem_valor_pago_cai_no_fixo():
+    assert valor_conversao(v(1000, None)) == '10.00'
+    assert valor_conversao(v(1000, 0)) == '10.00'
+    assert valor_conversao(v(1000, 'lixo')) == '10.00'
+    assert valor_conversao(SimpleNamespace(produto_id=12, valor_pago=22)) == '10.00'  # sem estado

@@ -1,7 +1,7 @@
 """Configuração de um app (um arquivo config.py por app, ex.: apps/fatia/config.py).
 
 Aqui fica só o que é do app em si (nome, cores, suporte). O que se VENDE (preço, dias, bônus,
-renovação) é produto: tabela apps_produto, cadastrada no admin.
+renovação) são os planos dos produtos, cadastrados no admin ("Planos e entregáveis") — ver docs/PLANOS.md.
 """
 from dataclasses import dataclass
 

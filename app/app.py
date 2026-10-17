@@ -451,26 +451,31 @@ def fatia():
 def _planos_app_fatia(produto_basico_id):
     """(preço do Básico, Plano Guiado, desconto do popup) para a landing do Fatia.
 
-    Guiado = produto do tipo app do Fatia à venda no site (o mais caro). O popup ("última tentativa"
-    ao clicar no Básico) aparece quando esse produto tem desconto de oferta cadastrado
-    (produtos.desconto_oferta, migration 083): leva para o mesmo produto com o token da oferta no link
-    (web/oferta.py). Sem app: (preço, None, None) e a landing mostra só o Básico."""
+    Básico = plano padrão do produto. Guiado = o plano com o App Fatias à venda no site (de vitrine, não
+    renovação; o mais caro), de preferência do próprio produto (ex.: /pay/12?plano=completo). O popup
+    ("última tentativa" ao clicar no Básico) aparece quando esse plano tem desconto de oferta: leva para
+    ele com o token da oferta no link (web/oferta.py). Sem plano com app: (preço, None, None) e a landing
+    mostra só o Básico."""
     preco_basico, guiado, desconto = 10.0, None, None
     try:
-        from database import listar_apps_produto, get_ebook_principal_produto
-        from web.oferta import desconto_do_produto, gerar_token
-        principal = get_ebook_principal_produto(produto_basico_id)
-        if principal:
-            preco_basico = float(principal['preco_promocional'])
-        ofertas = listar_apps_produto('fatia', renovacao=False, so_venda_web=True)  # ordem: preço
+        from database import listar_planos_com_app, get_plano_venda
+        from web.oferta import desconto_do_plano, gerar_token
+        from web.links import link_checkout
+        basico = get_plano_venda(produto_basico_id)
+        if basico:
+            preco_basico = float(basico['preco_promocional'])
+        ofertas = [p for p in listar_planos_com_app('fatia', renovacao=False, so_venda_web=True) if p['vitrine']]
+        ofertas = [p for p in ofertas if p['produto_id'] == produto_basico_id] or ofertas  # ordem: preço
         if ofertas:
-            guiado = ofertas[-1]
+            guiado = dict(ofertas[-1])
+            guiado['href'] = link_checkout(guiado['produto_id'], guiado)
             preco = float(guiado['preco_promocional'])
-            valor_desconto = desconto_do_produto(guiado['produto_id'], preco)
+            valor_desconto = desconto_do_plano(guiado, preco)
             if valor_desconto > 0:
-                desconto = {'produto_id': guiado['produto_id'], 'preco_cheio': preco,
-                            'preco_promocional': round(preco - valor_desconto, 2), 'economia': valor_desconto,
-                            'oferta': gerar_token(guiado['produto_id'])}
+                desconto = {'preco_cheio': preco, 'preco_promocional': round(preco - valor_desconto, 2),
+                            'economia': valor_desconto,
+                            'href': link_checkout(guiado['produto_id'], guiado,
+                                                  oferta=gerar_token(guiado['produto_id'], guiado['id']))}
     except Exception as e:
         logger.error(f"[FATIA-E] Erro ao buscar os planos do app: {e}")
     return preco_basico, guiado, desconto

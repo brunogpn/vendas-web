@@ -44,7 +44,8 @@ Progresso a acompanhar:
 - [ ] Adicionar rota GET /<slug>-e em app/app.py
 - [ ] Ajustar produtos: preco, descricao, disponivel_web=1, email_remetente/nome/cores,
       url_pagina_vendas
-- [ ] Admin → E-books do produto: principal (arquivo, capas, preço), bônus (grátis) e order bumps (pagos)
+- [ ] Admin → Planos e entregáveis: plano padrão (nome, preço, capas) com principal, bônus (grátis) e
+      order bumps (pagos) do catálogo; outras ofertas = outros planos (docs/PLANOS.md)
 - [ ] Converter imagens novas pra WebP, descartar original
 - [ ] Rebuild + deploy do container app
 - [ ] Testar (curl + Playwright, desktop e mobile)

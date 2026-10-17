@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout — {{ ebook_principal.nome_venda }}</title>
+    <title>Checkout — {{ plano.nome }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -421,18 +421,18 @@
         <!-- Resumo do produto (vira uma listinha de itens quando um bump é marcado) -->
         <div class="card">
             <div class="resumo-hero">
-                {% if ebook_principal.imagem_grande %}
+                {% if plano.imagem_grande %}
                 <img class="resumo-hero-img"
-                     src="{{ url_for('static', filename='images/' + ebook_principal.imagem_grande) }}"
-                     alt="{{ ebook_principal.nome_venda }}"
+                     src="{{ url_for('static', filename='images/' + plano.imagem_grande) }}"
+                     alt="{{ plano.nome }}"
                      onerror="this.style.display='none'">
                 {% endif %}
                 <div class="resumo-hero-texto">
                     <div class="resumo-label">Detalhes da sua compra:{% if desconto %} <span class="selo-oferta">🎁 Oferta aplicada</span>{% endif %}</div>
                     <div id="resumoItens" class="resumo-itens">
                         <div class="linha-item linha-item-principal">
-                            <span>{{ ebook_principal.nome_venda }}</span>
-                            <span>R$ {{ "%.2f"|format(ebook_principal.preco_promocional) }}</span>
+                            <span>{{ plano.nome }}</span>
+                            <span>R$ {{ "%.2f"|format(plano.preco_promocional) }}</span>
                         </div>
                         {% if desconto %}
                         <div class="linha-item linha-item-desconto">
@@ -443,11 +443,26 @@
                     </div>
                     <div class="resumo-total-wrap">
                         <span>Total</span>
-                        <strong id="resumoTotal">R$ {{ "%.2f"|format((ebook_principal.preco_promocional|float) - (desconto or 0)) }}</strong>
+                        <strong id="resumoTotal">R$ {{ "%.2f"|format((plano.preco_promocional|float) - (desconto or 0)) }}</strong>
                     </div>
                 </div>
             </div>
         </div>
+
+        {% if plano.principais|length > 1 %}
+        <!-- Plano com mais de um item principal (ex.: Completo = app + e-book): o que vem no plano -->
+        <div class="bonus-box">
+            <div class="bonus-titulo">✅ O que você recebe</div>
+            {% for p in plano.principais %}
+            <div class="bonus-item">
+                <span class="check">✓</span>
+                <span>
+                    <strong>{{ '📱' if p.tipo == 'app' else '📖' }} {{ p.nome_venda }}</strong>{% if p.tipo == 'app' and p.dias %} — {{ p.dias }} dias de acesso{% endif %}{% if p.descricao %} — {{ p.descricao }}{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         {% if bonus %}
         <!-- Bônus incluídos -->
@@ -604,7 +619,7 @@
 
         <div class="total-linha">
             <span>Total</span>
-            <strong id="totalDisplay">R$ {{ "%.2f"|format((ebook_principal.preco_promocional|float) - (desconto or 0)) }}</strong>
+            <strong id="totalDisplay">R$ {{ "%.2f"|format((plano.preco_promocional|float) - (desconto or 0)) }}</strong>
         </div>
 
         <button class="btn-finalizar" id="btnFinalizar">FINALIZAR COMPRA</button>
@@ -672,11 +687,12 @@
 
 <script
     data-produto-id="{{ produto.id }}"
-    data-preco="{{ '%.2f'|format(ebook_principal.preco_promocional) }}"
-    data-nome="{{ ebook_principal.nome_venda }}"
+    data-preco="{{ '%.2f'|format(plano.preco_promocional) }}"
+    data-nome="{{ plano.nome }}"
     data-pedido-id-inicial="{{ pedido_id_inicial or '' }}"
     data-desconto="{{ '%.2f'|format(desconto or 0) }}"
     data-oferta="{{ oferta or '' }}"
+    data-plano="{{ plano.slug }}"
     data-tem-cartao="{{ '1' if config_cartao else '' }}"
     id="checkout-config">
 </script>
@@ -688,6 +704,7 @@
     // busca o desconto no banco — o valor daqui é só para mostrar.
     const DESCONTO = parseFloat(_cfg.desconto) || 0;
     const OFERTA = _cfg.oferta || '';
+    const PLANO = _cfg.plano || '';
     const PRODUTO_NOME = _cfg.nome;
     const TEM_CARTAO = !!_cfg.temCartao;
     // Pedido criado ao carregar a página (funil: chegou no checkout) — se o cliente finalizar,
@@ -1193,7 +1210,7 @@
     // histórico do navegador.
     // Produto do tipo app (ex.: App Fatias): vai direto para o app, já logada (a rota abre a
     // licença na hora); produto de e-book segue para a Estante como sempre.
-    const APP_SLUG = {{ (ebook_principal.app_slug or '')|tojson }};
+    const APP_SLUG = {{ (plano.app_slug or '')|tojson }};
     function pagamentoConfirmado(guid) {
         mostrarEstado('sucesso');
         setTimeout(() => {
@@ -1296,7 +1313,7 @@
         recalcularTotal();
 
         const endpoint = (metodoAtual === 'cartao') ? '/api/v1/cartao/gerar' : '/api/v1/pix/gerar';
-        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, oferta: OFERTA, desconto_exibido: DESCONTO, ...dados, ...utmData };
+        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, plano: PLANO, oferta: OFERTA, desconto_exibido: DESCONTO, ...dados, ...utmData };
         if (dadosCartao) Object.assign(payload, dadosCartao);
 
         try {

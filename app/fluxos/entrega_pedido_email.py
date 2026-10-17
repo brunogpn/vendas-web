@@ -60,11 +60,11 @@ def executar(pedido_id: int) -> None:
     guid = db.garantir_guid_pedido(pedido_id)
     link_estante = f"{base_url}/pedido2/{guid}"
     # Apps que esta compra dá (ex.: App Fatias): botão que entra no app já logada, via Estante.
-    from apps import apps_do_produto
+    from apps import apps_do_pedido
     apps = [{'nome': cfg.nome, 'link': f"{base_url}/pedido2/{guid}/abrir-app/{cfg.slug}"}
-            for cfg, _dias in apps_do_produto(pedido['produto_id'])]
+            for cfg, _dias in apps_do_pedido(pedido_id)]
     if apps:
-        # Produto do tipo app: não há o que "baixar" — o principal é o acesso ao app.
+        # Plano com app: o destaque do e-mail é o acesso ao app (os e-books seguem na Estante).
         subject = f'Pedido {pedido_num} ✅ Seu acesso está liberado: {nome_produto}!'
 
     html_entrega = _corpo_html(nome_cliente, nome_produto, itens, link_estante,
@@ -145,7 +145,8 @@ def _corpo_html(nome: str, nome_produto: str,
     # do mesmo link de acesso (a Estante) e não têm mais um botão próprio que os diferencie.
     resumo_partes = []
     if principais:
-        resumo_partes.append(f"você comprou <strong>{principais[0]['nome']}</strong>")
+        # Plano com vários principais (ex.: Completo = app + e-book): cita todos.
+        resumo_partes.append(f"você comprou <strong>{_juntar_nomes([i['nome'] for i in principais])}</strong>")
     if bonus_itens:
         nomes_bonus = _juntar_nomes([i['nome'] for i in bonus_itens])
         resumo_partes.append(f"ganhou de bônus <strong>{nomes_bonus}</strong>")

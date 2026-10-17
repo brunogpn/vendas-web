@@ -154,9 +154,10 @@ offer-sec (preço) → guar-sec (garantia 7 dias) → faq-sec → final CTA → 
 3. Ajustar a linha do produto em `produtos` (via admin ou SQL direto no ambiente de dev):
    `preco`, `descricao`, `disponivel_web=1`, `email_remetente`,
    `email_nome_remetente`, `email_cor_primaria/secundaria`, `url_pagina_vendas`.
-4. Admin → E-books do produto: vincular o principal (arquivo, capas, preço), os bônus (grátis) e os order bumps (upsell pago) —
-   sem esquecer de excluir o próprio produto da lista de bumps se ele já existir como bump em
-   outro produto.
+4. Admin → Planos e entregáveis: criar o plano padrão (`basico`: nome, preço, capas) e incluir o
+   e-book principal, os bônus (grátis) e os order bumps (upsell pago) do catálogo — sem esquecer de
+   não oferecer como bump o próprio e-book do produto. Mais de uma oferta (ex.: Completo com app) =
+   outro plano no mesmo produto, link `/pay/<id>?plano=<slug>`. Ver `docs/PLANOS.md`.
 5. Converter imagens novas pra WebP e descartar o PNG/JPG original (ver script abaixo).
 6. Rebuild + deploy: `docker compose build app && docker compose up -d app`.
 7. Testar: `curl` simples pra status 200 + rodar a suíte Playwright (seção 6) pra desktop e

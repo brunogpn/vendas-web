@@ -1,7 +1,8 @@
 """Configuração do App Fatias (/app/fatia/).
 
-Os produtos que vendem o app (Plano Guiado, renovações) são cadastrados no admin como produto do
-tipo app (tabela apps_produto). Valores marcados PENDENTE dependem de decisão do Leo e do Bruno.
+Os planos que vendem o app (Completo/Guiado, renovações) são cadastrados no admin, em "Planos e
+entregáveis" do produto, com o App Fatias como item. Valores marcados PENDENTE dependem de decisão do
+Leo e do Bruno.
 """
 import os
 
