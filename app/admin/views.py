@@ -120,9 +120,8 @@ def listar_produtos():
         return redirect(url_for('admin.dashboard'))
 
 def _nome_arquivo_imagem(valor):
-    """Extrai só o nome do arquivo de `imagem_checkout` — protege contra o admin colar
-    a URL completa por engano (hábito do campo vizinho url_imagem_complementar) e contra
-    qualquer componente de diretório (ex: '../') no valor digitado."""
+    """Extrai só o nome do arquivo de uma imagem do catálogo (capa grande/pequena) — protege contra o
+    admin colar a URL completa por engano e contra qualquer componente de diretório (ex: '../')."""
     valor = (valor or '').strip()
     if not valor:
         return None
@@ -221,8 +220,6 @@ def dados_basicos_produto(produto_id):
                     disponivel_web        = %s,
                     url_pagina_vendas     = %s,
                     numero_convenio_bb    = %s,
-                    imagem_checkout       = %s,
-                    url_pdf               = %s,
                     url_imagem_complementar = %s,
                     email_remetente       = %s,
                     email_nome_remetente  = %s,
@@ -241,8 +238,6 @@ def dados_basicos_produto(produto_id):
                 1 if request.form.get('disponivel_web') else 0,
                 request.form.get('url_pagina_vendas') or None,
                 request.form.get('numero_convenio_bb') or None,
-                _nome_arquivo_imagem(request.form.get('imagem_checkout')),
-                request.form.get('url_pdf') or None,
                 request.form.get('url_imagem_complementar') or None,
                 request.form.get('email_remetente') or None,
                 request.form.get('email_nome_remetente') or None,
@@ -609,58 +604,27 @@ def clonar_produto(produto_id):
         # Insere uma cópia com nome diferente; execute_query retorna lastrowid
         novo_id = db.execute_query("""
             INSERT INTO produtos (
-                nome, preco, descricao, prompt_vendas, faq, prompt_followup,
-                url_faq_produto, url_audio_introducao, url_audio_explicativo,
-                url_audio_pedido_entregue, url_imagem_complementar,
-                url_arquivo_produto, caption_arquivo_produto, nome_arquivo_produto,
-                mensagem_introducao, mensagem_pedido_enviado_sem_interesse,
-                mensagem_para_pagamento, chave_pix, pix_destinatario_esperado,
-                valor_minimo_pagamento, mensagem_pagamento_confirmado,
-                mensagem_comprovante_invalido, url_arquivo_surpresa,
-                caption_arquivo_surpresa, nome_arquivo_surpresa,
+                nome, preco, descricao, prompt_vendas, faq, url_imagem_complementar,
+                url_arquivo_produto, chave_pix,
                 google_sheets_spreadsheet_id, google_sheets_sheet_name,
                 google_ads_conversion_name, numero_convenio_bb, disponivel_web,
-                url_pdf, url_pdf_bonus, email_remetente,
-                email_nome_remetente, email_cor_primaria, email_cor_secundaria,
+                email_remetente, email_nome_remetente, email_cor_primaria, email_cor_secundaria,
                 ativo
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            )
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             f"Cópia de {produto['nome']}",  # nome diferente para identificar
             produto['preco'],
             produto['descricao'],
             produto['prompt_vendas'],
             produto['faq'],
-            produto['prompt_followup'],
-            produto['url_faq_produto'],
-            produto['url_audio_introducao'],
-            produto['url_audio_explicativo'],
-            produto['url_audio_pedido_entregue'],
             produto['url_imagem_complementar'],
             produto['url_arquivo_produto'],
-            produto['caption_arquivo_produto'],
-            produto['nome_arquivo_produto'],
-            produto['mensagem_introducao'],
-            produto['mensagem_pedido_enviado_sem_interesse'],
-            produto['mensagem_para_pagamento'],
             produto['chave_pix'],
-            produto['pix_destinatario_esperado'],
-            produto['valor_minimo_pagamento'],
-            produto['mensagem_pagamento_confirmado'],
-            produto['mensagem_comprovante_invalido'],
-            produto['url_arquivo_surpresa'],
-            produto['caption_arquivo_surpresa'],
-            produto['nome_arquivo_surpresa'],
             produto['google_sheets_spreadsheet_id'],
             produto['google_sheets_sheet_name'],
             produto['google_ads_conversion_name'],
             produto['numero_convenio_bb'],
             0,  # disponivel_web = FALSE por padrão
-            produto['url_pdf'],
-            produto['url_pdf_bonus'],
             produto['email_remetente'],
             produto['email_nome_remetente'],
             produto['email_cor_primaria'],
@@ -700,7 +664,7 @@ def clonar_produto(produto_id):
         # (constraint uk_telefone na tabela telefones_produto).
         # O usuário deve configurar telefones manualmente para o novo produto.
 
-        flash(f'Produto clonado com sucesso! {contador_acoes} ações e {contador_mensagens} mensagens copiadas. ⚠️ Configure os números WhatsApp manualmente. Revise e ative quando estiver pronto.', 'success')
+        flash(f'Produto clonado com sucesso! {contador_acoes} ações e {contador_mensagens} mensagens copiadas. ⚠️ Configure os números WhatsApp e vincule os e-books (principal, bônus e bumps) em "E-books do produto" — a clonagem não copia o catálogo. Revise e ative quando estiver pronto.', 'success')
         logger.info(f"[ADMIN] ✅ Produto #{produto_id} clonado (#{novo_id}) por {current_user.email} - {contador_acoes} ações, {contador_mensagens} mensagens (telefones não clonados)")
 
         # Seleciona o clone como produto ativo e vai para os submenus

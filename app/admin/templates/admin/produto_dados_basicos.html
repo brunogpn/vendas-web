@@ -197,26 +197,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="imagem_checkout">Imagem do checkout (nome do arquivo em static/images)</label>
-                            <input type="text" id="imagem_checkout" name="imagem_checkout" maxlength="255"
-                                   value="{{ produto.imagem_checkout or '' }}"
-                                   placeholder="Ex: tempero-capa.webp">
-                            <p class="field-hint">Suba o arquivo em /admin/arquivos e cole aqui só o nome</p>
-                        </div>
-
-                        <div class="form-group">
                             <label for="url_imagem_complementar">Imagem complementar (portfólio)</label>
                             <input type="text" id="url_imagem_complementar" name="url_imagem_complementar"
                                    value="{{ produto.url_imagem_complementar or '' }}"
                                    placeholder="URL da imagem exibida no card do portfólio">
-                        </div>
-
-                        <div class="form-group span-2">
-                            <label for="url_pdf">Arquivo PDF principal entregue no checkout web (nome do arquivo)</label>
-                            <input type="text" id="url_pdf" name="url_pdf"
-                                   value="{{ produto.url_pdf or '' }}"
-                                   placeholder="Ex: guia-paes-saudaveis.pdf">
-                            <p class="field-hint">Nome do arquivo PDF em /static/arquivos/ que é gravado no pedido no momento da compra web — é este arquivo que o cliente recebe por e-mail. Confira sempre depois de clonar um produto.</p>
                         </div>
 
                         <div class="form-group span-2">

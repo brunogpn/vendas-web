@@ -54,7 +54,6 @@ Internet
 - `GET /pay/<produto_id>` — checkout web
 - `POST /api/v1/pix/gerar` — gera PIX (Banco do Brasil)
 - `GET /api/v1/pix/status/<txid>` — status do pagamento
-- `GET /api/v1/produto/pdf/<pedido_id>` — entrega do produto digital
 
 **Blueprint `/admin`** (`app/admin/views.py`):
 - Dashboard, CRUD de produtos e usuários
@@ -187,8 +186,6 @@ GET /api/v1/pix/status/<txid>  ← frontend faz polling
 | `POST` | `/api/v1/pix/gerar` | Cria pedido + gera QR PIX |
 | `GET` | `/api/v1/pix/pedido/<pedido_id>` | Retorna txid e estado do pedido |
 | `GET` | `/api/v1/pix/status/<txid>` | Verifica se foi pago (polling) |
-| `GET` | `/api/v1/produto/pdf/<pedido_id>` | Serve PDF do produto (legado) |
-| `GET` | `/api/v1/produto/pdf/<pedido_id>/bonus` | Serve PDF bônus (legado) |
 
 ### Arquivos Envolvidos
 

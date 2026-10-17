@@ -953,26 +953,3 @@ def _consolidar_itens_ebook(linhas):
         elif atual['bloqueado'] and not item['bloqueado']:
             escolhidos[chave] = item
     return [escolhidos[chave] for chave in ordem]
-
-
-def entregar_pdf(pedido_id: int, bonus: bool = False):
-    """
-    Mantido para compatibilidade com pedidos antigos (pedido_web).
-    Valida se o pedido_web foi pago e retorna (caminho, nome_arquivo).
-
-    Retorna (None, 403) se o pagamento não foi confirmado.
-    Retorna (None, 404) se bonus=True e o produto não tem url_pdf_bonus.
-    """
-    from database import get_pedido_web, get_produto_web
-    pedido = get_pedido_web(pedido_id)
-    if not pedido or pedido.get('estado') != 0:
-        return None, 403
-    produto = get_produto_web(pedido['remetente_id'])
-    if bonus:
-        arquivo = produto.get('url_pdf_bonus', '') if produto else ''
-        if not arquivo:
-            return None, 404
-    else:
-        arquivo = produto.get('url_pdf', 'paes-sem-gluten.pdf') if produto else 'paes-sem-gluten.pdf'
-    caminho = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'arquivos', arquivo)
-    return caminho, arquivo

@@ -65,13 +65,12 @@ WHATSAPP_PHONE_NUMBER_ID=seu-phone-number-id
 
 A tabela `produtos` agora suporta campos de personalização por produto:
 
-- `prompt_vendas`
-- `prompt_followup`
-- `url_audio_introducao`
-- `url_audio_explicativo`
-- `url_imagem_complementar`
-- `url_arquivo_produto`
-- `mensagem_introducao`
+- `prompt_vendas` / `prompt_vendas_email` / `faq` (IA de vendas e de e-mail)
+- `url_arquivo_produto` (PDF que a IA lê para responder dúvidas)
+- `url_imagem_complementar` (card do portfólio)
+
+Mensagens, áudios e arquivos de cada etapa do WhatsApp ficam em `acoes_fluxo_produto` (fluxos
+dinâmicos); o que é entregue (e-books, bônus, bumps) fica no catálogo (`ebooks` + `ebooks_produto`).
 
 Esses campos permitem deixar os fluxos responsivos para diferentes produtos sem hardcode no Python.
 

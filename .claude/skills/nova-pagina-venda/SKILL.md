@@ -34,7 +34,7 @@ Use AskUserQuestion pra confirmar, um de cada vez ou agrupado:
 4. Levante assets já existentes do produto (`static/images/`, `static/audios/`,
    `static/arquivos/`) antes de pedir novos.
 5. Consulte o estado atual da linha do produto em `produtos` — geralmente tem campos errados
-   copiados de outro produto (`url_pdf`, `email_remetente` etc).
+   copiados de outro produto (`email_remetente` etc).
 
 ## Fase 3 — Implementação
 
@@ -42,9 +42,9 @@ Progresso a acompanhar:
 ```
 - [ ] Copiar fatia-e.html -> app/templates/<slug>-e.html, adaptar copy/imagens/paleta
 - [ ] Adicionar rota GET /<slug>-e em app/app.py
-- [ ] Ajustar produtos: preco, descricao, disponivel_web=1, url_pdf, imagem_checkout,
-      email_remetente/nome/cores, url_pagina_vendas
-- [ ] Cadastrar produto_bonus (grátis) e revisar produto_bump (pago)
+- [ ] Ajustar produtos: preco, descricao, disponivel_web=1, email_remetente/nome/cores,
+      url_pagina_vendas
+- [ ] Admin → E-books do produto: principal (arquivo, capas, preço), bônus (grátis) e order bumps (pagos)
 - [ ] Converter imagens novas pra WebP, descartar original
 - [ ] Rebuild + deploy do container app
 - [ ] Testar (curl + Playwright, desktop e mobile)

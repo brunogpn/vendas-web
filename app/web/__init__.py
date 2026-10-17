@@ -434,21 +434,3 @@ def pedido_arquivo(guid, item_id):
     inline = request.args.get('download') != '1'
     return send_file(caminho, mimetype='application/pdf',
                      as_attachment=not inline, download_name=item['nome_arquivo'])
-
-
-@web_bp.get('/api/v1/produto/pdf/<int:pedido_id>')
-def servir_pdf(pedido_id):
-    from web.checkout import entregar_pdf
-    caminho, arquivo = entregar_pdf(pedido_id)
-    if caminho is None:
-        return jsonify({'error': 'Pagamento não confirmado'}), arquivo
-    return send_file(caminho, as_attachment=True, download_name=arquivo)
-
-
-@web_bp.get('/api/v1/produto/pdf/<int:pedido_id>/bonus')
-def servir_pdf_bonus(pedido_id):
-    from web.checkout import entregar_pdf
-    caminho, arquivo = entregar_pdf(pedido_id, bonus=True)
-    if caminho is None:
-        return jsonify({'error': 'Pagamento não confirmado ou bônus não disponível'}), arquivo
-    return send_file(caminho, as_attachment=True, download_name=arquivo)

@@ -37,7 +37,7 @@ Nunca assuma — pergunte ao usuário:
 - Levante os assets já existentes do produto (`static/images/`, `static/audios/`,
   `static/arquivos/`) antes de pedir novos — geralmente já tem bastante coisa aproveitável do
   fluxo WhatsApp.
-- Confira o estado atual da linha do produto em `produtos` (preço, `disponivel_web`, `url_pdf`,
+- Confira o estado atual da linha do produto em `produtos` (preço, `disponivel_web`,
   `email_remetente` etc.) — é comum estar com valores errados/copiados de outro produto.
 
 ## 3. Design system (paleta e componentes reaproveitáveis de `fatia-e.html`)
@@ -152,9 +152,9 @@ offer-sec (preço) → guar-sec (garantia 7 dias) → faq-sec → final CTA → 
    copy, imagens, cores, contagem de bônus/e-books.
 2. Adicionar rota `GET /<slug>-e` em `app/app.py`, copiando o bloco de `fatia_e()`.
 3. Ajustar a linha do produto em `produtos` (via admin ou SQL direto no ambiente de dev):
-   `preco`, `descricao`, `disponivel_web=1`, `url_pdf`, `imagem_checkout`, `email_remetente`,
+   `preco`, `descricao`, `disponivel_web=1`, `email_remetente`,
    `email_nome_remetente`, `email_cor_primaria/secundaria`, `url_pagina_vendas`.
-4. Cadastrar `produto_bonus` (itens grátis) e revisar/cadastrar `produto_bump` (upsell pago) —
+4. Admin → E-books do produto: vincular o principal (arquivo, capas, preço), os bônus (grátis) e os order bumps (upsell pago) —
    sem esquecer de excluir o próprio produto da lista de bumps se ele já existir como bump em
    outro produto.
 5. Converter imagens novas pra WebP e descartar o PNG/JPG original (ver script abaixo).
