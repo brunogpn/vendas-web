@@ -164,6 +164,14 @@
                             </select>
                             <p class="field-hint">Configuração fiscal (CNPJ, certificado) fica na tela "Fiscal / NF-e" — aqui só escolhe qual delas emite pra este produto</p>
                         </div>
+                        <div class="form-group span-2">
+                            <label>
+                                <input type="checkbox" name="nfe_automatica" value="1"
+                                       {% if produto.nfe_automatica %}checked{% endif %}>
+                                Emitir NF-e automaticamente (rotina diária, como livro)
+                            </label>
+                            <p class="field-hint">Desmarque para produto que não é livro (ex.: Música): os pagamentos dele ficam fora da emissão automática por PIX e cartão</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>

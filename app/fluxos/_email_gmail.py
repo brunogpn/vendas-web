@@ -22,7 +22,7 @@ _GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 def enviar(destinatario: str, remetente: str, nome_remetente: str,
           subject: str, html: str, imagens_inline: list = None,
           thread_id: str = None, in_reply_to: str = None,
-          conta: str = 'admin@lsnlivros.com.br') -> dict:
+          conta: str = 'admin@lsnlivros.com.br', cc: str = None) -> dict:
     """
     imagens_inline: lista opcional de {'cid': str, 'dados': bytes, 'subtype': str}.
     Referencie no HTML via <img src="cid:{cid}">. Anexo MIME inline (Content-ID),
@@ -41,6 +41,8 @@ def enviar(destinatario: str, remetente: str, nome_remetente: str,
 
     conta: caixa do Workspace que envia (impersonada pela Service Account). O atendimento por
     e-mail passa a caixa de teste no dev (fluxos/_gmail_labels.caixa_atendimento).
+
+    cc: endereço em cópia (opcional; ex.: a Música de presente vai para quem recebe com cópia para quem comprou).
     """
     # Usa sempre a SA do produto 6 (conta empresarial com Google Workspace)
     # TODO: migrar produto 1 para Workspace e usar GOOGLE_SA_JSON_P{produto_id}
@@ -58,6 +60,8 @@ def enviar(destinatario: str, remetente: str, nome_remetente: str,
 
     msg = MIMEMultipart('related') if imagens_inline else MIMEMultipart('alternative')
     msg['to']      = destinatario
+    if cc:
+        msg['cc']  = cc
     msg['from']    = formataddr((nome_remetente, remetente))
     msg['subject'] = subject
     dominio_msgid = remetente.split('@')[-1] if '@' in (remetente or '') else 'lsnlivros.com.br'

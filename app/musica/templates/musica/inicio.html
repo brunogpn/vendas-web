@@ -1,0 +1,255 @@
+{% extends "musica/musica_base.html" %}
+{# Páginas por ocasião para os anúncios: /musica/?ocasiao=mae (título e foto da abertura mudam) #}
+{% set paginas = {
+  "mae": {"titulo": "Uma música feita só para a sua mãe", "img": "mae-filha.jpg", "alt": "Mãe e filha abraçadas na praia", "quiz": "Dia das Mães"},
+  "pai": {"titulo": "Uma música feita só para o seu pai", "img": "pai-filha.jpg", "alt": "Pai sorrindo com a filha no colo", "quiz": "Dia dos Pais"},
+  "namorados": {"titulo": "A história de vocês virou música", "img": "casal.jpg", "alt": "Casal sorrindo juntos", "quiz": "Dia dos Namorados"},
+  "casamento": {"titulo": "A música do casamento de vocês", "img": "casamento.jpg", "alt": "Noivos sorrindo no casamento", "quiz": "Casamento"},
+  "desculpas": {"titulo": "Às vezes, uma música diz o que a gente não consegue", "img": "casal.jpg", "alt": "Casal abraçado", "quiz": "Pedido de desculpas"},
+  "aniversario": {"titulo": "Um parabéns que ninguém vai esquecer", "img": "avo-aniversario.jpg", "alt": "Senhor sorrindo diante do bolo de aniversário", "quiz": "Aniversário"},
+  "formatura": {"titulo": "Uma música para celebrar essa conquista", "img": "formatura.jpg", "alt": "Formanda abraçada com a mãe", "quiz": "Formatura"},
+  "15anos": {"titulo": "Uma música para os 15 anos dela", "img": "quinze-anos.jpg", "alt": "Debutante no vestido de festa", "quiz": "Aniversário"},
+  "filho": {"titulo": "Uma música feita só para o seu filho ou filha", "img": "familia-final.jpg", "alt": "Pais beijando a filha", "quiz": ""},
+} %}
+{% set pg = paginas.get(ocasiao, {"titulo": "Uma música feita só para quem você ama", "img": "capa-fone.jpg", "alt": "Mãe e filha dividindo o fone de ouvido e sorrindo", "quiz": ""}) %}
+{% set ocasioes = [
+  {"nome": "Dia das Mães", "slug": "Dia das Mães", "img": "mae-filha.jpg", "audio": "mae-rosa.mp3", "musica": "Dona Rosa, Meu Abraço"},
+  {"nome": "Casamento", "slug": "Casamento", "img": "casamento.jpg", "audio": "casal-mi.mp3", "musica": "Mi, Meu Sim É Seu"},
+  {"nome": "Aniversário", "slug": "Aniversário", "img": "avo-aniversario.jpg", "audio": "avo-ze.mp3", "musica": "O Forró do Vô Zé"},
+  {"nome": "Dia dos Pais", "slug": "Dia dos Pais", "img": "pai-filha.jpg", "audio": "pai-carlos.mp3", "musica": "Painho, Meu Lugar"},
+  {"nome": "Dia dos Namorados", "slug": "Dia dos Namorados", "img": "casal.jpg", "audio": "namorados-bia.mp3", "musica": "Bia, É Só Você Sorrir"},
+  {"nome": "15 anos", "slug": "Aniversário", "img": "quinze-anos.jpg", "audio": "quinze-sofi.mp3", "musica": "Sofi, Pode Sonhar"},
+  {"nome": "Formatura", "slug": "Formatura", "img": "formatura.jpg", "audio": "formatura-je.mp3", "musica": "Jé, Pode Comemorar"},
+  {"nome": "Só porque eu amo", "slug": "Só porque eu amo", "img": "amigos.jpg", "audio": "amigos-celo.mp3", "musica": "Celo, Meu Bom Amigo"},
+] %}
+{% block estilo %}
+<style>
+.largura{max-width:1180px;margin:0 auto;padding:0 24px}
+.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--fundo) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+.nav.rolou{border-bottom-color:var(--linha)}
+.nav .largura{display:flex;align-items:center;justify-content:space-between;height:68px;gap:24px}
+.nav nav{display:flex;align-items:center;gap:28px}
+.nav nav a{color:var(--suave);text-decoration:none;font-weight:500;font-size:1rem}
+.nav nav a:hover{color:var(--texto)}
+.nav nav a.botao,.nav nav a.botao:hover{color:var(--sobre-cor)}
+.nav .botao{width:auto;min-height:44px;padding:10px 22px;font-size:1rem;white-space:nowrap}
+.nav .marca{white-space:nowrap}
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center;padding:56px 0 72px}
+.hero h1{margin-bottom:18px}
+.hero p.sub{font-size:1.2rem;color:var(--suave);max-width:30ch;margin:0 0 32px}
+.acoes{display:flex;gap:12px;flex-wrap:wrap}
+.acoes .botao{width:auto}
+.foto-hero{position:relative;border-radius:var(--raio);overflow:hidden;aspect-ratio:4/5;box-shadow:var(--sombra)}
+.foto-hero img{width:100%;height:100%;object-fit:cover}
+.garantias{display:flex;gap:36px;flex-wrap:wrap;padding:26px 0;border-top:1px solid var(--linha);border-bottom:1px solid var(--linha)}
+.garantias div{display:flex;align-items:center;gap:12px;font-weight:600}
+.garantias i{font-size:1.6rem;color:var(--cor)}
+section.bloco{padding:80px 0}
+.trilho-topo{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+.setas{display:flex;gap:10px}
+.setas button{width:52px;height:52px;border-radius:999px;border:1.5px solid var(--linha);background:var(--cartao);color:var(--texto);font-size:1.3rem;cursor:pointer;display:grid;place-items:center}
+.setas button:hover{border-color:var(--texto)}
+.trilho{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,23%);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:32px;padding-bottom:8px;scrollbar-width:none;overscroll-behavior-x:contain}
+.trilho::-webkit-scrollbar{display:none}
+.ex{position:relative;border-radius:var(--raio);overflow:hidden;aspect-ratio:3/4;color:#fff;background:#222;scroll-snap-align:start;display:block;text-decoration:none}
+.ex img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.ex:hover img{transform:scale(1.04)}
+.ex::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,10,9,.88) 0%,rgba(12,10,9,.25) 50%,transparent 100%)}
+.ex .info{position:absolute;left:20px;right:20px;bottom:20px;z-index:1}
+.ex .info strong{display:block;font-family:var(--titulo);font-size:1.7rem;line-height:1.05;letter-spacing:-.02em;margin:14px 0 4px}
+.ex .info span{font-size:.92rem;opacity:.85}
+.tocar{position:relative;z-index:2;width:58px;height:58px;border-radius:999px;border:0;background:#fff;color:#1C1917;display:grid;place-items:center;cursor:pointer;font-size:1.6rem;transition:transform .2s}
+.tocar:hover{transform:scale(1.06)} .tocar:active{transform:scale(.96)}
+.ex.tocando .tocar{background:var(--cor);color:#fff}
+.ex-cta{border-radius:var(--raio);background:var(--cor);color:var(--sobre-cor);padding:28px;display:flex;flex-direction:column;justify-content:space-between;aspect-ratio:3/4;scroll-snap-align:start}
+.ex-cta h3{font-size:1.9rem;color:inherit}
+.ex-cta .botao{background:var(--sobre-cor);color:var(--cor-forte)}
+.como{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:72px;align-items:center}
+.como .foto{border-radius:var(--raio);overflow:hidden;aspect-ratio:4/5}
+.como .foto img{width:100%;height:100%;object-fit:cover}
+.passos{list-style:none;padding:0;margin:32px 0 0;display:grid;gap:30px;counter-reset:p}
+.passos li{display:grid;grid-template-columns:56px 1fr;gap:18px;counter-increment:p}
+.passos li::before{content:counter(p);font-family:var(--titulo);font-weight:800;font-size:1.3rem;width:56px;height:56px;border-radius:999px;display:grid;place-items:center;background:var(--cor-clara);color:var(--cor-forte)}
+.passos h3{margin:6px 0 4px}
+.passos p{margin:0;color:var(--suave)}
+.oferta{max-width:560px;margin:0 auto;text-align:center}
+.oferta .cartao{padding:40px 36px;margin-top:32px}
+.preco{font-family:var(--titulo);font-weight:800;font-size:3.4rem;letter-spacing:-.03em;line-height:1;margin:6px 0}
+.inclui{list-style:none;padding:0;margin:26px 0 30px;text-align:left;display:grid;gap:12px}
+.inclui li{display:flex;gap:12px;align-items:flex-start}
+.inclui i{color:var(--ok);font-size:1.3rem;margin-top:2px}
+.duvidas{max-width:760px;margin:0 auto}
+.duvidas details{border-bottom:1px solid var(--linha);padding:22px 0}
+.duvidas summary{cursor:pointer;font-weight:700;font-size:1.12rem;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.duvidas summary::-webkit-details-marker{display:none}
+.duvidas summary::after{content:"+";font-size:1.5rem;line-height:1;color:var(--cor)}
+.duvidas details[open] summary::after{content:"−"}
+.duvidas details p{margin:12px 0 0;color:var(--suave)}
+.final{position:relative;border-radius:var(--raio);overflow:hidden;min-height:440px;display:flex;align-items:flex-end;color:#fff;margin-bottom:72px}
+.final img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.final::after{content:"";position:absolute;inset:0;background:linear-gradient(to right,rgba(12,10,9,.82) 0%,rgba(12,10,9,.45) 55%,rgba(12,10,9,.1) 100%)}
+.final .txt{position:relative;z-index:1;padding:48px;max-width:560px}
+.final h2{color:#fff}
+.final .botao{width:auto}
+footer{border-top:1px solid var(--linha);padding:32px 0 48px;color:var(--suave);font-size:.95rem}
+footer .largura{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.surgir{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.surgir.visivel{opacity:1;transform:none}
+@media (max-width: 900px){
+  .nav nav{display:none}
+  .hero{grid-template-columns:minmax(0,1fr);gap:28px;padding:20px 0 48px}
+  .hero p.sub{max-width:none}
+  .foto-hero{aspect-ratio:5/4;order:-1}
+  .acoes .botao{width:100%}
+  .garantias{gap:14px;flex-direction:column}
+  section.bloco{padding:64px 0}
+  .trilho{grid-auto-columns:72%}
+  .setas{display:none}
+  .como{grid-template-columns:minmax(0,1fr);gap:36px}
+  .como .foto{aspect-ratio:5/4}
+  .final .txt{padding:28px}
+}
+@media (max-width: 560px){ .largura{padding:0 16px} .oferta .cartao{padding:30px 20px} }
+@media (prefers-reduced-motion:reduce){ .surgir{opacity:1;transform:none} }
+</style>
+{% endblock %}
+
+{% block pagina %}
+<header class="nav" id="nav">
+  <div class="largura">
+    <a class="marca" href="{{ url_for('musica.inicio') }}"><i class="ti ti-music" aria-hidden="true"></i>{{ marca }}</a>
+    <nav>
+      <a href="#exemplos">Exemplos</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#duvidas">Dúvidas</a>
+      <a class="botao" href="{{ url_for('musica.criar') }}">Criar minha música</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="largura">
+    <section class="hero">
+      <div class="surgir">
+        <h1>{{ pg.titulo }}</h1>
+        <p class="sub">Conte a história de vocês. A gente transforma em música, com o nome e as lembranças de quem vai receber.</p>
+        <div class="acoes">
+          <a class="botao" href="{{ url_for('musica.criar', ocasiao=pg.quiz) if pg.quiz else url_for('musica.criar') }}">Criar minha música <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+          <a class="botao secundario" href="#exemplos"><i class="ti ti-player-play" aria-hidden="true"></i> Ouvir exemplos</a>
+        </div>
+      </div>
+      <div class="foto-hero surgir">
+        <img src="{{ url_for('musica.static', filename='img/' ~ pg.img) }}" alt="{{ pg.alt }}" fetchpriority="high" width="900" height="1100">
+      </div>
+    </section>
+
+    <div class="garantias surgir">
+      <div><i class="ti ti-headphones" aria-hidden="true"></i>Você ouve antes de pagar</div>
+      <div><i class="ti ti-clock" aria-hidden="true"></i>Pronta em poucos minutos</div>
+      <div><i class="ti ti-mail" aria-hidden="true"></i>Chega na hora, no seu e-mail</div>
+    </div>
+
+    <section class="bloco" id="exemplos">
+      <div class="trilho-topo surgir">
+        <div>
+          <h2>Para cada momento importante</h2>
+          <p class="suave" style="margin:0">Aperte o play e ouça músicas criadas aqui. Depois, é só contar a sua história.</p>
+        </div>
+        <div class="setas"><button type="button" data-dir="-1" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><button type="button" data-dir="1" aria-label="Avançar"><i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+      </div>
+      <div class="trilho" id="trilho">
+        {% for o in ocasioes %}
+        <a class="ex" href="{{ url_for('musica.criar', ocasiao=o.slug) }}">
+          <img src="{{ url_for('musica.static', filename='img/' ~ o.img) }}" alt="" loading="lazy" width="800" height="1000">
+          <div class="info">
+            <button class="tocar" type="button" data-audio="{{ url_for('musica.static', filename='exemplos/' ~ o.audio) }}" aria-label="Ouvir {{ o.musica }}"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+            <strong>{{ o.nome }}</strong><span>{{ o.musica }}</span>
+          </div>
+        </a>
+        {% endfor %}
+        <div class="ex-cta">
+          <h3>Agora é a vez da sua história</h3>
+          <a class="botao" href="{{ url_for('musica.criar') }}">Criar minha música</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloco como" id="como-funciona">
+      <div class="foto surgir"><img src="{{ url_for('musica.static', filename='img/ouvindo.jpg') }}" alt="Mulher de olhos fechados ouvindo música com fones" loading="lazy" width="900" height="1100"></div>
+      <div class="surgir">
+        <h2>Do seu jeito, em poucos minutos</h2>
+        <ol class="passos">
+          <li><div><h3>Conte a história</h3><p>Responda umas perguntas rápidas: o nome, o apelido e as lembranças que só vocês têm.</p></div></li>
+          <li><div><h3>Ouça antes de pagar</h3><p>Você lê a letra, pode pedir ajustes e ouve um trecho das duas versões da música.</p></div></li>
+          <li><div><h3>Entregue o presente</h3><p>Receba a música completa no seu e-mail, pronta para enviar e emocionar.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="bloco oferta" id="preco">
+      <h2 class="surgir">Um presente que ninguém esquece</h2>
+      <div class="cartao surgir">
+        <p class="suave" style="margin:0">Música completa</p>
+        <p class="preco">{{ preco_texto }}</p>
+        <p class="suave" style="margin:0">Pagamento único, no PIX ou no cartão</p>
+        <ul class="inclui">
+          <li><i class="ti ti-check" aria-hidden="true"></i>Duas versões completas da música para você escolher</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Letra escrita a partir da história de vocês</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Arquivo MP3 para guardar e compartilhar</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Entrega na hora, no seu e-mail</li>
+        </ul>
+        <a class="botao" href="{{ url_for('musica.criar') }}">Criar minha música</a>
+      </div>
+    </section>
+
+    <section class="bloco duvidas" id="duvidas" style="padding-top:0">
+      <h2 class="surgir">Dúvidas frequentes</h2>
+      <details><summary>Preciso pagar antes de ouvir?</summary><p>Não. Você ouve um trecho da música pronta e só paga se gostar.</p></details>
+      <details><summary>Posso mudar a letra?</summary><p>Pode. Antes de criar a música, você lê a letra e pede os ajustes que quiser.</p></details>
+      <details><summary>Quanto tempo demora?</summary><p>A letra fica pronta em menos de um minuto e a música, em poucos minutos.</p></details>
+      <details><summary>O que eu recebo?</summary><p>Duas versões completas da música em MP3, com a letra, no seu e-mail. Também dá para levar o videoclipe com as suas fotos, o cartão com QR code e a entrega por e-mail para quem vai receber.</p></details>
+      <details><summary>Quais estilos posso escolher?</summary><p>Sertanejo, gospel, pagode, samba, forró, piseiro, MPB, pop, rock, valsa, infantil e vários outros.</p></details>
+    </section>
+
+    <section class="final surgir">
+      <img src="{{ url_for('musica.static', filename='img/familia-final.jpg') }}" alt="Pai e mãe beijando a filha" loading="lazy" width="1600" height="900">
+      <div class="txt">
+        <h2>Tem alguém que merece ouvir isso hoje</h2>
+        <a class="botao" href="{{ url_for('musica.criar') }}">Criar minha música</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="largura">
+    <span>{{ marca }} · <a href="{{ url_for('musica.termos') }}" style="color:inherit">Termos de uso</a> · <a href="{{ url_for('musica.privacidade') }}" style="color:inherit">Privacidade</a></span>
+    <span>Música criada com ajuda de inteligência artificial. Fotos ilustrativas.</span>
+  </div>
+</footer>
+{% endblock %}
+
+{% block script %}
+<script>
+const nav = document.getElementById("nav");
+new IntersectionObserver(([e]) => nav.classList.toggle("rolou", !e.isIntersecting)).observe(document.querySelector(".hero"));
+
+const reveal = new IntersectionObserver(entradas => entradas.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("visivel"); reveal.unobserve(e.target); }
+}), {threshold: .15});
+document.querySelectorAll(".surgir").forEach(el => reveal.observe(el));
+
+const player = new Audio(); let atual = null;
+function parar(){ if (atual) { atual.closest(".ex").classList.remove("tocando"); atual.innerHTML = '<i class="ti ti-player-play" aria-hidden="true"></i>'; } atual = null; }
+document.querySelectorAll(".tocar").forEach(b => b.addEventListener("click", ev => {
+  ev.preventDefault(); ev.stopPropagation();
+  if (atual === b) { player.pause(); parar(); return; }
+  parar(); player.src = b.dataset.audio; player.play(); atual = b;
+  b.closest(".ex").classList.add("tocando"); b.innerHTML = '<i class="ti ti-player-pause" aria-hidden="true"></i>';
+}));
+player.addEventListener("ended", parar);
+const trilho = document.getElementById("trilho");
+document.querySelectorAll(".setas button").forEach(b => b.addEventListener("click", () =>
+  trilho.scrollBy({left: Number(b.dataset.dir) * trilho.clientWidth * .8, behavior: "smooth"})));
+</script>
+{% endblock %}

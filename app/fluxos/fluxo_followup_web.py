@@ -84,7 +84,15 @@ def _enviar_followup(pedido: dict) -> None:
     # O link reabre o pedido no plano dele (Completo reaberto como Básico viraria um pedido novo do Básico).
     from web.links import link_checkout
     plano = db.get_plano(pedido['plano_id']) if pedido.get('plano_id') else None
-    link_pagamento = pedido.get('url_bbpay') or f"{base_url}{link_checkout(produto_id, plano, pedido=pedido_id)}"
+    # Produto Música: o link leva a música do pedido (o checkout só vende música com ?musica=). Este e-mail vai
+    # para a própria cliente, então pode carregar o token.
+    musica = None
+    try:
+        from musica.integracao import token_do_pedido
+        musica = token_do_pedido(pedido_id)
+    except Exception as e:
+        logger.error(f'[FOLLOWUP-WEB] Erro ao buscar a música do pedido #{pedido_id}: {e}')
+    link_pagamento = pedido.get('url_bbpay') or f"{base_url}{link_checkout(produto_id, plano, pedido=pedido_id, musica=musica)}"
 
     subject = f'🎁 {nome_cliente}, seu {nome_produto} ainda está te esperando!'
 

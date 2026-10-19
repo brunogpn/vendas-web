@@ -1,3 +1,5 @@
+import re
+
 from flask import Blueprint, jsonify, request, send_file, render_template, make_response, redirect
 
 web_bp = Blueprint('web', __name__)
@@ -42,13 +44,36 @@ def _oferta_do_link(produto_id, plano):
     return (token, desconto) if desconto > 0 else (None, 0.0)
 
 
+def _sem_musica_volta_para_previa(produto_id, plano):
+    """Plano do produto Música: o checkout só abre com a música do link (?musica=<token>, vindo da prévia).
+    Sem ela (ou já comprada, ou não pronta), volta para a prévia/landing. None = pode seguir. O retorno do
+    BB Pay (?pedido=) segue: aquele pedido já tem a música gravada."""
+    from musica.dominio.recursos import plano_vende_musica   # sem dependências: não derruba o checkout dos e-books
+    if not plano_vende_musica(plano) or request.args.get('pedido'):
+        return None
+    from musica.integracao import Recusa, conferir_para_checkout
+    token = request.args.get('musica') or ''
+    try:
+        conferir_para_checkout(token, produto_id)
+    except Recusa:
+        return redirect(f'/musica/p/{token}' if re.fullmatch(r'[0-9a-f]{32}', token) else '/musica/')
+    return None
+
+
 def _retomar_sem_perder_oferta(pedido_id, oferta, plano):
     """O cookie aponta para um pedido já iniciado deste produto; retomar reabre o PIX/cartão dele.
     Não retoma (segue para um pedido novo) quando aquele pedido é de OUTRO plano (ex.: comprou o Básico
-    e agora abriu o Completo), ou quando a cliente chegou agora por uma OFERTA (popup/Estante) e aquele
-    pedido não tem desconto (e não foi pago)."""
+    e agora abriu o Completo), quando a cliente chegou agora por uma OFERTA (popup/Estante) e aquele
+    pedido não tem desconto (e não foi pago), ou — plano de Música — quando aquele pedido é de OUTRA música
+    (a do link é outra): só retoma o PIX da mesma música, para ela não ficar com dois QR válidos."""
     if pedido_id is None:
         return None
+    from musica.dominio.recursos import plano_vende_musica
+    if plano_vende_musica(plano):
+        # O pedido vem do cookie deste navegador (é dela): pode olhar a música dele.
+        from musica.integracao import token_do_pedido
+        if not request.args.get('musica') or token_do_pedido(pedido_id) != request.args.get('musica'):
+            return None
     from database import get_pedido
     from web.checkout import pedido_do_plano
     pedido = get_pedido(pedido_id) or {}
@@ -76,6 +101,9 @@ def checkout(produto_id):
     plano = _plano_da_pagina(produto_id)
     if not plano:
         return 'Produto não encontrado', 404
+    voltar = _sem_musica_volta_para_previa(produto_id, plano)
+    if voltar:
+        return voltar
 
     config_cartao = get_config_cartao_produto(produto_id)  # None = aba Cartão não aparece
     oferta, desconto = _oferta_do_link(produto_id, plano)
@@ -92,7 +120,8 @@ def checkout(produto_id):
             # (?pedido=<id>) em vez de duplicar em Python a lógica pago→downloads /
             # pendente→retomar pix, que o JS de checkout.html já sabe fazer.
             from web.links import link_checkout
-            resp = redirect(link_checkout(produto_id, plano, pedido=pedido_id_retomar, oferta=oferta))
+            resp = redirect(link_checkout(produto_id, plano, pedido=pedido_id_retomar, oferta=oferta,
+                                          musica=request.args.get('musica')))
             resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
         pedido_id_inicial = rastrear_visita_funil(request, produto_id, estado_novo=1003)
@@ -138,6 +167,9 @@ def checkout_v2(produto_id):
     plano = _plano_da_pagina(produto_id)
     if not plano:
         return 'Produto não encontrado', 404
+    voltar = _sem_musica_volta_para_previa(produto_id, plano)
+    if voltar:
+        return voltar
 
     config_cartao = get_config_cartao_produto(produto_id)
     oferta, desconto = _oferta_do_link(produto_id, plano)
@@ -179,7 +211,7 @@ def checkout_v2(produto_id):
         if pedido_id_retomar is not None:
             from web.links import link_checkout
             resp = redirect(link_checkout(produto_id, plano, v2=True, pedido=pedido_id_retomar, ref=ref_guid,
-                                          oferta=oferta))
+                                          oferta=oferta, musica=request.args.get('musica')))
             resp.set_cookie(f'pedido_web_v2_{produto_id}', str(pedido_id_retomar), max_age=COOKIE_MAX_AGE_FUNIL)
             return resp
         pedido_id_inicial = rastrear_visita_funil(request, produto_id, estado_novo=1003, cookie_prefixo='pedido_web_v2')
@@ -409,6 +441,15 @@ def pedido_publico_v2(guid):
         logging.getLogger(__name__).error(f"[ESTANTE] Erro ao listar apps do pedido #{pedido['id']}: {e}")
         meus_apps = []
 
+    # "Minha música": compra do produto Música (o card leva à área da música). Também não pode derrubar a página.
+    minha_musica = None
+    try:
+        from musica.integracao import musica_do_pedido_pago
+        minha_musica = musica_do_pedido_pago(pedido)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"[ESTANTE] Erro ao buscar a música do pedido #{pedido['id']}: {e}")
+
     # Link de cada card (e-book ou app): o checkout v2 do plano, com a Estante de origem e o token da oferta.
     from web.links import link_checkout
     for c in cross_sell:
@@ -416,7 +457,7 @@ def pedido_publico_v2(guid):
                                   v2=True, ref=guid, oferta=c.get('oferta'))
 
     return render_template('pedido-2.html', primeiro_nome=primeiro_nome, itens=itens,
-                            cross_sell=cross_sell, guid=guid, meus_apps=meus_apps)
+                            cross_sell=cross_sell, guid=guid, meus_apps=meus_apps, minha_musica=minha_musica)
 
 
 @web_bp.get('/pedido/<guid>/ler/<int:item_id>')

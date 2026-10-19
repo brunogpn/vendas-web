@@ -8,9 +8,9 @@ from urllib.parse import urlencode
 
 
 def link_checkout(produto_id, plano: dict | None = None, *, v2: bool = False, pedido=None, ref=None,
-                  oferta=None) -> str:
-    """'/pay/<id>' (ou '/pay2/<id>') com, nesta ordem, pedido, ref, plano (só se não for o padrão) e oferta.
-    `plano`: dict com 'slug' e 'padrao' (None = o padrão)."""
+                  oferta=None, musica=None) -> str:
+    """'/pay/<id>' (ou '/pay2/<id>') com, nesta ordem, pedido, ref, plano (só se não for o padrão), oferta e
+    musica (token da música que o produto Música vende). `plano`: dict com 'slug' e 'padrao' (None = o padrão)."""
     params = []
     if pedido:
         params.append(('pedido', pedido))
@@ -20,5 +20,7 @@ def link_checkout(produto_id, plano: dict | None = None, *, v2: bool = False, pe
         params.append(('plano', plano['slug']))
     if oferta:
         params.append(('oferta', oferta))
+    if musica:
+        params.append(('musica', musica))
     caminho = f"/pay{'2' if v2 else ''}/{int(produto_id)}"
     return caminho + (f'?{urlencode(params)}' if params else '')

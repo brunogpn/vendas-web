@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <div class="page-title">Editar {{ 'app' if entregavel.tipo == 'app' else 'e-book' }} do catálogo</div>
+        <div class="page-title">Editar {{ {'app': 'app', 'musica': 'item de música'}.get(entregavel.tipo, 'e-book') }} do catálogo</div>
         <div class="page-subtitle">{{ entregavel.nome_venda }}</div>
     </div>
     <a href="{{ url_for('admin.listar_entregaveis_view') }}" class="btn btn-ghost btn-sm">← Voltar</a>
@@ -26,6 +26,12 @@
                 <select name="app_slug" required>
                     {% for slug, cfg in apps.items() %}<option value="{{ slug }}" {% if slug == entregavel.app_slug %}selected{% endif %}>{{ cfg.nome }}</option>{% endfor %}
                 </select>
+            </div>
+            {% elif entregavel.tipo == 'musica' %}
+            <div class="form-group span-2">
+                <label>O que libera</label>
+                <input type="text" value="{{ recursos[entregavel.recurso].nome if entregavel.recurso in recursos else entregavel.recurso }}" disabled>
+                <small class="form-text text-muted">Não muda depois de criado: é por ele que o pedido pago é liberado.</small>
             </div>
             {% else %}
             <div class="form-group span-2">

@@ -132,6 +132,35 @@ def _erro_validacao_email(body: dict):
     return None
 
 
+def _erro_musica(plano, body: dict, produto_id: int):
+    """Plano do produto Música: só se compra a partir de uma prévia pronta — o token vem do link (?musica=,
+    repassado no payload; nunca é buscado pelo pedido_id do corpo, que vem do navegador). Devolve o dict de
+    erro para o front (ou None se está tudo certo)."""
+    from musica.dominio.recursos import plano_vende_musica   # sem dependências: não derruba o checkout dos e-books
+    if not plano_vende_musica(plano):
+        return None
+    from musica.integracao import Recusa, conferir_para_checkout
+    try:
+        conferir_para_checkout(body.get('musica'), produto_id)
+    except Recusa as recusa:
+        return {'musica_invalida': True, 'mensagem': recusa.mensagem}
+    return None
+
+
+def _vincular_musica(plano, body: dict, pedido_id: int, produto_id: int) -> None:
+    """Grava qual música este pedido compra (é por ela que o pagamento libera a música)."""
+    from musica.dominio.recursos import plano_vende_musica
+    if not plano_vende_musica(plano):
+        return
+    try:
+        from musica.integracao import vincular_ao_pedido
+        vincular_ao_pedido(body.get('musica'), pedido_id, produto_id)
+    except Exception as e:
+        # Já conferido por _erro_musica antes de criar o pedido: só uma corrida (ex.: outra aba comprou).
+        # A reconciliação não acharia a música — avisa para o atendimento.
+        logger.error(f'[WEB-CHECKOUT] ❌ Pedido #{pedido_id} sem música vinculada: {e}')
+
+
 def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     """
     Cria um pedido em `pedidos` (estado 1001) e gera uma solicitação PIX no BB Pay.
@@ -169,6 +198,10 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     if divergente:
         return divergente
     valor_principal = round(valor_principal - desconto, 2)
+
+    erro_musica = _erro_musica(plano, body, produto_id)
+    if erro_musica:
+        return erro_musica
 
     # Bumps: nunca confiar em preço vindo do cliente — releitura pelos ids escolhidos.
     bump_rows = listar_bumps_validos(plano, body.get('bump_ids'))
@@ -223,6 +256,7 @@ def gerar_pix(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
     except Exception as e:
         # Snapshot informativo — uma falha aqui não pode derrubar o checkout em si.
         logger.error(f'[WEB-CHECKOUT] Erro ao gravar itens do pedido #{pedido_id}: {e}')
+    _vincular_musica(plano, body, pedido_id, produto_id)
 
     try:
         from web.pix_estatico import gerar_payload_pix, gerar_qrcode_base64 as _gerar_qr_estatico
@@ -517,6 +551,10 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
             return {'aprovado': False, **divergente}
     valor_principal = round(valor_principal - desconto, 2)
 
+    erro_musica = _erro_musica(plano, body, produto_id)
+    if erro_musica:
+        return {'aprovado': False, **erro_musica}
+
     bump_rows = listar_bumps_validos(plano, body.get('bump_ids'))
     valor_original = valor_principal + sum(float(b['preco_promocional']) for b in bump_rows)
 
@@ -564,6 +602,7 @@ def gerar_cartao(body: dict, url_base: str = '', dns_origem: str = '') -> dict:
             criar_itens_pedido_web(pedido_id, plano, valor_principal, bump_rows)
         except Exception as e:
             logger.error(f'[WEB-CHECKOUT] Erro ao gravar itens do pedido cartão #{pedido_id}: {e}')
+    _vincular_musica(plano, body, pedido_id, produto_id)
 
     numero_cartao = re.sub(r'\D', '', body.get('numero_cartao', ''))
     cpf = re.sub(r'\D', '', body.get('cpf', ''))

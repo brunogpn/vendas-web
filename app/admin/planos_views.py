@@ -25,6 +25,17 @@ def _apps():
     return APPS
 
 
+def _recursos_musica():
+    from musica.dominio.recursos import RECURSOS
+    return RECURSOS
+
+
+def _so_no_site(item):
+    """Item que não vai no plano padrão de produto com WhatsApp (que entrega antes de pagar): app e música
+    (a música nasce no quiz do site)."""
+    return item['tipo'] in ('app', 'musica')
+
+
 def _numero(valor, padrao=0.0):
     """Número digitado no admin (aceita vírgula); ValueError se não for um número finito."""
     texto = str(valor if valor not in (None, '') else padrao).replace(',', '.')
@@ -56,19 +67,20 @@ def _produto_ou_none(produto_id):
 def listar_entregaveis_view():
     from database import listar_entregaveis
     return render_template('admin/entregaveis.html', entregaveis=listar_entregaveis(), apps=_apps(),
+                           recursos=_recursos_musica(),
                            pdfs=_arquivos('arquivos'), imagens=_arquivos('images'))
 
 
 def _dados_entregavel(form):
     """(dados, erro) do formulário de entregável."""
-    tipo = form.get('tipo') if form.get('tipo') in ('ebook', 'app') else 'ebook'
+    tipo = form.get('tipo') if form.get('tipo') in ('ebook', 'app', 'musica') else 'ebook'
     dados = {
         'tipo': tipo,
         'nome_venda': (form.get('nome_venda') or '').strip(),
         'descricao': (form.get('descricao') or '').strip(),
         'imagem_grande': _imagem(form.get('imagem_grande')),
         'imagem_pequena': _imagem(form.get('imagem_pequena')),
-        'path_arquivo': None, 'nome_arquivo': None, 'app_slug': None,
+        'path_arquivo': None, 'nome_arquivo': None, 'app_slug': None, 'recurso': None,
     }
     if not dados['nome_venda']:
         return dados, 'Informe o nome de venda.'
@@ -77,6 +89,10 @@ def _dados_entregavel(form):
         if not dados['path_arquivo']:
             return dados, 'Escolha o arquivo do e-book.'
         dados['nome_arquivo'] = (form.get('nome_arquivo') or '').strip() or dados['path_arquivo']
+    elif tipo == 'musica':
+        dados['recurso'] = form.get('recurso') or ''
+        if dados['recurso'] not in _recursos_musica():
+            return dados, 'Escolha o que o item de música libera.'
     else:
         dados['app_slug'] = form.get('app_slug') or ''
         dados['imagem_grande'] = dados['imagem_pequena'] = None  # app: a capa vem do plano
@@ -114,6 +130,8 @@ def editar_entregavel(entregavel_id):
     if request.method == 'POST':
         form = request.form.to_dict()
         form['tipo'] = entregavel['tipo']  # o tipo não muda: e-book vendido não vira app
+        if entregavel['tipo'] == 'musica':
+            form['recurso'] = entregavel['recurso']  # nem o recurso: é por ele que o pedido pago é liberado
         dados, erro = _dados_entregavel(form)
         if erro:
             flash(erro, 'warning')
@@ -127,6 +145,7 @@ def editar_entregavel(entregavel_id):
                 logger.error(f"[ADMIN] ❌ Erro ao atualizar entregável: {e}")
                 flash(f'Erro ao salvar: {e}', 'danger')
     return render_template('admin/entregavel_editar.html', entregavel=entregavel, apps=_apps(),
+                           recursos=_recursos_musica(),
                            pdfs=_arquivos('arquivos'), imagens=_arquivos('images'))
 
 
@@ -292,9 +311,9 @@ def definir_plano_padrao_view(produto_id, plano_id):
     if not any(i['papel'] == 'principal' for i in itens):
         flash('O plano padrão precisa ter ao menos um item principal.', 'warning')
         return destino
-    if _tem_whatsapp(produto_id) and any(i['tipo'] == 'app' for i in itens):
+    if _tem_whatsapp(produto_id) and any(_so_no_site(i) for i in itens):
         flash('Este produto vende pelo WhatsApp, que usa o plano padrão e entrega antes do pagamento: '
-              'o plano padrão não pode ter app.', 'warning')
+              'o plano padrão não pode ter app nem música.', 'warning')
         return destino
     definir_plano_padrao(produto_id, plano_id)
     logger.info(f"[ADMIN-PLANOS] Produto #{produto_id}: plano #{plano_id} agora é o padrão ({current_user.email})")
@@ -322,9 +341,9 @@ def copiar_itens_plano_view(produto_id, plano_id):
     origem_id = request.form.get('origem_id', type=int)
     destino = get_plano(plano_id, produto_id)
     if (destino and destino['padrao'] and origem_id and _tem_whatsapp(produto_id)
-            and any(i['tipo'] == 'app' for i in listar_entregaveis_plano(origem_id))):
+            and any(_so_no_site(i) for i in listar_entregaveis_plano(origem_id))):
         flash('Este produto vende pelo WhatsApp, que usa o plano padrão e entrega antes do pagamento: '
-              'não dá para copiar um plano com app para o padrão.', 'warning')
+              'não dá para copiar um plano com app ou música para o padrão.', 'warning')
         return redirect(url_for('admin.produto_planos', produto_id=produto_id, _anchor=f'plano-{plano_id}'))
     try:
         copiados = copiar_itens_plano(produto_id, origem_id, plano_id) if origem_id else 0
@@ -357,6 +376,15 @@ def incluir_item_plano(produto_id, plano_id):
         if plano['padrao'] and _tem_whatsapp(produto_id):
             flash('Este produto vende pelo WhatsApp, que usa o plano padrão e entrega antes do pagamento: '
                   'o app vai num plano que não é o padrão (ex.: Completo).', 'warning')
+            return destino
+    if plano and entregavel and entregavel['tipo'] == 'musica':
+        from musica.dominio.recursos import papel_permitido
+        if not papel_permitido(entregavel['recurso'], papel):
+            flash('Música e videoclipe entram como principal; QR code e entregas, como order bump.', 'warning')
+            return destino
+        if plano['padrao'] and _tem_whatsapp(produto_id):
+            flash('Este produto vende pelo WhatsApp, que usa o plano padrão e entrega antes do pagamento: '
+                  'itens de música não vão no plano padrão dele.', 'warning')
             return destino
     try:
         preco_original = _numero(f.get('preco_original')) if papel == 'bump' else 0

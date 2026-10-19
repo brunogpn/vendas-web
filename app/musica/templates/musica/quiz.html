@@ -1,0 +1,211 @@
+{% extends "musica/musica_base.html" %}
+{% block titulo %}Criar minha música · {{ marca }}{% endblock %}
+{% block estilo %}
+<style>
+.funil{max-width:680px;margin:0 auto;padding:0 20px 64px}
+.funil-topo{display:flex;align-items:center;justify-content:space-between;height:68px}
+.funil-topo .sair{color:var(--suave);text-decoration:none;font-weight:500}
+.status{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px;color:var(--suave);font-size:.95rem;font-weight:600}
+.voltar{background:none;border:0;color:var(--suave);font:600 1rem var(--corpo);padding:8px 0;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.voltar:hover{color:var(--texto)}
+.progresso{height:6px;background:var(--fundo-2);border-radius:99px;overflow:hidden;margin-bottom:40px}
+.progresso div{height:100%;width:0;background:var(--cor);border-radius:99px;transition:width .5s cubic-bezier(.16,1,.3,1)}
+.passo h2{font-size:clamp(1.8rem,4.4vw,2.5rem);margin-bottom:10px}
+.passo .ajuda{color:var(--suave);margin:0 0 6px;font-size:1.05rem}
+.entrar{animation:entrar .45s cubic-bezier(.16,1,.3,1)}
+@keyframes entrar{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.opcoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:26px 0 0}
+.opcao{position:relative;min-height:64px;padding:14px 12px;border:1.5px solid var(--linha);border-radius:16px;background:var(--cartao);font:600 1.05rem var(--corpo);color:var(--texto);cursor:pointer;text-align:center;transition:border-color .2s,background .2s,transform .15s}
+.opcao:hover{border-color:var(--texto)}
+.opcao:active{transform:scale(.98)}
+.opcao.marcada{border-color:var(--cor);background:var(--cor-clara);color:var(--cor-forte)}
+.opcao.com-som{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding-right:8px}
+.ouvir{flex:0 0 auto;width:38px;height:38px;border-radius:999px;border:1.5px solid var(--linha);background:var(--fundo);color:var(--texto);display:grid;place-items:center;font-size:1.05rem;cursor:pointer}
+.ouvir.tocando{background:var(--cor);border-color:var(--cor);color:var(--sobre-cor)}
+.campo{font-size:1.1rem;margin-top:22px}
+textarea.campo{min-height:200px;line-height:1.55}
+.dicas{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.dica{border:1.5px dashed var(--linha);background:transparent;color:var(--suave);border-radius:999px;padding:8px 14px;font:600 .92rem var(--corpo);cursor:pointer}
+.dica:hover{border-color:var(--cor);color:var(--cor-forte)}
+.acoes{margin-top:26px}
+label{display:block;font-weight:700;margin:22px 0 0}
+label + .campo{margin-top:8px}
+.privacidade{display:flex;gap:8px;align-items:flex-start;color:var(--suave);font-size:.9rem;margin-top:14px}
+.enviando{text-align:center;padding:48px 0}
+.equalizador{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:56px;margin:0 0 28px}
+.equalizador i{width:9px;border-radius:99px;background:var(--cor);animation:eq 1s ease-in-out infinite}
+.equalizador i:nth-child(1){animation-delay:-.2s}.equalizador i:nth-child(2){animation-delay:-.6s}.equalizador i:nth-child(3){animation-delay:-.1s}.equalizador i:nth-child(4){animation-delay:-.8s}.equalizador i:nth-child(5){animation-delay:-.4s}
+@keyframes eq{0%,100%{height:12px}50%{height:56px}}
+@media (max-width:560px){ .opcoes{grid-template-columns:repeat(2,minmax(0,1fr))} .funil{padding:0 16px 48px} }
+</style>
+{% endblock %}
+{% block pagina %}
+<div class="funil">
+  <header class="funil-topo">
+    <a class="marca" href="{{ url_for('musica.inicio') }}"><i class="ti ti-music" aria-hidden="true"></i>{{ marca }}</a>
+    <a class="sair" href="{{ url_for('musica.inicio') }}">Sair</a>
+  </header>
+  <div id="quiz">
+    <div class="status"><button class="voltar" id="voltar" type="button"><i class="ti ti-arrow-left" aria-hidden="true"></i>Voltar</button><span id="contador"></span></div>
+    <div class="progresso"><div id="barra"></div></div>
+    <div id="passo" class="passo"></div>
+    <div class="erro" id="erro" role="alert"></div>
+    {% if turnstile_site_key %}
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-callback="turnstileOk" style="margin-top:16px"></div>
+    {% endif %}
+  </div>
+  <div id="enviando" class="enviando" style="display:none">
+    <div class="equalizador" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <h2 id="tituloEnviando">Escrevendo a letra</h2>
+    <p class="suave">Estamos transformando a sua história em versos. Leva menos de um minuto.</p>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+const PERGUNTAS = {{ perguntas|tojson }};
+const AMOSTRAS = {{ amostras|tojson }};
+const URL_CRIAR = "{{ url_for('musica.api_criar') }}";
+const FEMININO = {{ feminino|tojson }}, MASCULINO = {{ masculino|tojson }};
+const CASAL = ["Esposa", "Marido", "Namorada", "Namorado"];
+const dicasLembrancas = () => CASAL.includes(respostas.para_quem)
+  ? ["Como vocês se conheceram", "Uma mania {dela}", "Uma frase que {ela} sempre fala", "Um momento difícil que superaram", "Um sonho de vocês"]
+  : ["Uma lembrança marcante", "Uma mania {dela}", "Uma frase que {ela} sempre fala", "Algo que {ela} te ensinou", "O que você mais admira"];
+const respostas = {}; let contato = {whatsapp: "", email: ""}; let atual = 0; let tokenRobo = "";
+window.turnstileOk = t => tokenRobo = t;
+
+const el = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+
+// Troca {nome}, {da_sua_pessoa}, {ela}... pelas respostas já dadas (ver quiz.py).
+function personalizar(texto){
+  if (!texto) return texto;
+  const rel = respostas.para_quem || "";
+  const fem = FEMININO.includes(rel), masc = MASCULINO.includes(rel);
+  const nome = respostas.apelido || respostas.nome || "essa pessoa";
+  const trocas = {
+    nome, primeiro: respostas.nome || "essa pessoa", de: respostas.de || "",
+    da_sua_pessoa: fem ? "da sua " + rel.toLowerCase() : masc ? "do seu " + rel.toLowerCase() : "de quem vai receber",
+    ela: fem ? "ela" : masc ? "ele" : "essa pessoa",
+    dela: fem ? "dela" : masc ? "dele" : "dessa pessoa",
+  };
+  return texto.replace(/\{(\w+)\}/g, (m, k) => k in trocas ? trocas[k] : m).replace(/^, /, "");
+}
+
+function mostrarErro(msg){ const e = el("erro"); e.textContent = msg; e.style.display = msg ? "block" : "none"; }
+
+// Amostra de cada estilo na pergunta de estilo
+const som = new Audio(); let botaoSom = null;
+function pararSom(){ som.pause(); if (botaoSom) { botaoSom.classList.remove("tocando"); botaoSom.innerHTML = '<i class="ti ti-player-play" aria-hidden="true"></i>'; } botaoSom = null; }
+som.addEventListener("ended", pararSom);
+
+// Vindo de um cartão de ocasião da página inicial (?ocasiao=...), essa pergunta já vem respondida e é pulada.
+const PREENCHIDAS = new Set();
+const ocasiaoUrl = new URLSearchParams(location.search).get("ocasiao");
+const pergOcasiao = PERGUNTAS.find(p => p.chave === "ocasiao");
+if (ocasiaoUrl && pergOcasiao && pergOcasiao.opcoes.includes(ocasiaoUrl)) { respostas.ocasiao = ocasiaoUrl; PREENCHIDAS.add("ocasiao"); }
+const pular = dir => { while (PERGUNTAS[atual] && PREENCHIDAS.has(PERGUNTAS[atual].chave)) atual += dir; };
+const visiveis = PERGUNTAS.filter(p => !PREENCHIDAS.has(p.chave));
+
+function formatarTelefone(v){
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+  return `(${d.slice(0,2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
+}
+
+function desenhar(){
+  pararSom();
+  const p = PERGUNTAS[atual];
+  const posicao = visiveis.indexOf(p) + 1;
+  etapaFunil(Math.min(15, posicao), p.chave);
+  el("barra").style.width = ((posicao - 1) / visiveis.length * 100) + "%";
+  el("contador").textContent = `${posicao} de ${visiveis.length}`;
+  el("voltar").style.visibility = posicao > 1 ? "visible" : "hidden";
+  mostrarErro("");
+
+  let html = `<h2>${esc(personalizar(p.titulo))}</h2>` + (p.ajuda ? `<p class="ajuda">${esc(personalizar(p.ajuda))}</p>` : "");
+  if (p.tipo === "opcoes") {
+    html += `<div class="opcoes">` + p.opcoes.map(o => {
+      const [valor, texto] = Array.isArray(o) ? o : [o, o];
+      const marcada = respostas[p.chave] === valor ? "marcada" : "";
+      const amostra = p.chave === "estilo" && AMOSTRAS[valor];
+      if (amostra) return `<div class="opcao com-som ${marcada}" role="button" tabindex="0" data-valor="${esc(valor)}"><span>${esc(texto)}</span><button type="button" class="ouvir" data-som="${esc(amostra)}" aria-label="Ouvir ${esc(texto)}"><i class="ti ti-player-play" aria-hidden="true"></i></button></div>`;
+      return `<button type="button" class="opcao ${marcada}" data-valor="${esc(valor)}">${esc(texto)}</button>`;
+    }).join("") + `</div>`;
+    if (p.chave === "estilo") html += `<p class="ajuda" style="margin-top:14px;font-size:.95rem">Aperte o play para ouvir um trecho de cada estilo.</p>`;
+  } else if (p.tipo === "contato") {
+    html += `<label for="email">Seu e-mail (é por ele que a música chega)</label>
+      <input class="campo" id="email" type="email" inputmode="email" autocomplete="email" placeholder="seuemail@exemplo.com" value="${esc(contato.email)}">
+      <label for="whatsapp">WhatsApp com DDD (opcional)</label>
+      <input class="campo" id="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678" value="${esc(contato.whatsapp)}">
+      <p class="privacidade"><i class="ti ti-lock" aria-hidden="true"></i><span>Usamos só para entregar a sua música. Nada de spam. Veja a <a href="{{ url_for('musica.privacidade') }}" target="_blank" rel="noopener">política de privacidade</a>.</span></p>
+      <div class="acoes"><button class="botao" id="avancar" type="button">Criar a letra da música</button></div>`;
+  } else {
+    const longo = p.tipo === "texto_longo";
+    html += longo
+      ? `<textarea class="campo" id="resposta" placeholder="${esc(p.exemplo)}">${esc(respostas[p.chave])}</textarea>
+         <div class="dicas">${dicasLembrancas().map(d => `<button type="button" class="dica">+ ${esc(personalizar(d))}</button>`).join("")}</div>`
+      : `<input class="campo" id="resposta" placeholder="${esc(p.exemplo)}" value="${esc(respostas[p.chave])}" autocomplete="off">`;
+    html += `<div class="acoes"><button class="botao" id="avancar" type="button">Continuar</button></div>`;
+  }
+  const passo = el("passo");
+  passo.innerHTML = html;
+  passo.classList.remove("entrar"); void passo.offsetWidth; passo.classList.add("entrar");
+
+  passo.querySelectorAll(".opcao").forEach(b => {
+    const escolher = () => { respostas[p.chave] = b.dataset.valor; b.classList.add("marcada"); setTimeout(proximo, 160); };
+    b.addEventListener("click", e => { if (!e.target.closest(".ouvir")) escolher(); });
+    b.addEventListener("keydown", e => { if (e.key === "Enter" && !e.target.closest(".ouvir")) escolher(); });
+  });
+  passo.querySelectorAll(".ouvir").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    if (botaoSom === b) { pararSom(); return; }
+    pararSom(); som.src = b.dataset.som; som.play(); botaoSom = b;
+    b.classList.add("tocando"); b.innerHTML = '<i class="ti ti-player-pause" aria-hidden="true"></i>';
+  }));
+  passo.querySelectorAll(".dica").forEach(b => b.addEventListener("click", () => {
+    const t = el("resposta"); const texto = b.textContent.replace(/^\+ /, "") + ": ";
+    t.value = (t.value.trim() ? t.value.trim() + "\n" : "") + texto; t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+  }));
+  const tel = el("whatsapp"); if (tel) tel.addEventListener("input", () => { tel.value = formatarTelefone(tel.value); });
+
+  const campo = el("resposta") || el("whatsapp");
+  if (campo && matchMedia("(min-width: 700px)").matches) campo.focus();
+  const avancar = el("avancar");
+  if (avancar) avancar.onclick = () => {
+    if (p.tipo === "contato") return enviar();
+    const valor = el("resposta").value.trim();
+    if (p.obrigatoria && !valor) return mostrarErro("Esse campo é importante para a música.");
+    if (p.tipo === "texto_longo" && valor.length < 30) return mostrarErro("Conte um pouco mais. Quanto mais detalhes, mais emocionante fica a música.");
+    respostas[p.chave] = valor; proximo();
+  };
+  passo.querySelectorAll("input.campo").forEach(i => i.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); avancar.click(); } }));
+}
+
+function proximo(){ atual++; pular(1); desenhar(); window.scrollTo({top: 0}); }
+el("voltar").onclick = () => { if (atual) { atual--; pular(-1); if (atual < 0) atual = 0; desenhar(); } };
+
+async function enviar(){
+  contato = {whatsapp: el("whatsapp").value, email: el("email").value.trim()};
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contato.email)) return mostrarErro("Confira o e-mail.");
+  const digitos = contato.whatsapp.replace(/\D/g, "");
+  if (digitos && digitos.length < 10) return mostrarErro("Coloque o WhatsApp com DDD (ou deixe em branco).");
+  el("tituloEnviando").textContent = personalizar("Escrevendo a letra de {nome}");
+  el("quiz").style.display = "none"; el("enviando").style.display = "block"; window.scrollTo({top: 0});
+  try {
+    const r = await fetch(URL_CRIAR, {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({respostas, ...contato, turnstile: tokenRobo})});
+    const dados = await r.json();
+    if (!r.ok) throw new Error(dados.erro || "Algo deu errado.");
+    location.href = dados.link;
+  } catch (e) {
+    el("enviando").style.display = "none"; el("quiz").style.display = "block";
+    mostrarErro(e.message || "Sem conexão. Tente de novo.");
+  }
+}
+pular(1);
+desenhar();
+</script>
+{% endblock %}

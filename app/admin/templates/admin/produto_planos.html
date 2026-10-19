@@ -63,8 +63,8 @@
             <tr>
                 <td style="font-size:13px">{% if v.papel == 'principal' %}🏆 Principal{% elif v.papel == 'bonus' %}🎁 Bônus{% else %}🛒 Order bump{% endif %}</td>
                 <td style="color:var(--muted);font-family:var(--mono);font-size:13px;width:60px">{{ v.ordem }}</td>
-                <td style="font-size:14px">{{ '📱' if v.tipo == 'app' else '📖' }} {{ v.nome_venda }}</td>
-                <td style="font-family:var(--mono);font-size:13px;color:var(--muted)">{{ v.app_slug if v.tipo == 'app' else v.path_arquivo }}</td>
+                <td style="font-size:14px">{{ {'app': '📱', 'musica': '🎵'}.get(v.tipo, '📖') }} {{ v.nome_venda }}</td>
+                <td style="font-family:var(--mono);font-size:13px;color:var(--muted)">{{ v.app_slug if v.tipo == 'app' else (v.recurso if v.tipo == 'musica' else v.path_arquivo) }}</td>
                 <td style="font-size:13px">{% if v.papel == 'bump' %}R$ {{ '%.2f'|format(v.preco_promocional) }}{% if v.preco_original > v.preco_promocional %} <s style="color:var(--muted)">R$ {{ '%.2f'|format(v.preco_original) }}</s>{% endif %}{% else %}—{% endif %}</td>
                 <td style="font-size:13px">{{ v.dias or '—' }}</td>
                 {% if current_user.is_admin() %}
@@ -93,7 +93,7 @@
             <div class="form-group"><label>Item do catálogo</label>
                 <select name="entregavel_id" required class="sel-entregavel">
                     <option value="">— selecione —</option>
-                    {% for e in catalogo %}<option value="{{ e.id }}" data-tipo="{{ e.tipo }}">{{ '📱' if e.tipo == 'app' else '📖' }} {{ e.nome_venda }}</option>{% endfor %}
+                    {% for e in catalogo %}<option value="{{ e.id }}" data-tipo="{{ e.tipo }}">{{ {'app': '📱', 'musica': '🎵'}.get(e.tipo, '📖') }} {{ e.nome_venda }}</option>{% endfor %}
                 </select></div>
             <div class="form-group"><label>Papel</label>
                 <select name="papel" required class="sel-papel">

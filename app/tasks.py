@@ -722,6 +722,14 @@ def enviar_email_entrega(self, pedido_id: int):
         liberar_licencas_do_pedido(pedido_id)
     except Exception as exc:
         logger.error(f"[TASK-EMAIL] ❌ Erro ao liberar apps do pedido #{pedido_id}: {exc}")
+    # Mesmo ponto para a Música (o e-mail já leva o botão "Ouvir minha música"); se falhar, a área da
+    # compra e a manutenção de 5 em 5 min (musica.manutencao) liberam.
+    try:
+        from musica import casos_de_uso as musica_uc
+        from musica.fabrica import servicos as musica_servicos
+        musica_uc.liberar_do_pedido(musica_servicos(), pedido_id)
+    except Exception as exc:
+        logger.error(f"[TASK-EMAIL] ❌ Erro ao liberar a música do pedido #{pedido_id}: {exc}")
     try:
         executar(pedido_id)
         logger.info(f"[TASK-EMAIL] ✅ E-mail entregue para pedido #{pedido_id}")

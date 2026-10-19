@@ -41,6 +41,10 @@ app.register_blueprint(web_bp)
 # Apps das clientes (PWA em /app/<slug>/, ex.: App Fatias) — ver docs/APPS.md
 apps_registrar(app)
 
+# Produto Música (/musica/...: quiz, prévia, compra, presente) — ver docs/MUSICA.md
+from musica import registrar as musica_registrar
+musica_registrar(app)
+
 
 @app.template_filter('brl')
 def formatar_brl(valor):

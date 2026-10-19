@@ -1,0 +1,209 @@
+{% extends "musica/musica_base.html" %}
+{% block titulo %}Sua música · {{ marca }}{% endblock %}
+{% block estilo %}
+<style>
+.funil{max-width:680px;margin:0 auto;padding:0 20px 72px}
+.funil-topo{display:flex;align-items:center;justify-content:space-between;height:68px}
+.etapa-nome{color:var(--suave);font-weight:600;font-size:.95rem}
+.trilha{display:flex;gap:6px;margin:14px 0 36px}
+.trilha span{flex:1;height:6px;border-radius:99px;background:var(--fundo-2)}
+.trilha span.feita{background:var(--cor)}
+.tela h1{font-size:clamp(2rem,5vw,2.8rem)}
+.entrar{animation:entrar .5s cubic-bezier(.16,1,.3,1)}
+@keyframes entrar{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.folha{background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:30px 28px;box-shadow:var(--sombra);margin-top:24px}
+.folha .titulo-musica{font-family:var(--titulo);font-weight:700;font-size:1.5rem;letter-spacing:-.02em;margin:0 0 4px}
+.folha .para{color:var(--suave);margin:0 0 20px}
+.versos{white-space:pre-wrap;font-size:1.08rem;line-height:1.75;max-height:460px;overflow:auto;padding-right:6px}
+.versos .refrao{font-weight:700}
+.botoes{display:grid;gap:10px;margin-top:24px}
+.ajuste{margin-top:16px;display:none}
+.ajuste textarea{min-height:120px}
+.nota{color:var(--suave);font-size:.9rem;margin-top:10px}
+.espera{text-align:center;padding:24px 0}
+.disco{width:180px;height:180px;margin:10px auto 34px;border-radius:50%;background:
+  radial-gradient(circle at center, var(--cor) 0 17%, var(--fundo) 17% 19%, #1C1917 19% 100%);
+  box-shadow:inset 0 0 0 10px #292524, inset 0 0 0 22px #1C1917, inset 0 0 0 23px #44403C, inset 0 0 0 40px #1C1917, inset 0 0 0 41px #44403C, var(--sombra);
+  animation:girar 2.4s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.etapas{list-style:none;padding:0;margin:26px auto 0;max-width:340px;text-align:left;display:grid;gap:14px}
+.etapas li{display:flex;align-items:center;gap:12px;color:var(--suave);font-weight:500;transition:color .3s}
+.etapas li i{font-size:1.3rem}
+.etapas li.feita{color:var(--ok)} .etapas li.agora{color:var(--texto);font-weight:700}
+.previa-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:26px 0}
+.oferta{background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:30px 26px;box-shadow:var(--sombra);text-align:center}
+.preco{font-family:var(--titulo);font-weight:800;font-size:3rem;letter-spacing:-.03em;line-height:1;margin:6px 0}
+.inclui{list-style:none;padding:0;margin:20px 0 24px;text-align:left;display:grid;gap:10px}
+.inclui li{display:flex;gap:10px;align-items:flex-start}
+.inclui i{color:var(--ok);font-size:1.25rem;margin-top:2px}
+.extras{display:grid;gap:10px;margin:0 0 22px;text-align:left}
+.extra{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--linha);border-radius:16px;padding:14px 16px;cursor:pointer;transition:border-color .2s,background .2s}
+.extra:hover{border-color:var(--texto)}
+.extra input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--cor);flex:0 0 auto}
+.extra.marcado{border-color:var(--cor);background:var(--cor-clara)}
+.extra b{display:block}
+.extra small{color:var(--suave);display:block;line-height:1.4;margin-top:2px}
+.extra .valor{margin-left:auto;font-weight:700;white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--linha);padding-top:14px;margin:0 0 16px;font-weight:700}
+.total strong{font-family:var(--titulo);font-size:1.6rem}
+.selos{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;color:var(--suave);font-size:.9rem;margin-top:14px}
+.selos span{display:inline-flex;align-items:center;gap:6px}
+details.letra-dobra{margin-top:18px;background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:18px 22px}
+details.letra-dobra summary{cursor:pointer;font-weight:700}
+.link-simples{background:none;border:0;color:var(--suave);font:600 1rem var(--corpo);text-decoration:underline;cursor:pointer;margin:22px auto 0;display:block}
+.aviso{text-align:center;padding:30px 0}
+.aviso i{font-size:3rem;color:var(--cor)}
+@media (max-width:560px){ .funil{padding:0 16px 56px} .folha{padding:24px 18px} }
+@media (prefers-reduced-motion:reduce){ .disco{animation:none} }
+</style>
+{% endblock %}
+{% block pagina %}
+<div class="funil">
+  <header class="funil-topo">
+    <a class="marca" href="{{ url_for('musica.inicio') }}"><i class="ti ti-music" aria-hidden="true"></i>{{ marca }}</a>
+    <span class="etapa-nome" id="etapaNome"></span>
+  </header>
+  <div class="trilha" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div id="tela" class="tela"><div class="carregando"><i></i><i></i><i></i></div></div>
+  <div class="erro" id="erro" role="alert"></div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+const BASE = "{{ url_for('musica.api_ver', token=token) }}";
+const URL_CRIAR = "{{ url_for('musica.criar') }}";
+const el = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+let ultimo = "", timer = null, inicioGeracao = 0;
+
+function mostrarErro(msg){ const e = el("erro"); e.textContent = msg || ""; e.style.display = msg ? "block" : "none"; }
+function etapa(n, nome){
+  document.querySelectorAll(".trilha span").forEach((s, i) => s.classList.toggle("feita", i < n));
+  el("etapaNome").textContent = nome;
+}
+// Mostra a letra com o refrão em destaque (o servidor marca o refrão com a linha "(Refrão)").
+function versos(texto){
+  let refrao = false;
+  return String(texto || "").split("\n").map(l => {
+    if (l.trim() === "(Refrão)") { refrao = true; return ""; }
+    if (!l.trim()) { refrao = false; return ""; }
+    return refrao ? `<span class="refrao">${esc(l)}</span>` : esc(l);
+  }).join("\n").replace(/^\n+/, "");
+}
+
+async function acao(caminho, corpo){
+  mostrarErro("");
+  const r = await fetch(BASE + caminho, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(corpo || {})});
+  const dados = await r.json().catch(() => ({}));
+  if (!r.ok) { mostrarErro(dados.erro || "Algo deu errado. Tente de novo."); return false; }
+  ultimo = ""; atualizar(); return true;
+}
+
+const ETAPAS = [["ti-file-text", "Lendo a sua história"], ["ti-music", "Compondo a melodia"], ["ti-microphone-2", "Gravando a voz"], ["ti-adjustments-horizontal", "Mixando os instrumentos"], ["ti-sparkles", "Dando os últimos retoques"]];
+
+function telaEspera(p){
+  if (!inicioGeracao) inicioGeracao = Date.now();
+  const agora = Math.min(ETAPAS.length - 1, Math.floor((Date.now() - inicioGeracao) / 12000));
+  return `<div class="espera">
+    <div class="disco" aria-hidden="true"></div>
+    <h1>Criando a música de ${esc(p.para)}</h1>
+    <p class="suave">Leva cerca de um minuto. Pode deixar esta página aberta.</p>
+    <ul class="etapas">${ETAPAS.map(([icone, nome], i) => `<li class="${i < agora ? "feita" : i === agora ? "agora" : ""}"><i class="ti ${i < agora ? "ti-circle-check" : icone}" aria-hidden="true"></i>${nome}</li>`).join("")}</ul>
+  </div>`;
+}
+
+function desenhar(p){
+  if (p.link_musica) { location.href = p.link_musica; return; }
+  const tela = el("tela");
+  tela.classList.remove("entrar"); void tela.offsetWidth; tela.classList.add("entrar");
+
+  if (p.status === "escrevendo") {
+    etapa(1, "Letra");
+    tela.innerHTML = `<div class="espera"><div class="disco" aria-hidden="true"></div>
+      <h1>Escrevendo a letra de ${esc(p.para)}</h1>
+      <p class="suave">Estamos transformando a sua história em versos. Leva menos de um minuto.</p></div>`;
+
+  } else if (p.status === "letra_pronta") {
+    etapa(1, "Letra"); etapaFunil(20, "letra");
+    tela.innerHTML = `<h1>A letra ficou pronta</h1>
+      <p class="suave">Leia com calma. Se estiver do seu jeito, a gente cria a música.</p>
+      <article class="folha">
+        <p class="titulo-musica">${esc(p.titulo)}</p>
+        <p class="para">Para ${esc(p.para)}</p>
+        <div class="versos">${versos(p.letra)}</div>
+      </article>
+      <div class="botoes">
+        <button class="botao" id="gerar">Criar a música <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+        ${p.ajustes_restantes ? `<button class="botao secundario" id="mudar"><i class="ti ti-pencil" aria-hidden="true"></i> Quero mudar algo</button>` : ""}
+      </div>
+      <div class="ajuste" id="caixaAjuste">
+        <label for="ajuste" style="font-weight:700;display:block;margin-bottom:8px">O que você quer mudar?</label>
+        <textarea class="campo" id="ajuste" placeholder="O apelido dela é Lena, não Lele. Tire a parte do pai."></textarea>
+        <button class="botao" id="enviarAjuste" style="margin-top:10px">Reescrever a letra</button>
+        <p class="nota">Você pode pedir ${p.ajustes_restantes} ${p.ajustes_restantes === 1 ? "ajuste" : "ajustes"}.</p>
+      </div>`;
+    el("gerar").onclick = e => { e.currentTarget.disabled = true; inicioGeracao = Date.now(); acao("/gerar").then(ok => { if (!ok) e.target.disabled = false; }); };
+    if (el("mudar")) el("mudar").onclick = () => { el("caixaAjuste").style.display = "block"; el("ajuste").focus(); };
+    if (el("enviarAjuste")) el("enviarAjuste").onclick = () => {
+      const t = el("ajuste").value.trim(); if (!t) return mostrarErro("Escreva o que você quer mudar.");
+      acao("/ajustar", {ajuste: t});
+    };
+
+  } else if (p.status === "gerando" || p.status === "processando") {
+    etapa(2, "Música");
+    tela.innerHTML = telaEspera(p);
+
+  } else if (p.status === "previa_pronta") {
+    etapa(3, "Prévia"); inicioGeracao = 0; etapaFunil(30, "previa");
+    tela.innerHTML = `<h1>A música de ${esc(p.para)} ficou pronta</h1>
+      <p class="suave">Ouça um trecho das duas versões de "${esc(p.titulo)}". Na compra, você leva as duas completas.</p>
+      <div class="previa-lista">${p.previas.map((u, i) => `<div class="player" data-src="${u}" data-titulo="Versão ${i + 1}"></div>`).join("")}</div>
+      ${(p.planos || []).map(pl => `<div class="oferta" style="margin-bottom:14px">
+        <p class="suave" style="margin:0">${esc(pl.nome)}</p>
+        <p class="preco">${esc(pl.preco)}</p>
+        <p class="suave" style="margin:0">Pagamento único, no PIX ou no cartão</p>
+        <ul class="inclui">
+          <li><i class="ti ti-check" aria-hidden="true"></i>As duas versões completas, em MP3</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>A letra de "${esc(p.titulo)}"</li>
+          ${pl.videoclipe ? `<li><i class="ti ti-check" aria-hidden="true"></i>Videoclipe com as suas fotos, para o Status e o Instagram</li>` : ""}
+          <li><i class="ti ti-check" aria-hidden="true"></i>Chega na hora, no seu e-mail</li>
+        </ul>
+        ${pl.descricao ? `<p class="suave" style="margin:0 0 14px">${esc(pl.descricao)}</p>` : ""}
+        <a class="botao ${pl.videoclipe || p.planos.length === 1 ? "" : "secundario"}" href="${pl.link}">${pl.videoclipe ? "Quero com o videoclipe" : "Quero a música completa"}</a>
+        <div class="selos"><span><i class="ti ti-shield-check" aria-hidden="true"></i>Pagamento seguro</span><span><i class="ti ti-bolt" aria-hidden="true"></i>Liberação imediata</span></div>
+      </div>`).join("") || `<p class="suave">A venda está fechada agora. Volte mais tarde 💛</p>`}
+      <details class="letra-dobra"><summary>Ver a letra</summary><div class="versos" style="margin-top:14px">${versos(p.letra)}</div></details>
+      ${p.outras_versoes_restantes ? `<button class="link-simples" id="outra">Não gostei. Criar outra versão</button>` : ""}`;
+    window.Player && Player.montar(tela);
+    tela.querySelectorAll(".oferta a.botao").forEach(a => a.addEventListener("click", () => etapaFunil(40, "comprar")));
+    if (el("outra")) el("outra").onclick = e => { if (!confirm("Criar outra versão da música? As duas atuais serão substituídas.")) return; e.target.disabled = true; inicioGeracao = Date.now(); acao("/outra-versao"); };
+
+  } else if (p.status === "erro_letra") {
+    etapa(1, "Letra");
+    tela.innerHTML = `<div class="aviso"><i class="ti ti-mood-sad" aria-hidden="true"></i>
+      <h1>Não conseguimos escrever agora</h1>
+      <p class="suave">Tente de novo em alguns minutos. As suas respostas não foram cobradas.</p>
+      <a class="botao" href="${URL_CRIAR}">Tentar de novo</a></div>`;
+
+  } else if (p.status === "erro") {
+    etapa(2, "Música");
+    tela.innerHTML = `<div class="aviso"><i class="ti ti-music" aria-hidden="true"></i>
+      <h1>Estamos finalizando a sua música</h1>
+      <p class="suave">Ela está demorando mais que o normal. Nossa equipe já foi avisada e vai te escrever por e-mail.</p></div>`;
+  }
+}
+
+async function atualizar(){
+  clearTimeout(timer);
+  try {
+    const p = await (await fetch(BASE)).json();
+    const chave = p.status + (p.status === "letra_pronta" ? p.letra : "") + (p.previas || []).join();
+    const esperando = ["escrevendo", "gerando", "processando"].includes(p.status);
+    if (chave !== ultimo) { desenhar(p); ultimo = chave; }
+    else if (p.status === "gerando" || p.status === "processando") { el("tela").querySelector(".etapas").outerHTML = telaEspera(p).match(/<ul class="etapas">[\s\S]*<\/ul>/)[0]; }
+    if (esperando) timer = setTimeout(atualizar, 3000);
+  } catch (e) { timer = setTimeout(atualizar, 5000); }
+}
+atualizar();
+</script>
+{% endblock %}

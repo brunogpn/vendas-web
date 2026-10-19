@@ -66,6 +66,40 @@ def _e_bounce_ou_autoresponder(remetente_header: str, headers: dict) -> bool:
     return auto_submitted != 'no'
 
 
+_REGEX_RECUSADO = re.compile(r'^(?:final|original)-recipient:\s*rfc822;\s*<?([^\s<>;]+@[^\s<>;]+)>?',
+                             re.IGNORECASE | re.MULTILINE)
+
+
+def _destinatarios_recusados(full: dict, headers: dict) -> list | None:
+    """Endereços que uma devolução (DSN) diz que recusaram a mensagem: o cabeçalho X-Failed-Recipients (Gmail) e os
+    campos Final-/Original-Recipient do relatório (message/delivery-status), olhando o Action de cada destinatário.
+    Não o texto solto: a devolução cita os cabeçalhos originais (To e Cc), e o Cc é de quem comprou.
+    None = só aviso de ATRASO (Action: delayed): a mensagem ainda vai ser entregue, não é devolução."""
+    falhas = {e.strip().lower() for e in (headers.get('x-failed-recipients') or '').split(',') if '@' in e}
+    adiados = set()
+
+    def _walk(parte):
+        if (parte.get('mimeType') or '').startswith(('message/delivery-status', 'text/')):
+            dados = (parte.get('body') or {}).get('data')
+            if dados:
+                texto = _decodificar_b64url(dados).decode('utf-8', 'replace')
+                for bloco in re.split(r'\r?\n[ \t]*\r?\n', texto):   # um bloco por destinatário no relatório
+                    recipiente = _REGEX_RECUSADO.search(bloco)
+                    if not recipiente:
+                        continue
+                    acao = re.search(r'^action:\s*(\w+)', bloco, re.IGNORECASE | re.MULTILINE)
+                    if acao and acao.group(1).lower() != 'failed':
+                        adiados.add(recipiente.group(1).lower())   # delayed / delivered / relayed / expanded
+                    else:
+                        falhas.add(recipiente.group(1).lower())
+        for sub in parte.get('parts') or []:
+            _walk(sub)
+    _walk(full.get('payload') or {})
+    if not falhas and adiados:
+        return None
+    return sorted(falhas)
+
+
 def _decodificar_b64url(data: str) -> bytes:
     return base64.urlsafe_b64decode(data + '==')
 
@@ -372,6 +406,16 @@ def _processar_mensagem(service, db, message_id: str, envio_automatico: bool = T
         return
 
     if _e_bounce_ou_autoresponder(headers.get('from', ''), headers) or _e_ruido(remetente_email, headers):
+        # Devolução de um presente da Música (caixa lotada de quem recebe): agenda a próxima tentativa.
+        # Continua indo para o Ruído como as outras; uma falha aqui não pode travar a leitura da caixa.
+        try:
+            if remetente_email.startswith(('mailer-daemon@', 'postmaster@')):   # devolução, não resposta automática
+                recusados = _destinatarios_recusados(full, headers)
+                if recusados is not None:   # None = aviso de atraso, não devolução
+                    from musica.integracao import presente_devolvido
+                    presente_devolvido(thread_id, recusados)
+        except Exception as exc:
+            logger.warning(f"[EMAIL-CONVERSAS] ⚠️ Devolução {message_id}: checagem do presente da Música falhou: {exc}")
         registro.update(tipo='ruido', categoria='ruido', estado='sem_acao')
         db.inserir_email_atendimento(registro)
         aplicar_rotulos(service, registro)  # se falhar, a próxima rodada reaplica (ja_registrado acima)

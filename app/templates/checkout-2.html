@@ -462,7 +462,7 @@
             <div class="bonus-item">
                 <span class="check">✓</span>
                 <span>
-                    <strong>{{ '📱' if p.tipo == 'app' else '📖' }} {{ p.nome_venda }}</strong>{% if p.tipo == 'app' and p.dias %} — {{ p.dias }} dias de acesso{% endif %}{% if p.descricao %} — {{ p.descricao }}{% endif %}
+                    <strong>{{ {'app': '📱', 'musica': '🎵'}.get(p.tipo, '📖') }} {{ p.nome_venda }}</strong>{% if p.tipo == 'app' and p.dias %} — {{ p.dias }} dias de acesso{% endif %}{% if p.descricao %} — {{ p.descricao }}{% endif %}
                 </span>
             </div>
             {% endfor %}
@@ -713,6 +713,8 @@
     const DESCONTO = parseFloat(_cfg.desconto) || 0;
     const OFERTA = _cfg.oferta || '';
     const PLANO = _cfg.plano || '';
+    // Produto Música: a música (token) que este pedido compra, sempre no link (prévia, retomada e e-mail de lembrete).
+    const MUSICA = new URLSearchParams(window.location.search).get('musica') || '';
     const PRODUTO_NOME = _cfg.nome;
     const TEM_CARTAO = !!_cfg.temCartao;
     // Pedido criado ao carregar a página (funil: chegou no checkout) — se o cliente finalizar,
@@ -1223,9 +1225,12 @@
     // Produto do tipo app (ex.: App Fatias): vai direto para o app, já logada (a rota abre a
     // licença na hora); produto de e-book segue para a Estante como sempre.
     const APP_SLUG = {{ (plano.app_slug or '')|tojson }};
+    // Produto Música: depois de pagar vai para a área da música (ouvir, QR, presente, videoclipe).
+    const PLANO_MUSICA = {{ 'true' if plano.principais|selectattr('tipo', 'equalto', 'musica')|list else 'false' }};
     function pagamentoConfirmado(guid) {
         mostrarEstado('sucesso');
         setTimeout(() => {
+            if (PLANO_MUSICA) { window.location.replace('/musica/compra/' + guid); return; }
             window.location.replace(APP_SLUG ? '/pedido2/' + guid + '/abrir-app/' + APP_SLUG : '/pedido2/' + guid);
         }, 1500);
     }
@@ -1325,7 +1330,7 @@
         recalcularTotal();
 
         const endpoint = (metodoAtual === 'cartao') ? '/api/v1/cartao/gerar' : '/api/v1/pix/gerar';
-        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, plano: PLANO, oferta: OFERTA, desconto_exibido: DESCONTO, ...dados, ...utmData };
+        const payload = { produto_id: PRODUTO_ID, pedido_id: PEDIDO_ID_INICIAL, bump_ids: bumpIds, plano: PLANO, oferta: OFERTA, desconto_exibido: DESCONTO, musica: MUSICA, ...dados, ...utmData };
         if (dadosCartao) Object.assign(payload, dadosCartao);
 
         try {
@@ -1342,6 +1347,12 @@
                 const u = new URL(window.location.href);
                 u.searchParams.delete('oferta');
                 window.location.replace(u.pathname + u.search);
+                return;
+            }
+            if (data.musica_invalida) {
+                // Produto Música: a compra sai da página da prévia (a música vem no link). Nada foi cobrado.
+                alert(data.mensagem || 'Não encontramos a sua música. Volte para a página da prévia.');
+                window.location.href = MUSICA ? '/musica/p/' + encodeURIComponent(MUSICA) : '/musica/';
                 return;
             }
             currentPedidoId = data.pedido_id;

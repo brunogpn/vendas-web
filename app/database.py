@@ -1609,7 +1609,7 @@ def selecionar_e_avancar_variante(phone_number_id, produto_id, fluxo, condicao, 
 _SELECT_PLANO_ENTREGAVEIS = """
     SELECT pe.id, pe.produto_id, pe.plano_id, pe.entregavel_id, pe.papel, pe.ordem, pe.dias,
            pe.preco_original, pe.preco_promocional,
-           e.tipo, e.app_slug, e.nome_venda, e.descricao, e.path_arquivo, e.nome_arquivo,
+           e.tipo, e.app_slug, e.recurso, e.nome_venda, e.descricao, e.path_arquivo, e.nome_arquivo,
            e.imagem_grande, e.imagem_pequena
     FROM plano_entregaveis pe JOIN entregaveis e ON e.id = pe.entregavel_id
 """
@@ -1706,7 +1706,7 @@ def preco_cobrado_plano(produto_id, plano) -> float:
 # ------------------------------------------------------------ catálogo de entregáveis (admin)
 
 def listar_entregaveis(tipo=None):
-    """O catálogo (e-books e apps), por nome de venda."""
+    """O catálogo (e-books, apps e itens de música), por nome de venda."""
     if tipo:
         return db.execute_query("SELECT * FROM entregaveis WHERE tipo = %s ORDER BY nome_venda",
                                 (tipo,), fetch_all=True) or []
@@ -1718,25 +1718,27 @@ def get_entregavel(entregavel_id):
 
 
 def salvar_entregavel(entregavel_id, tipo, nome_venda, descricao, path_arquivo=None, nome_arquivo=None,
-                      imagem_grande=None, imagem_pequena=None, app_slug=None):
+                      imagem_grande=None, imagem_pequena=None, app_slug=None, recurso=None):
     """Cria (entregavel_id None) ou atualiza um item do catálogo. E-book tem arquivo; app tem
-    app_slug (pasta app/apps/<slug>). Retorna o id."""
-    if tipo == 'app':
+    app_slug (pasta app/apps/<slug>); música tem recurso (musica.dominio.recursos). Retorna o id."""
+    if tipo != 'ebook':
         path_arquivo = nome_arquivo = None
-    else:
+    if tipo != 'app':
         app_slug = None
-    valores = (tipo, app_slug, nome_venda, descricao or None, path_arquivo, nome_arquivo,
+    if tipo != 'musica':
+        recurso = None
+    valores = (tipo, app_slug, recurso, nome_venda, descricao or None, path_arquivo, nome_arquivo,
                imagem_grande or None, imagem_pequena or None)
     if entregavel_id:
         db.execute_query(
-            """UPDATE entregaveis SET tipo=%s, app_slug=%s, nome_venda=%s, descricao=%s, path_arquivo=%s,
+            """UPDATE entregaveis SET tipo=%s, app_slug=%s, recurso=%s, nome_venda=%s, descricao=%s, path_arquivo=%s,
                    nome_arquivo=%s, imagem_grande=%s, imagem_pequena=%s
                WHERE id=%s""", (*valores, entregavel_id))
         return entregavel_id
     return db.execute_query(
-        """INSERT INTO entregaveis (tipo, app_slug, nome_venda, descricao, path_arquivo, nome_arquivo,
+        """INSERT INTO entregaveis (tipo, app_slug, recurso, nome_venda, descricao, path_arquivo, nome_arquivo,
                                     imagem_grande, imagem_pequena)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", valores)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", valores)
 
 
 def remover_entregavel(entregavel_id):
@@ -2086,7 +2088,8 @@ def criar_itens_pedido_web(pedido_id, plano, valor_plano, bump_rows=None):
     bônus do plano (0.00) e uma linha 'bump' por order bump aceito (já validado pelo chamador via
     listar_bumps_validos, com o preço do bump). Cada linha grava `ebook_produto_id` (o vínculo de
     origem em plano_entregaveis) e, quando o item é app, `app_slug` — é por ele que a licença é
-    liberada (dias do vínculo).
+    liberada (dias do vínculo); quando é de música, `recurso` — é por ele que a música, o videoclipe,
+    o QR code e a entrega por e-mail são liberados (musica.casos_de_uso.liberar_do_pedido).
 
     Recebe `plano` (get_plano_venda) e `valor_plano` já resolvidos pelo chamador em vez de
     rebuscar — garante que o valor gravado bate com o que foi de fato cobrado (que pode divergir do
@@ -2108,9 +2111,10 @@ def criar_itens_pedido_web(pedido_id, plano, valor_plano, bump_rows=None):
     linhas += [('bump', item, item['preco_promocional']) for item in (bump_rows or [])]
     db.execute_many(
         """INSERT INTO pedido_itens
-               (pedido_id, tipo, ebook_produto_id, app_slug, nome, path_arquivo, nome_arquivo, valor)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+               (pedido_id, tipo, ebook_produto_id, app_slug, recurso, nome, path_arquivo, nome_arquivo, valor)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         [(pedido_id, tipo, item['id'], item['app_slug'] if item['tipo'] == 'app' else None,
+          item.get('recurso') if item['tipo'] == 'musica' else None,
           item['nome_venda'], item['path_arquivo'], item['nome_arquivo'], valor)
          for tipo, item, valor in linhas]
     )
@@ -2183,7 +2187,8 @@ def listar_produtos_cross_sell_cliente(entregaveis_possuidos):
     """Planos de e-book para a seção de cross-sell da Estante 2 (/pedido2/<guid>): o plano padrão
     (ativo, de vitrine) de cada produto com venda web cujo e-book principal a cliente ainda não tem.
     `entregaveis_possuidos` = ids dos entregáveis que ela já tem (o chamador tira de
-    listar_itens_ebook_do_cliente). Planos com app ficam com a vitrine de apps (apps/_nucleo/estante.py).
+    listar_itens_ebook_do_cliente). Planos com app ficam com a vitrine de apps (apps/_nucleo/estante.py);
+    os da Música ficam fora (a compra começa no quiz de /musica, não no checkout).
 
     Só planos padrão: e-books que só existem como bônus/bump de outros produtos ficam de fora de
     propósito (não têm preço nem configuração fiscal independentes)."""
@@ -2191,7 +2196,8 @@ def listar_produtos_cross_sell_cliente(entregaveis_possuidos):
         """SELECT pp.produto_id, pp.id AS plano_id, pp.slug AS plano_slug, pp.padrao AS plano_padrao,
                   pp.preco_promocional, pp.desconto_oferta, pp.nome AS nome_venda,
                   pp.imagem_pequena, pp.imagem_grande,
-                  GROUP_CONCAT(pe.entregavel_id) AS principais, MAX(e.tipo = 'app') AS tem_app
+                  GROUP_CONCAT(pe.entregavel_id) AS principais, MAX(e.tipo = 'app') AS tem_app,
+                  MAX(e.tipo = 'musica') AS tem_musica
            FROM produto_planos pp
            JOIN produtos p ON p.id = pp.produto_id
            JOIN plano_entregaveis pe ON pe.plano_id = pp.id AND pe.papel = 'principal'
@@ -2203,7 +2209,8 @@ def listar_produtos_cross_sell_cliente(entregaveis_possuidos):
         fetch_all=True
     ) or []
     return [r for r in rows
-            if not r['tem_app'] and not {int(i) for i in r['principais'].split(',')} & set(entregaveis_possuidos)]
+            if not r['tem_app'] and not r['tem_musica']
+            and not {int(i) for i in r['principais'].split(',')} & set(entregaveis_possuidos)]
 
 
 def registrar_visualizacao_estante(pedido_id: int, variante: str) -> None:
@@ -4033,6 +4040,9 @@ def buscar_pagamentos_pix_sem_nfe(
     - Pagador com CNPJ (14 dígitos) é excluído: decisão do contador (14/09/2026) —
       SEFAZ rejeita (cStat=232, IE do destinatário não informada) sem a IE real da
       empresa, que não coletamos no checkout. Fica de fora, sem tentar.
+    - Música não é livro: fica fora o pagamento cujo pedido tem item de música (pedido_itens.recurso) —
+      pelo vínculo do PIX ao pedido ou, sem ele, pelo txid (no PIX estático do site, txid = id do pedido).
+      Também fica fora produto com nfe_automatica = 0 (produto do pedido; sem pedido, o da chave).
 
     Retorna lista de {id, valor_liquido}.
     """
@@ -4043,7 +4053,14 @@ def buscar_pagamentos_pix_sem_nfe(
            LEFT JOIN nfe_emitidas ne ON ne.pagamento_pix_id = pp.id
            LEFT JOIN devolucoes_pix dp ON dp.pagamento_pix_id = pp.id
                AND dp.horario_liquidacao IS NOT NULL
+           LEFT JOIN pedidos ped ON ped.id = pp.pedido_id
+           LEFT JOIN produtos pr ON pr.id = COALESCE(ped.produto_id, pp.produto_id)
            WHERE pp.tenant_slug = %s
+             AND (pr.id IS NULL OR pr.nfe_automatica = 1)
+             AND NOT EXISTS (SELECT 1 FROM pedido_itens pi
+                             WHERE pi.recurso IS NOT NULL
+                               AND pi.pedido_id = COALESCE(pp.pedido_id,
+                                     CASE WHEN pp.txid REGEXP '^[0-9]+$' THEN CAST(pp.txid AS UNSIGNED) END))
              AND pp.horario <= NOW() - INTERVAL %s DAY
              AND pp.valor >= %s
              AND pp.nfe_emitida_id IS NULL
@@ -4069,7 +4086,7 @@ def buscar_pagamentos_cartao_sem_nfe(
 ) -> list[dict]:
     """
     Pagamentos por cartão aprovados elegíveis para NF-e.
-    config_id filtra pelo tenant via produtos.nfe_config_id.
+    config_id filtra pelo tenant via produtos.nfe_config_id. Pedido com item de música fica fora (não é livro).
 
     Pagador com CNPJ (14 dígitos) é excluído: decisão do contador (14/09/2026) —
     SEFAZ rejeita (cStat=232, IE do destinatário não informada) sem a IE real da
@@ -4081,9 +4098,10 @@ def buscar_pagamentos_cartao_sem_nfe(
                   ped.produto_id
            FROM pagamento_cartao pc
            JOIN pedidos ped ON ped.id = pc.pedido_id AND ped.estado_id = 1000
-           JOIN produtos p ON p.id = ped.produto_id AND p.nfe_config_id = %s
+           JOIN produtos p ON p.id = ped.produto_id AND p.nfe_config_id = %s AND p.nfe_automatica = 1
            LEFT JOIN nfe_emitidas ne ON ne.pagamento_cartao_id = pc.id
            WHERE pc.status_cielo = 2
+             AND NOT EXISTS (SELECT 1 FROM pedido_itens pi WHERE pi.pedido_id = ped.id AND pi.recurso IS NOT NULL)
              AND pc.valor >= %s
              AND ped.data_pagamento <= NOW() - INTERVAL %s DAY
              AND (ne.id IS NULL OR ne.status_emissao = 'erro')

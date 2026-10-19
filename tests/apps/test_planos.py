@@ -119,7 +119,7 @@ def test_itens_do_pedido_com_varios_principais(banco):
     plano = database.get_plano_venda(12, 'completo')
     bumps = database.listar_bumps_validos(plano, [4])
     database.criar_itens_pedido_web(500, plano, 15.0, bumps)
-    gravados = [(g[1], g[2], g[3], g[4], float(g[7])) for g in banco.gravados]
+    gravados = [(g[1], g[2], g[3], g[5], float(g[8])) for g in banco.gravados]
     assert gravados == [('principal', 1, 'fatia', 'App Fatias', 15.0),
                         ('principal', 2, None, 'Fatias que Vendem', 0.0),
                         ('bonus', 3, None, 'Bolos Caseiros', 0.0),
@@ -129,7 +129,24 @@ def test_itens_do_pedido_com_varios_principais(banco):
 
 def test_itens_do_whatsapp_sao_os_do_plano_padrao(banco):
     database.criar_itens_pedido_web(501, database.get_plano_venda(12), 0.0)
-    assert [(g[1], g[4]) for g in banco.gravados] == [('principal', 'Fatias que Vendem'), ('bonus', 'Bolos Caseiros')]
+    assert [(g[1], g[5]) for g in banco.gravados] == [('principal', 'Fatias que Vendem'), ('bonus', 'Bolos Caseiros')]
+
+
+def test_itens_de_musica_gravam_o_recurso(monkeypatch):
+    """Plano da Música: a música (principal) e o QR code (bump) gravam o recurso — é por ele que a música é
+    liberada; e-book e app não gravam recurso."""
+    plano = {'id': 40, 'produto_id': 20, 'slug': 'musica', 'nome': 'Música', 'padrao': 1, 'ativo': 1,
+             'preco_promocional': Decimal('29.90'), 'desconto_oferta': Decimal('0.00')}
+    musica = dict(item(20, 'principal', 'musica', 'Sua música', plano_id=40), recurso='musica',
+                  path_arquivo=None, nome_arquivo=None)
+    qr = dict(item(21, 'bump', 'musica', 'Cartão com QR code', preco='9.90', plano_id=40), recurso='qrcode',
+              path_arquivo=None, nome_arquivo=None)
+    b = Banco([plano], [musica, qr])
+    monkeypatch.setattr(database, 'db', b)
+    p = database.get_plano_venda(20, 'musica')
+    database.criar_itens_pedido_web(600, p, 29.9, database.listar_bumps_validos(p, [21]))
+    assert [(g[1], g[3], g[4], float(g[8])) for g in b.gravados] == [('principal', None, 'musica', 29.9),
+                                                                     ('bump', None, 'qrcode', 9.9)]
 
 
 def test_sem_plano_nao_grava_itens(banco):
@@ -163,9 +180,11 @@ def test_estante_nao_lista_o_app_como_livro(monkeypatch):
 
 
 def test_cross_sell_de_ebook_pula_o_que_ela_tem_e_planos_com_app(monkeypatch):
-    linhas = [{'produto_id': 12, 'principais': '5', 'tem_app': 0, 'nome_venda': 'Fatias'},
-              {'produto_id': 14, 'principais': '6', 'tem_app': 0, 'nome_venda': 'Orquídeas'},
-              {'produto_id': 16, 'principais': '18', 'tem_app': 1, 'nome_venda': 'App'}]
+    """Também fica fora a Música: a compra dela começa no quiz de /musica, não no checkout."""
+    linhas = [{'produto_id': 12, 'principais': '5', 'tem_app': 0, 'tem_musica': 0, 'nome_venda': 'Fatias'},
+              {'produto_id': 14, 'principais': '6', 'tem_app': 0, 'tem_musica': 0, 'nome_venda': 'Orquídeas'},
+              {'produto_id': 16, 'principais': '18', 'tem_app': 1, 'tem_musica': 0, 'nome_venda': 'App'},
+              {'produto_id': 20, 'principais': '30', 'tem_app': 0, 'tem_musica': 1, 'nome_venda': 'Música'}]
     monkeypatch.setattr(database.db, 'execute_query', lambda *a, **k: linhas)
     assert [c['produto_id'] for c in database.listar_produtos_cross_sell_cliente({5})] == [14]
 

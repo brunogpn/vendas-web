@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">Editar item do plano</div>
-        <div class="page-subtitle">{{ produto.nome }} — {{ '📱' if vinculo.tipo == 'app' else '📖' }} {{ vinculo.nome_venda }} ({{ vinculo.papel }})</div>
+        <div class="page-subtitle">{{ produto.nome }} — {{ {'app': '📱', 'musica': '🎵'}.get(vinculo.tipo, '📖') }} {{ vinculo.nome_venda }} ({{ vinculo.papel }})</div>
     </div>
     <a href="{{ url_for('admin.produto_planos', produto_id=produto.id) }}" class="btn btn-ghost btn-sm">← Voltar</a>
 </div>

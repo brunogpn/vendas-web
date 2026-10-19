@@ -13,7 +13,7 @@ celery_app = Celery(
     "vendas",
     broker=REDIS_URL,
     backend=REDIS_URL,
-    include=["tasks"]  # era "app.tasks", agora só "tasks"
+    include=["tasks", "musica.tarefas"]  # era "app.tasks", agora só "tasks"; musica.tarefas = produto Música
 )
 
 celery_app.conf.beat_schedule = {
@@ -140,6 +140,23 @@ celery_app.conf.beat_schedule = {
         'schedule': crontab(minute=47),  # toda hora no :47
         'options': {'queue': 'baixa'},
     },
+    # Produto Música (docs/MUSICA.md): presentes por e-mail na hora marcada, destravar tarefas perdidas e
+    # reconciliar pagos; lembretes de prévia não comprada (8h–21h); limpeza das não pagas de 90+ dias.
+    'musica-manutencao': {
+        'task': 'musica.manutencao',
+        'schedule': crontab(minute='*/5'),
+        'options': {'queue': 'normal'},
+    },
+    'musica-lembretes': {
+        'task': 'musica.lembretes',
+        'schedule': crontab(minute='7,37', hour='8-21'),
+        'options': {'queue': 'normal'},
+    },
+    'musica-limpeza': {
+        'task': 'musica.limpeza',
+        'schedule': crontab(hour=4, minute=13),
+        'options': {'queue': 'baixa'},
+    },
 }
 
 from celery.signals import worker_process_init
@@ -206,5 +223,13 @@ celery_app.conf.update(
         "tasks.emitir_nfe_cartao":                       {"queue": "normal"},
         "tasks.emitir_nfe_diaria_lbe":                   {"queue": "normal"},
         "tasks.finalizar_execucao_nfe_diaria":           {"queue": "normal"},
+        # Produto Música: a letra na urgente (a cliente espera na tela); o videoclipe na baixa (pesado)
+        "musica.escrever_letra":                         {"queue": "urgente"},
+        "musica.consultar":                              {"queue": "normal"},
+        "musica.enviar_presentes":                       {"queue": "normal"},
+        "musica.manutencao":                             {"queue": "normal"},
+        "musica.lembretes":                              {"queue": "normal"},
+        "musica.fazer_video":                            {"queue": "baixa"},
+        "musica.limpeza":                                {"queue": "baixa"},
     },
 )

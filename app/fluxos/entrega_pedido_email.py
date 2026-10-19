@@ -12,6 +12,7 @@ Fluxo:
   6. Marca data_envio_ebook no pedido
 """
 
+import html as _html
 import os
 import time
 import logging
@@ -66,9 +67,20 @@ def executar(pedido_id: int) -> None:
     if apps:
         # Plano com app: o destaque do e-mail é o acesso ao app (os e-books seguem na Estante).
         subject = f'Pedido {pedido_num} ✅ Seu acesso está liberado: {nome_produto}!'
+    # Produto Música: o link principal é a área da música (ouvir, baixar, QR, presente, videoclipe).
+    musica = None
+    try:
+        from musica.integracao import musica_do_pedido_pago
+        # Sem exigir a liberação: este e-mail não é reenviado, e sem a música ele cairia na Estante vazia.
+        musica = musica_do_pedido_pago({'id': pedido_id, 'guid': guid}, exigir_liberada=False)
+    except Exception as e:
+        logger.error(f'[EMAIL] Erro ao buscar a música do pedido #{pedido_id}: {e}')
+    if musica:
+        link_estante = f"{base_url}{musica['caminho']}"
+        subject = f"Pedido {pedido_num} ✅ A música de {musica['para']} está pronta 🎵"
 
     html_entrega = _corpo_html(nome_cliente, nome_produto, itens, link_estante,
-                               nome_remetente_email, cor_primaria, cor_secundaria, apps=apps)
+                               nome_remetente_email, cor_primaria, cor_secundaria, apps=apps, musica=musica)
 
     resultado = _enviar_gmail(
         destinatario=destinatario,
@@ -114,7 +126,8 @@ def _corpo_html(nome: str, nome_produto: str,
                 nome_remetente: str,
                 cor_primaria: str,
                 cor_secundaria: str,
-                apps: list | None = None) -> str:
+                apps: list | None = None,
+                musica: dict | None = None) -> str:
     """
     Gera HTML do e-mail de entrega com personalização por produto.
 
@@ -130,6 +143,8 @@ def _corpo_html(nome: str, nome_produto: str,
         cor_secundaria: Cor dos botões em hex (ex: '#b45309')
         apps: lista de dicts {nome, link} — apps que a compra libera (ex.: App Fatias); cada um
               ganha um botão próprio logo abaixo do botão da Estante
+        musica: {titulo, para} quando a compra é do produto Música — aí link_estante é a área da música
+                e o texto/botão falam dela em vez da Estante
     """
     def _juntar_nomes(nomes: list) -> str:
         if len(nomes) <= 1:
@@ -161,16 +176,28 @@ def _corpo_html(nome: str, nome_produto: str,
               Resumindo: {', '.join(resumo_partes)}.
             </p>'''
 
+    if musica:
+        texto_acesso = (f'A música <strong>“{_html.escape(musica["titulo"])}”</strong> para '
+                        f'{_html.escape(musica["para"])} ficou pronta! '
+                        'Clique no botão abaixo para ouvir as duas versões, baixar e enviar para quem você ama.')
+        rotulo_botao = '🎵 Ouvir minha música'
+        texto_link = 'Esse link é pessoal — é por ele que você ouve e baixa a sua música, de qualquer celular ou computador.'
+    else:
+        texto_acesso = ('Para acessar, é só clicar no botão abaixo. Você vai entrar direto no nosso site, '
+                        'na sua página pessoal — a <strong>Sua Estante</strong> — onde fica tudo o que você '
+                        'já comprou com a gente. Dá pra ler direto no navegador, sem instalar nada, e '
+                        'também dá pra salvar para ler depois, quando quiser.')
+        rotulo_botao = '📚 Acessar minha estante'
+        texto_link = ('Esse link é pessoal — é ele que abre sua Estante, e você pode acessar de '
+                      'qualquer celular ou computador, quantas vezes quiser.')
+
     corpo_interno = f"""
             <p style="font-size:16px; color:#333; margin:0 0 16px;">
               Oi, {nome}! Aqui é a <strong>{nome_remetente}</strong>. Sua compra foi confirmada — parabéns pela decisão! 🎉
             </p>
             {resumo_compra}
             <p style="font-size:15px; color:#333; margin:0 0 20px;">
-              Para acessar, é só clicar no botão abaixo. Você vai entrar direto no nosso site,
-              na sua página pessoal — a <strong>Sua Estante</strong> — onde fica tudo o que você
-              já comprou com a gente. Dá pra ler direto no navegador, sem instalar nada, e
-              também dá pra salvar para ler depois, quando quiser.
+              {texto_acesso}
             </p>
 
             {_bloco_apps(apps, cor_primaria)}
@@ -183,7 +210,7 @@ def _corpo_html(nome: str, nome_produto: str,
                      style="display:inline-block; background:{cor_secundaria}; color:#ffffff;
                             font-size:17px; font-weight:bold; text-decoration:none;
                             padding:16px 32px; border-radius:12px;">
-                    📚 Acessar minha estante
+                    {rotulo_botao}
                   </a>
                 </td>
               </tr>
@@ -209,8 +236,7 @@ def _corpo_html(nome: str, nome_produto: str,
             </table>
 
             <p style="font-size:14px; color:#555; margin:0 0 8px;">
-              Esse link é pessoal — é ele que abre sua Estante, e você pode acessar de
-              qualquer celular ou computador, quantas vezes quiser.
+              {texto_link}
             </p>
             <p style="font-size:14px; color:#555; margin:0 0 24px;">
               💡 <strong>Dica:</strong> guarde este e-mail. Sempre que quiser reler ou salvar

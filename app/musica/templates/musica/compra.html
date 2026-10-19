@@ -1,0 +1,242 @@
+{% extends "musica/musica_base.html" %}
+{# Área de quem comprou (/musica/compra/<guid>): ouvir e baixar, e os itens da compra — cartão QR, presente
+   por e-mail, videoclipe. O link do presente (/musica/m/<token>) é o que vai para quem recebe. #}
+{% block titulo %}{{ musica.titulo }} · {{ marca }}{% endblock %}
+{% block estilo %}
+<meta name="robots" content="noindex">
+<style>
+.funil{max-width:680px;margin:0 auto;padding:0 20px 72px}
+.funil-topo{display:flex;align-items:center;justify-content:space-between;height:68px}
+.capa{position:relative;border-radius:var(--raio);overflow:hidden;background:#1C1917;color:#fff;padding:44px 28px 34px;margin-top:12px;text-align:center}
+.capa::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 20%, color-mix(in srgb,var(--cor) 55%,transparent), transparent 45%),radial-gradient(circle at 80% 90%, color-mix(in srgb,var(--cor) 30%,transparent), transparent 40%);opacity:.9}
+.capa > *{position:relative}
+.capa .icone{width:64px;height:64px;border-radius:999px;background:rgba(255,255,255,.12);display:grid;place-items:center;margin:0 auto 18px;font-size:1.8rem}
+.capa h1{color:#fff;margin-bottom:8px}
+.capa p{margin:0;opacity:.85}
+.lista{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:22px 0}
+.baixar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.botoes{display:grid;gap:10px;margin-top:10px}
+.whats{background:#1F9D55}
+.whats:hover{background:#178246}
+.copiar{display:flex;gap:8px}
+.copiar input{flex:1}
+details.letra-dobra{margin-top:22px;background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:18px 22px}
+details.letra-dobra summary{cursor:pointer;font-weight:700}
+.versos{white-space:pre-wrap;font-size:1.06rem;line-height:1.75;margin-top:14px}
+.extra-bloco{background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:22px;margin-top:16px}
+.extra-bloco h2{font-size:1.35rem;margin-bottom:6px}
+.extra-bloco p{color:var(--suave);margin:0 0 14px}
+.grade-agenda{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grade-agenda label{font-weight:700;font-size:.95rem;display:block;margin-bottom:6px}
+.agendado{display:flex;gap:12px;align-items:flex-start;color:var(--texto)}
+.agendado i{font-size:1.5rem;color:var(--ok)}
+.fotos-escolha{border:2px dashed var(--linha);border-radius:var(--raio);padding:22px;text-align:center;cursor:pointer;display:block}
+.fotos-escolha:hover{border-color:var(--cor)}
+.fotos-escolha i{font-size:2rem;color:var(--cor)}
+.miniaturas{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:14px 0 0}
+.miniaturas img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px}
+.versao-escolha{display:flex;gap:10px;margin:14px 0}
+.versao-escolha label{flex:1;border:1.5px solid var(--linha);border-radius:14px;padding:12px;text-align:center;font-weight:600;cursor:pointer}
+.versao-escolha input{accent-color:var(--cor);margin-right:6px}
+video{width:100%;max-height:70vh;border-radius:16px;background:#000}
+.guardar{display:flex;gap:12px;align-items:flex-start;background:var(--fundo-2);border-radius:var(--raio);padding:18px 20px;margin-top:22px;color:var(--suave)}
+.guardar i{font-size:1.4rem;color:var(--cor)}
+@media (max-width:560px){ .funil{padding:0 16px 56px} .baixar{grid-template-columns:minmax(0,1fr)} .grade-agenda{grid-template-columns:minmax(0,1fr)} }
+</style>
+{% endblock %}
+{% block pagina %}
+<div class="funil">
+  <header class="funil-topo">
+    <a class="marca" href="{{ url_for('musica.inicio') }}"><i class="ti ti-music" aria-hidden="true"></i>{{ marca }}</a>
+  </header>
+
+  <section class="capa">
+    <div class="icone"><i class="ti ti-gift" aria-hidden="true"></i></div>
+    <h1>{{ musica.titulo }}</h1>
+    <p>Uma música para {{ para }}, com carinho de {{ musica.respostas.de }}</p>
+  </section>
+
+  <div class="lista">
+    {% for faixa in musica.faixas %}
+    <div class="player" data-src="{{ url_for('musica.musica_completa', token=musica.token, numero=faixa.numero) }}" data-titulo="Versão {{ faixa.numero }}"></div>
+    {% endfor %}
+  </div>
+  <div class="baixar">
+    {% for faixa in musica.faixas %}
+    <a class="botao secundario" href="{{ url_for('musica.musica_completa', token=musica.token, numero=faixa.numero, baixar=1) }}"><i class="ti ti-download" aria-hidden="true"></i> Baixar versão {{ faixa.numero }}</a>
+    {% endfor %}
+  </div>
+
+  <section class="extra-bloco">
+    <h2>Enviar para {{ para }}</h2>
+    <p>Este é o link do presente: abre só a música, para ouvir e baixar.</p>
+    <div class="copiar"><input class="campo" id="link-presente" value="{{ link_presente }}" readonly><button class="botao secundario" id="copiar" type="button"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button></div>
+    <div class="botoes">
+      <a class="botao whats" href="https://wa.me/?text={{ ('Fiz uma música só pra você: ' ~ link_presente)|urlencode }}"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar no WhatsApp</a>
+    </div>
+  </section>
+
+  {% if tem_presente %}
+  <section class="extra-bloco" id="presente">
+    <h2>Entrega por e-mail</h2>
+    {% if musica.presente_enviado_em %}
+      <div class="agendado"><i class="ti ti-circle-check" aria-hidden="true"></i><span>A música foi enviada para <b>{{ musica.presente_nome }}</b> ({{ musica.presente_email }}), com cópia para você.</span></div>
+    {% else %}
+      <p>A gente manda a música por e-mail para quem vai receber, agora ou no dia e horário que você escolher (horário de Brasília). Você recebe uma cópia.</p>
+      {% if musica.presente_email %}
+      <div class="agendado" style="margin-bottom:16px"><i class="ti ti-calendar-check" aria-hidden="true"></i><span>Agendado para <b>{{ musica.presente_nome }}</b> em <b>{{ musica.presente_em.strftime('%d/%m às %H:%M') if musica.presente_em else 'agora' }}</b>. Você pode mudar abaixo.</span></div>
+      {% endif %}
+      <div class="grade-agenda">
+        <div><label for="pr-nome">Nome de quem vai receber</label><input class="campo" id="pr-nome" maxlength="120" value="{{ musica.presente_nome or para }}"></div>
+        <div><label for="pr-email">E-mail dela ou dele</label><input class="campo" id="pr-email" type="email" inputmode="email" placeholder="email@exemplo.com" value="{{ musica.presente_email or '' }}"></div>
+        <div><label for="pr-dia">Dia</label><input class="campo" id="pr-dia" type="date" value="{{ musica.presente_em.strftime('%Y-%m-%d') if musica.presente_em else '' }}"></div>
+        <div><label for="pr-hora">Horário</label><input class="campo" id="pr-hora" type="time" value="{{ musica.presente_em.strftime('%H:%M') if musica.presente_em else '09:00' }}"></div>
+      </div>
+      <label for="pr-mensagem" style="font-weight:700;display:block;margin:12px 0 6px">Um recado (opcional)</label>
+      <textarea class="campo" id="pr-mensagem" maxlength="500" placeholder="Feliz aniversário, mãe! Te amo.">{{ musica.presente_mensagem or '' }}</textarea>
+      <p class="suave" style="font-size:.95rem;margin-top:10px"><i class="ti ti-info-circle" aria-hidden="true"></i> Peça para a pessoa olhar também a caixa de spam ou "Promoções".</p>
+      <div class="erro" id="pr-erro" role="alert"></div>
+      <div class="botoes" style="margin-top:14px">
+        <button class="botao" id="pr-agendar" type="button"><i class="ti ti-calendar" aria-hidden="true"></i> Agendar o envio</button>
+        <button class="botao secundario" id="pr-agora" type="button"><i class="ti ti-send" aria-hidden="true"></i> Enviar agora</button>
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if tem_qrcode %}
+  <section class="extra-bloco">
+    <h2>Cartão com QR code</h2>
+    <p>Imprima e entregue junto com o presente. A pessoa aponta a câmera do celular e a música toca.</p>
+    <a class="botao secundario" href="{{ url_for('musica.cartao_qrcode', guid=guid) }}" target="_blank" rel="noopener"><i class="ti ti-printer" aria-hidden="true"></i> Abrir o cartão para imprimir</a>
+  </section>
+  {% endif %}
+
+  {% if tem_video %}
+  <section class="extra-bloco" id="video">
+    <h2>Videoclipe com as suas fotos</h2>
+    {% if musica.video_status == "pronto" %}
+      <video controls playsinline preload="metadata" poster="{{ url_for('musica.capa_video', token=musica.token) }}" src="{{ url_for('musica.videoclipe', token=musica.token) }}"></video>
+      <a class="botao secundario" style="margin-top:12px" href="{{ url_for('musica.videoclipe', token=musica.token, baixar=1) }}"><i class="ti ti-download" aria-hidden="true"></i> Baixar o vídeo</a>
+      <p style="margin-top:12px">Quer trocar as fotos? <a href="#" id="refazer">Fazer de novo</a>.</p>
+    {% endif %}
+    <div id="video-fazendo" style="display:{{ 'block' if musica.video_status == 'fazendo' else 'none' }}">
+      <div class="carregando"><i></i><i></i><i></i></div>
+      <p style="text-align:center">Montando o seu vídeo. Leva de 2 a 4 minutos, pode deixar a página aberta.</p>
+    </div>
+    <div id="video-form" style="display:{{ 'none' if musica.video_status in ('pronto', 'fazendo') else 'block' }}">
+      <p>Escolha até {{ max_fotos }} fotos. A gente monta um vídeo vertical com a música, pronto para o Status e o Instagram.</p>
+      {% if musica.video_status == "erro" %}<p style="color:var(--cor-forte)">Não conseguimos montar o vídeo da última vez. Tente de novo com outras fotos.</p>{% endif %}
+      <label class="fotos-escolha" for="fotos"><i class="ti ti-photo-plus" aria-hidden="true"></i><br><b>Escolher fotos</b><br><small class="suave">JPG ou PNG, até {{ max_fotos }}</small></label>
+      <input id="fotos" type="file" accept="image/*" multiple hidden>
+      <div class="miniaturas" id="miniaturas"></div>
+      {% if musica.faixas|length > 1 %}
+      <div class="versao-escolha">
+        <label><input type="radio" name="versao" value="1" checked>Versão 1</label>
+        <label><input type="radio" name="versao" value="2">Versão 2</label>
+      </div>
+      {% endif %}
+      {% if legenda_video %}<label class="extra-check" style="display:flex;gap:10px;align-items:center;margin:6px 0 14px;font-weight:600;cursor:pointer"><input type="checkbox" id="video-legenda" checked style="width:20px;height:20px;accent-color:var(--cor)">Mostrar a letra no vídeo, como legenda</label>{% endif %}
+      <div class="erro" id="video-erro" role="alert"></div>
+      <button class="botao" id="video-criar" type="button" disabled>Criar o vídeo</button>
+    </div>
+  </section>
+  {% endif %}
+
+  <details class="letra-dobra"><summary>Ver a letra</summary>
+    <div class="versos">{{ letra_texto }}</div>
+  </details>
+  <div class="guardar"><i class="ti ti-bookmark" aria-hidden="true"></i><span>Guarde o e-mail da compra: o botão dele sempre traz você de volta para esta página.</span></div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+const copiar = document.getElementById("copiar");
+if (copiar) copiar.addEventListener("click", async () => {
+  const campo = document.getElementById("link-presente");
+  try { await navigator.clipboard.writeText(campo.value); } catch (_) { campo.select(); document.execCommand("copy"); }
+  copiar.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copiado';
+});
+
+// Videoclipe: reduz as fotos no celular antes de enviar (fica leve para o 4G).
+const campoFotos = document.getElementById("fotos");
+const MAX_FOTOS = {{ max_fotos }};
+if (campoFotos) {
+  const URL_VIDEO = "{{ url_for('musica.api_video', guid=guid) }}";
+  const URL_FOTO = "{{ url_for('musica.api_foto', guid=guid) }}";
+  let escolhidas = [];
+  // Reduz no celular antes de enviar: cada foto vai sozinha e precisa ficar abaixo de ~900 KB (o servidor
+  // aceita até 1 MB por envio). Se ainda ficar grande, reduz mais.
+  async function reduzir(arquivo){
+    const bmp = await createImageBitmap(arquivo, {imageOrientation: "from-image"});
+    for (const [lado, qualidade] of [[1600, .86], [1280, .8], [1024, .72]]) {
+      const escala = Math.min(1, lado / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas"); c.width = Math.round(bmp.width * escala); c.height = Math.round(bmp.height * escala);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", qualidade));
+      if (blob && blob.size < 900 * 1024) return blob;
+    }
+    throw new Error("Uma das fotos é grande demais. Tente outra.");
+  }
+  async function postar(url, corpo){
+    const r = await fetch(url, {method: "POST", body: corpo, headers: corpo instanceof FormData ? {} : {"Content-Type": "application/json"}});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || "Não deu certo. Tente de novo.");
+    return d;
+  }
+  campoFotos.addEventListener("change", () => {
+    escolhidas = [...campoFotos.files].slice(0, MAX_FOTOS);
+    const m = document.getElementById("miniaturas"); m.innerHTML = "";
+    escolhidas.forEach(f => { const i = document.createElement("img"); i.src = URL.createObjectURL(f); i.alt = ""; m.appendChild(i); });
+    document.getElementById("video-criar").disabled = !escolhidas.length;
+    document.getElementById("video-criar").textContent = escolhidas.length ? `Criar o vídeo com ${escolhidas.length} ${escolhidas.length === 1 ? "foto" : "fotos"}` : "Criar o vídeo";
+  });
+  document.getElementById("video-criar").addEventListener("click", async e => {
+    const b = e.currentTarget, erro = document.getElementById("video-erro"); erro.style.display = "none";
+    b.disabled = true;
+    try {
+      for (const [i, f] of escolhidas.entries()) {
+        b.textContent = `Enviando a foto ${i + 1} de ${escolhidas.length}...`;
+        const dados = new FormData();
+        dados.append("foto", await reduzir(f), `foto${i}.jpg`);
+        dados.append("primeira", i === 0 ? "1" : "0");
+        await postar(URL_FOTO, dados);
+      }
+      const v = document.querySelector('input[name="versao"]:checked'), leg = document.getElementById("video-legenda");
+      await postar(URL_VIDEO, JSON.stringify({versao: v ? v.value : "1", legenda: !!(leg && leg.checked)}));
+      document.getElementById("video-form").style.display = "none"; document.getElementById("video-fazendo").style.display = "block";
+      esperarVideo();
+    } catch (x) { erro.textContent = x.message; erro.style.display = "block"; b.disabled = false; b.textContent = "Criar o vídeo"; }
+  });
+  const refazer = document.getElementById("refazer");
+  if (refazer) refazer.addEventListener("click", e => { e.preventDefault(); document.getElementById("video-form").style.display = "block"; });
+}
+async function esperarVideo(){
+  const r = await fetch("{{ url_for('musica.api_status_video', guid=guid) }}").then(r => r.json()).catch(() => ({}));
+  if (r.status === "fazendo" || !r.status) { setTimeout(esperarVideo, 5000); return; }
+  location.hash = "video"; location.reload();
+}
+{% if musica.video_status == "fazendo" %}esperarVideo();{% endif %}
+
+// Presente por e-mail: agendar (dia/hora de Brasília) ou enviar agora.
+async function enviarPresente(agora){
+  const erro = document.getElementById("pr-erro"); erro.style.display = "none";
+  const dia = document.getElementById("pr-dia").value, hora = document.getElementById("pr-hora").value;
+  if (!agora && !(dia && hora)) { erro.textContent = "Escolha o dia e o horário, ou toque em Enviar agora."; erro.style.display = "block"; return; }
+  const r = await fetch("{{ url_for('musica.api_presente', guid=guid) }}", {method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({nome: document.getElementById("pr-nome").value, email: document.getElementById("pr-email").value,
+                          mensagem: document.getElementById("pr-mensagem").value, agora, quando: agora ? "" : `${dia}T${hora}:00`})});
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { erro.textContent = d.erro || "Não deu certo. Tente de novo."; erro.style.display = "block"; return; }
+  location.hash = "presente"; location.reload();
+}
+const agendar = document.getElementById("pr-agendar");
+if (agendar) {
+  document.getElementById("pr-dia").min = new Date().toLocaleDateString("sv-SE");
+  agendar.addEventListener("click", () => enviarPresente(false));
+  document.getElementById("pr-agora").addEventListener("click", () => {
+    if (confirm("Enviar a música por e-mail agora?")) enviarPresente(true);
+  });
+}
+</script>
+{% endblock %}

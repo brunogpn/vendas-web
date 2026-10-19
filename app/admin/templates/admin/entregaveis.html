@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">Catálogo de entregáveis</h1>
-        <p class="page-subtitle">Cadastre cada e-book ou app uma única vez aqui e inclua nos planos dos produtos (em "Planos e entregáveis")</p>
+        <p class="page-subtitle">Cadastre cada e-book, app ou item de música uma única vez aqui e inclua nos planos dos produtos (em "Planos e entregáveis")</p>
     </div>
 </div>
 
@@ -26,9 +26,9 @@
             <tbody>
                 {% for e in entregaveis %}
                 <tr>
-                    <td style="font-size: 13px;">{{ '📱 App' if e.tipo == 'app' else '📖 E-book' }}</td>
+                    <td style="font-size: 13px;">{{ {'app': '📱 App', 'musica': '🎵 Música'}.get(e.tipo, '📖 E-book') }}</td>
                     <td style="font-size: 14px;">{{ e.nome_venda }}</td>
-                    <td style="font-family: var(--mono); font-size: 13px; color: var(--muted);">{{ e.app_slug if e.tipo == 'app' else e.path_arquivo }}</td>
+                    <td style="font-family: var(--mono); font-size: 13px; color: var(--muted);">{{ e.app_slug if e.tipo == 'app' else (recursos[e.recurso].nome if e.tipo == 'musica' and e.recurso in recursos else e.path_arquivo) }}</td>
                     <td style="font-family: var(--mono); font-size: 12px; color: var(--muted);">
                         {% if e.tipo == 'app' %}— (capa vem do plano){% else %}{{ e.imagem_grande or '—' }} / {{ e.imagem_pequena or '—' }}{% endif %}
                     </td>
@@ -67,7 +67,15 @@
                 <select id="tipo" name="tipo">
                     <option value="ebook">📖 E-book (arquivo PDF)</option>
                     <option value="app">📱 App (acesso por dias)</option>
+                    <option value="musica">🎵 Música (produto Música de Presente)</option>
                 </select>
+            </div>
+            <div class="form-group so-musica">
+                <label for="recurso">O que libera</label>
+                <select id="recurso" name="recurso">
+                    {% for slug, r in recursos.items() %}<option value="{{ slug }}">{{ r.nome }} — {{ 'principal' if r.papel == 'principal' else 'order bump' }}</option>{% endfor %}
+                </select>
+                <small class="form-text text-muted">Música e videoclipe entram no plano como principal; QR code e entregas, como order bump (com preço).</small>
             </div>
             <div class="form-group so-app">
                 <label for="app_slug">App</label>
@@ -98,7 +106,7 @@
                        placeholder="se vazio, usa o mesmo nome do arquivo selecionado"
                        maxlength="255" autocomplete="off">
             </div>
-            <div class="form-group so-ebook">
+            <div class="form-group so-imagem">
                 <label for="imagem_grande">Imagem grande (opcional)</label>
                 <select id="imagem_grande" name="imagem_grande">
                     <option value="">— nenhuma —</option>
@@ -107,7 +115,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group so-ebook">
+            <div class="form-group so-imagem">
                 <label for="imagem_pequena">Imagem pequena (bônus/order bump no checkout)</label>
                 <select id="imagem_pequena" name="imagem_pequena">
                     <option value="">— nenhuma —</option>
@@ -136,9 +144,12 @@
     if (!form) return;
     var tipo = form.querySelector('#tipo');
     function atualizar() {
-        var app = tipo.value === 'app';
+        var app = tipo.value === 'app', musica = tipo.value === 'musica';
         form.querySelectorAll('.so-app').forEach(function (el) { el.style.display = app ? '' : 'none'; });
-        form.querySelectorAll('.so-ebook').forEach(function (el) { el.style.display = app ? 'none' : ''; });
+        form.querySelectorAll('.so-musica').forEach(function (el) { el.style.display = musica ? '' : 'none'; });
+        form.querySelectorAll('.so-ebook').forEach(function (el) { el.style.display = (app || musica) ? 'none' : ''; });
+        // Item de música usa a imagem pequena (order bump no checkout); o arquivo não vale.
+        form.querySelectorAll('.so-imagem').forEach(function (el) { el.style.display = app ? 'none' : ''; });
     }
     tipo.addEventListener('change', atualizar);
     atualizar();

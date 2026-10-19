@@ -195,15 +195,17 @@ def dados_basicos_produto(produto_id):
 
     if request.method == 'POST':
         try:
-            # ativo e nfe_config_id só aparecem no formulário pra admin (produto_dados_basicos.html)
+            # ativo, nfe_config_id e nfe_automatica só aparecem no formulário pra admin (produto_dados_basicos.html)
             # — sem essa checagem no servidor, um usuário com acesso ao produto mas sem ser admin
             # poderia mudar os dois só forjando o POST, já que @requer_acesso_produto não exige admin.
             if current_user.is_admin():
                 ativo_novo = int(request.form.get('ativo', 1))
                 nfe_config_id_novo = request.form.get('nfe_config_id') or None
+                nfe_automatica_novo = 1 if request.form.get('nfe_automatica') else 0
             else:
                 ativo_novo = produto['ativo']
                 nfe_config_id_novo = produto['nfe_config_id']
+                nfe_automatica_novo = produto['nfe_automatica']
 
             db.execute_query("""
                 UPDATE produtos SET
@@ -214,6 +216,7 @@ def dados_basicos_produto(produto_id):
                     preco                 = %s,
                     ativo                 = %s,
                     nfe_config_id         = %s,
+                    nfe_automatica        = %s,
                     disponivel_web        = %s,
                     url_pagina_vendas     = %s,
                     numero_convenio_bb    = %s,
@@ -232,6 +235,7 @@ def dados_basicos_produto(produto_id):
                 request.form.get('preco'),
                 ativo_novo,
                 nfe_config_id_novo,
+                nfe_automatica_novo,
                 1 if request.form.get('disponivel_web') else 0,
                 request.form.get('url_pagina_vendas') or None,
                 request.form.get('numero_convenio_bb') or None,

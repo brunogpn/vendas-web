@@ -1,0 +1,47 @@
+{
+  "_como_usar": "O site junta: estilo (base) + clima + voz. O resultado vai no campo 'style' do Suno. 'negativo' vai em 'Etiquetas negativas'. 'genero_vocal' vai no campo de gênero vocal.",
+
+  "estilos": {
+    "sertanejo":  "sertanejo romântico, acoustic guitar, viola caipira, accordion, Brazilian Portuguese",
+    "gospel":     "Brazilian gospel worship, mid-tempo, piano, acoustic guitar, strings, soft choir, Brazilian Portuguese",
+    "mpb":        "MPB, nylon acoustic guitar, soft percussion, warm intimate vocals, Brazilian Portuguese",
+    "pop":        "Brazilian pop, catchy melody, modern production, Brazilian Portuguese",
+    "pagode":     "pagode romântico, cavaquinho, pandeiro, banjo, tantã, Brazilian Portuguese",
+    "forro":      "forró pé de serra, accordion, zabumba, triangle, Brazilian Portuguese",
+    "romantica":  "romantic ballad, piano, strings, Brazilian Portuguese",
+    "infantil":   "Brazilian children's party song, ukulele, xylophone, claps, kids choir backing, Brazilian Portuguese",
+    "rock":       "Brazilian pop rock, electric guitars, drums, Brazilian Portuguese",
+    "bossa":      "bossa nova, nylon guitar, soft brushes, upright bass, Brazilian Portuguese",
+    "sertanejo_universitario": "sertanejo universitário, upbeat, acoustic guitar, accordion, modern drums, party vibe, Brazilian Portuguese",
+    "sertanejo_raiz": "música sertaneja raiz, moda de viola, viola caipira, acoustic guitar, duo harmony, rustic, Brazilian Portuguese",
+    "samba":      "samba, cavaquinho, pandeiro, surdo, tamborim, Brazilian Portuguese",
+    "piseiro":    "piseiro, pisadinha, keyboard synth, electronic forró beat, Brazilian Portuguese",
+    "arrocha":    "arrocha, romantic Brazilian arrocha, synth, saxophone, electronic drums, Brazilian Portuguese",
+    "axe":        "axé music, Bahia carnival, percussion, brass section, Brazilian Portuguese",
+    "funk":       "Brazilian funk, funk carioca beat, catchy hook, clean family-friendly lyrics, Brazilian Portuguese",
+    "reggae":     "Brazilian reggae, offbeat guitar skank, deep bass, relaxed groove, Brazilian Portuguese",
+    "rap":        "Brazilian hip hop, rap verses, melodic sung hook, boom bap beat, Brazilian Portuguese",
+    "valsa":      "romantic waltz, 3/4 time, strings, piano, elegant, Brazilian Portuguese"
+  },
+
+  "clima": {
+    "emocionante": "emotional, heartfelt ballad",
+    "alegre":      "upbeat, joyful, warm",
+    "engracado":   "playful, fun, lighthearted"
+  },
+
+  "voz": {
+    "masculina": { "genero_vocal": "m", "texto": "warm male vocals" },
+    "feminina":  { "genero_vocal": "f", "texto": "warm female vocals" },
+    "dupla":     { "genero_vocal": "m", "texto": "male duo with harmony in thirds" }
+  },
+
+  "negativo": "English, Spanish, European Portuguese accent, explicit lyrics",
+
+  "suno": {
+    "model_version": "V5_5",
+    "modo_personalizado": true,
+    "letras_automaticas": false,
+    "instrumental": false
+  }
+}
