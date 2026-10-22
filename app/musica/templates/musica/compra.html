@@ -79,6 +79,7 @@ video{width:100%;max-height:70vh;border-radius:16px;background:#000}
   {% if tem_presente %}
   <section class="extra-bloco" id="presente">
     <h2>Entrega para {{ musica.presente_nome or para }}</h2>
+    <div class="agendado" id="pr-ok" role="status" style="display:none;margin-bottom:16px;padding:14px;border:2px solid var(--ok);border-radius:var(--raio);font-weight:600"><i class="ti ti-circle-check" aria-hidden="true"></i><span id="pr-ok-texto"></span></div>
     {% set wa_falhou = musica.presente_wa_status == 'falhou' %}
     {% set email_falhou = musica.presente_falhou_em %}
     {% if musica.presente_enviado_em and not wa_falhou and not email_falhou %}
@@ -246,15 +247,35 @@ async function enviarPresente(agora){
   const erro = document.getElementById("pr-erro"); erro.style.display = "none";
   const dia = document.getElementById("pr-dia").value, hora = document.getElementById("pr-hora").value;
   if (!agora && !(dia && hora)) { erro.textContent = "Escolha o dia e o horário, ou toque em Enviar agora."; erro.style.display = "block"; return; }
+  const botao = document.getElementById(agora ? "pr-agora" : "pr-agendar"), rotulo = botao.innerHTML;
+  const botoes = [document.getElementById("pr-agendar"), document.getElementById("pr-agora")];
+  botoes.forEach(b => b.disabled = true);
+  botao.textContent = agora ? "Enviando..." : "Agendando...";
+  const voltar = () => { botoes.forEach(b => b.disabled = false); botao.innerHTML = rotulo; };
   const r = await fetch("{{ url_for('musica.api_presente', guid=guid) }}", {method: "POST", headers: {"Content-Type": "application/json"},
     body: JSON.stringify({nome: document.getElementById("pr-nome").value, email: document.getElementById("pr-email").value,
                           whatsapp: (document.getElementById("pr-whats") || {}).value || "",
                           confirmo: !!(document.getElementById("pr-confirmo") || {}).checked,
-                          mensagem: document.getElementById("pr-mensagem").value, agora, quando: agora ? "" : `${dia}T${hora}:00`})});
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) { erro.textContent = d.erro || "Não deu certo. Tente de novo."; erro.style.display = "block"; return; }
+                          mensagem: document.getElementById("pr-mensagem").value, agora, quando: agora ? "" : `${dia}T${hora}:00`})})
+    .catch(() => null);
+  const d = r ? await r.json().catch(() => ({})) : {};
+  if (!r || !r.ok) { voltar(); erro.textContent = d.erro || "Não deu certo. Tente de novo."; erro.style.display = "block"; return; }
+  const nome = document.getElementById("pr-nome").value.trim() || "quem vai receber";
+  const quando = agora ? "" : `${dia.split("-").reverse().slice(0, 2).join("/")} às ${hora}`;
+  try { sessionStorage.setItem("presente_ok", agora
+    ? `Pronto! A música está saindo agora para ${nome}. Você recebe um aviso quando chegar.`
+    : `Pronto! Agendado para ${nome} em ${quando} (horário de Brasília). Você recebe um aviso quando chegar.`); } catch (e) {}
   location.hash = "presente"; location.reload();
 }
+(() => {
+  let texto = null;
+  try { texto = sessionStorage.getItem("presente_ok"); sessionStorage.removeItem("presente_ok"); } catch (e) {}
+  const caixa = document.getElementById("pr-ok");
+  if (!texto || !caixa) return;
+  document.getElementById("pr-ok-texto").textContent = texto;
+  caixa.style.display = "flex";
+  caixa.scrollIntoView({behavior: "smooth", block: "center"});
+})();
 const agendar = document.getElementById("pr-agendar");
 if (agendar) {
   document.getElementById("pr-dia").min = new Date().toLocaleDateString("sv-SE");
