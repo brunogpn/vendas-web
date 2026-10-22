@@ -136,10 +136,27 @@ def checkout(produto_id):
         config_cartao=config_cartao,
         oferta=oferta,
         desconto=desconto,
+        prefill=_prefill_musica(plano),
     ))
     if pedido_id_inicial is not None:
         resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id_inicial), max_age=COOKIE_MAX_AGE_FUNIL)
     return resp
+
+
+def _prefill_musica(plano):
+    """Produto Música: o e-mail que ela já deu no quiz (a música do link ?musica=), para não digitar de novo.
+    Outros produtos não são afetados."""
+    from musica.dominio.recursos import plano_vende_musica
+    token = request.args.get('musica') or ''
+    if not plano_vende_musica(plano) or not re.fullmatch(r'[0-9a-f]{32}', token):
+        return {}
+    try:
+        from musica.integracao import dados_para_checkout
+        return dados_para_checkout(token)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"[WEB-CHECKOUT] Erro ao preencher o checkout da música: {e}")
+        return {}
 
 
 @web_bp.get('/pay2/<int:produto_id>')
@@ -233,7 +250,7 @@ def checkout_v2(produto_id):
         bumps=bumps,
         pedido_id_inicial=pedido_id_inicial,
         config_cartao=config_cartao,
-        prefill=prefill,
+        prefill={**_prefill_musica(plano), **{k: v for k, v in prefill.items() if v}},
         oferta=oferta,
         desconto=desconto,
     ))

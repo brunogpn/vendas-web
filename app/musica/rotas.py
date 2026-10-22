@@ -16,7 +16,7 @@ from musica import casos_de_uso as uc
 from musica import config
 from musica.casos_de_uso import Recusa
 from musica.dominio import regras
-from musica.dominio.quiz import CHAVES_VALIDAS, FEMININO, MASCULINO, PERGUNTAS
+from musica.dominio.quiz import CHAVES_VALIDAS, MAX_PESSOAS, PERGUNTAS, combinacao_invalida, config_do_navegador
 from musica.dominio.recursos import ENTREGA_EMAIL, QRCODE, VIDEOCLIPE
 from musica.fabrica import servicos
 
@@ -173,8 +173,8 @@ def criar():
     pedido_id = _rascunho_do_funil()   # anúncio que leva direto ao quiz também registra a campanha
     pasta = Path(bp.static_folder) / 'estilos'
     amostras = {a.stem: url_for('musica.static', filename=f'estilos/{a.name}') for a in sorted(pasta.glob('*.mp3'))}
-    resposta = make_response(render_template('musica/quiz.html', perguntas=PERGUNTAS, feminino=sorted(FEMININO),
-                                             masculino=sorted(MASCULINO), amostras=amostras))
+    resposta = make_response(render_template('musica/quiz.html', perguntas=PERGUNTAS, amostras=amostras,
+                                             regras_quiz=config_do_navegador()))
     return _com_cookie_do_funil(resposta, pedido_id)
 
 
@@ -313,7 +313,10 @@ def api_criar():
     dados = request.get_json(silent=True) or {}
     if not _turnstile_ok(dados.get('turnstile')):
         return jsonify(erro='Não conseguimos confirmar que você não é um robô. Recarregue a página.'), 400
-    respostas = {k: str(v).strip()[:1500] for k, v in (dados.get('respostas') or {}).items() if k in CHAVES_VALIDAS}
+    bruto = dados.get('respostas') if isinstance(dados.get('respostas'), dict) else {}
+    respostas = regras.montar_respostas(bruto, CHAVES_VALIDAS, MAX_PESSOAS)
+    if combinacao_invalida(respostas):
+        return jsonify(erro='Alguma resposta ficou faltando. Volte e confira as escolhas.'), 400
     whatsapp = re.sub(r'\D', '', dados.get('whatsapp') or '')[:20]
     email = (dados.get('email') or '').strip().lower()[:200]
     try:

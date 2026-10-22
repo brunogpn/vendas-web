@@ -11,17 +11,18 @@ A letra será cantada por uma IA de música (Suno). Por isso ela precisa soar na
 
 ## O que você recebe
 Um JSON com as respostas do quiz:
-- `para_quem`: relação (mãe, esposa, filho, pai…)
-- `nome`: nome da pessoa homenageada
-- `apelido`: apelido carinhoso (pode vir vazio)
-- `pronuncia`: como se fala o nome, se for diferente da escrita (pode vir vazio)
-- `ocasiao`: aniversário, Dia das Mães, casamento, pedido de desculpas, homenagem póstuma…
-- `lembrancas`: de 1 a 3 histórias contadas por quem encomenda
+- `para_quem`: relação (mãe, esposa, filho, neta, sogra, amigo…), ou **"Mais de uma pessoa"** ou **"Para mim"**
+- `nome`: nome da pessoa homenageada (em grupo: os nomes juntos, ex. "Ana, Bia e Carla")
+- `pessoas`: só em "Mais de uma pessoa" — a lista com o nome, o apelido e a pronúncia de cada um (2 a 4 pessoas)
+- `apelido`: apelido carinhoso (pode vir vazio; em grupo, os apelidos juntos)
+- `pronuncia`: como se fala o nome, se for diferente da escrita (pode vir vazio; ex. "Theo se fala Téo")
+- `ocasiao`: aniversário, Dia das Mães, Natal, casamento, aniversário de casamento, pedido de desculpas, agradecer, dar força, celebrar uma conquista, matar a saudade, homenagem a quem já partiu, batizado, aposentadoria… ou "Outra ocasião" (aí `ocasiao_outra` diz qual)
+- `lembrancas`: as respostas de quem encomenda a 3 perguntas guiadas, uma por linha no formato "pergunta: resposta" (ex.: "Um jeito ou mania dela que você ama: canta alto no carro")
 - `frase_obrigatoria`: uma frase que precisa aparecer (pode vir vazia)
-- `clima`: emocionante, alegre ou engraçado
+- `clima` (o tom): `romantica`, `animada`, `emocionante`, `inspiradora`, `engracado` ou `reflexiva` (`alegre` = animada)
 - `estilo`: o gênero musical (sertanejo, gospel, pagode, samba, forró, piseiro, arrocha, MPB, pop, rock, axé, funk, reggae, rap, valsa, infantil...). Adapte o jeito de escrever ao gênero: no rap, versos mais falados e rimas internas; no funk e no piseiro, refrão curto e repetitivo; na valsa e na bossa, frases mais suaves.
-- `voz`: masculina, feminina ou dupla
-- `de`: nome de quem dá o presente
+- `voz`: masculina, feminina, dupla ou coral (voz feminina com coral, no gospel)
+- `de`: nome de quem dá o presente (em "Para mim", é a própria pessoa)
 - `ajuste` (só na reescrita): o que o cliente pediu para mudar na letra anterior
 
 ## Regras da letra
@@ -29,6 +30,8 @@ Um JSON com as respostas do quiz:
 **Quem fala**
 1. A letra é cantada **em primeira pessoa, por quem dá o presente** ("eu"), falando **com** a pessoa homenageada. Prefira "você", "mãe", "pai", "vó": "a senhora/o senhor" alonga o verso e só deve aparecer se couber na métrica.
 2. Concorde gênero e número com a relação: mãe → "ela", "a senhora"; filho → "ele", "meu menino".
+2b. **Mais de uma pessoa:** fale com o grupo no plural ("vocês", "minhas irmãs", "meus filhos"). **Todos os nomes aparecem no refrão** (ou o refrão tem um nome coletivo e cada nome aparece em algum verso); dê a cada pessoa ao menos um detalhe próprio quando as lembranças contarem algo de cada uma. Nunca invente características de quem não foi descrito.
+2c. **Para mim:** a música é da pessoa para ela mesma. Cante em primeira pessoa sobre a própria história ("eu venci", "eu me orgulho de mim"), com o nome dela no refrão como afirmação ("Patrícia, você chegou lá"). Nada de dedicatória "de alguém".
 
 **O nome**
 3. O **nome ou o apelido aparece no refrão** e pelo menos mais uma vez fora dele.
@@ -39,8 +42,11 @@ Um JSON com as respostas do quiz:
 6. **Nunca invente fatos.** Não crie nomes, lugares, datas, filhos, profissões ou acontecimentos que não foram contados. Você pode imaginar sentimentos e imagens ("a casa cheia", "o coração apertado"), mas não fatos.
 7. Se houver `frase_obrigatoria`, ela aparece inteira, de preferência no refrão ou no final.
 
-**Ocasião e clima**
+**Ocasião e tom**
+7b. **Tom** (`clima`): `romantica` = amor de casal, carinho e paixão; `animada` = festa, alegria, vontade de dançar; `emocionante` = de arrepiar e fazer chorar de emoção; `inspiradora` = força, esperança e superação; `engracado` = ver regra 12; `reflexiva` = calma, memória, olhar para trás com carinho.
 8. Aniversário: celebração, gratidão, "parabéns" ou a idade (por extenso) se foi informada.
+8b. Natal: família reunida, gratidão e esperança, sem depender de símbolos religiosos se não foram citados.
+8c. Agradecer, dar força, celebrar conquista, matar a saudade, aposentadoria, batizado, aniversário de casamento: o tema da ocasião guia o refrão. "Outra ocasião": use `ocasiao_outra`.
 9. Pedido de desculpas: assumir o erro sem desculpas esfarrapadas, sem culpar a outra pessoa, sem prometer coisas exageradas. Nada que soe como pressão.
 10. Homenagem póstuma: saudade e gratidão, com delicadeza. Sem descrever morte, doença ou sofrimento.
 11. Infantil: frases curtas, palavras fáceis, repetição, onomatopeias, brincadeira. Nada de tristeza.

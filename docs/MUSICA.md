@@ -46,9 +46,31 @@ O admin recusa recurso no papel errado e item de música no plano padrão de pro
 - **Estante 2:** card "Minha música". A Música fica fora do cross-sell de e-books (a compra começa no quiz).
 - **Google Ads:** o GCLID fica no rascunho da landing (`musicas.pedido_origem_id`); se a compra criar pedido novo
   (ex.: voltou pelo lembrete), ele herda a campanha. Conversão pelo fluxo de sempre (planilha), valor real pago.
-- **Analytics Web:** página `musica` — quiz 1–15, letra 20, prévia 30, clique em comprar 40.
+- **Analytics Web:** página `musica-v2` (o quiz antigo, de 12 telas, ficou como `musica`) — quiz 1–9 (a etapa leva o nome da tela), letra 20, prévia 30, clique em comprar 40.
 - **NF-e:** produto com `nfe_automatica = 0` (admin → dados básicos, só admin) fica fora da emissão diária, por PIX
   e cartão. **A Música precisa ficar assim** até a decisão fiscal (música não é livro).
+
+## O quiz (9 telas, `app/musica/dominio/quiz.py`)
+
+1. Para quem é (inclui Neto(a), Sogra/Sogro, **Mais de uma pessoa** e **Para mim**) · 2. Nome(s), apelido e
+pronúncia (até 4 pessoas) · 3. Ocasião · 4. Lembranças (3 perguntas guiadas + medidor) · 5. Frase que não pode faltar
+(opcional) · 6. Tom · 7. Estilo (com amostra) · 8. Voz · 9. Seu nome, e-mail e WhatsApp (opcional).
+
+- **As opções dependem das anteriores**, tudo em dados no `quiz.py`: cada relação tem marcadores (`RELACOES`); cada
+  ocasião e tom diz para quem aparece (`para`/`exceto`, tons também `exceto_ocasioes`); as vozes dependem do estilo
+  (`VOZES_POR_ESTILO`: dupla só nos sertanejos e arrocha, "com coral" no gospel). Voltar e trocar uma resposta apaga as
+  escolhas seguintes que deixaram de combinar. Página de ocasião da landing (`?ocasiao=`) pula a tela 3 só se a
+  ocasião combinar com a relação.
+- **O navegador manda** `pessoas` e `lembrancas_partes`; o servidor monta `nome`/`apelido`/`pronuncia`/`lembrancas`
+  como antes (`regras.montar_respostas`) e guarda `pessoas` para a IA tratar o plural. "Para mim": `de` = o nome.
+- Progresso guardado no navegador por 24 h (`localStorage`); o checkout da Música abre com o nome e o e-mail do quiz.
+- **Som** (`conteudo/estilos.json`): o gênero vem primeiro; o tom (`clima`) só descreve o sentimento — nunca um gênero
+  ("ballad" no tom puxava tudo para balada); `negativo_estilo` (o que o Suno deve evitar em cada estilo) e
+  `voz_estilo` (voz própria de um estilo, ex.: gospel = "powerful female worship vocals").
+- **Amostras do "aperte o play"**: `docker compose exec app python -m musica.ferramentas.gerar_amostras --estilos
+  rock,gospel` (11 créditos por estilo; grava em `storage/musica/amostras/<estilo>-1/-2.mp3`, sem mexer no site). A
+  escolhida vai para `app/musica/static/estilos/<estilo>.mp3`. Rock e gospel refeitos em 22/10/2026; os outros 18
+  gerados com as descrições novas, aguardando a escuta do Bruno.
 
 ## Arquitetura (`app/musica/`, portas e adaptadores)
 

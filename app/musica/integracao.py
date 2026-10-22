@@ -6,7 +6,7 @@ from musica.dominio.recursos import plano_vende_musica
 from musica.fabrica import servicos
 
 __all__ = ['Recusa', 'plano_vende_musica', 'conferir_para_checkout', 'vincular_ao_pedido', 'liberar_do_pedido',
-           'musica_do_pedido_pago', 'presente_devolvido', 'token_do_pedido']
+           'musica_do_pedido_pago', 'presente_devolvido', 'token_do_pedido', 'dados_para_checkout']
 
 
 def conferir_para_checkout(token: str, produto_id: int) -> None:
@@ -47,3 +47,10 @@ def token_do_pedido(pedido_id: int) -> str | None:
     próprio navegador, e-mail enviado a ela): o token dá acesso à música — nunca a partir de um id vindo da requisição."""
     musica = servicos().repositorio.do_pedido(pedido_id)
     return musica['token'] if musica else None
+
+
+def dados_para_checkout(token: str) -> dict:
+    """O e-mail do quiz, para o checkout já abrir preenchido (quem tem o token é quem fez o quiz). O nome não: o
+    quiz pede só o primeiro nome, e o checkout precisa do nome completo de quem paga."""
+    musica = servicos().repositorio.por_token(token)
+    return {'email': musica['email'] or ''} if musica else {}

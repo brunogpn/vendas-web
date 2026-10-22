@@ -70,11 +70,12 @@ audio{width:100%;margin:8px 0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 <script>
-// Até onde a visita chegou (admin → Analytics Web, página "musica"): quiz 1–15, letra 20, prévia 30, comprar 40.
+// Até onde a visita chegou (admin → Analytics Web, página "musica-v2" = quiz de 9 telas de 22/10/2026; o antigo, de
+// 12 telas, ficou como "musica"): quiz 1–9, letra 20, prévia 30, comprar 40.
 // sendBeacon sobrevive à troca de página; falha aqui nunca atrapalha o funil.
 function etapaFunil(n, nome){
   try {
-    const body = JSON.stringify({produto_id: {{ produto_id|int }}, pagina: "musica", etapa: n, nome: nome});
+    const body = JSON.stringify({produto_id: {{ produto_id|int }}, pagina: "musica-v2", etapa: n, nome: nome});
     if (!(navigator.sendBeacon && navigator.sendBeacon("/api/v1/quiz/progresso", new Blob([body], {type: "application/json"}))))
       fetch("/api/v1/quiz/progresso", {method: "POST", headers: {"Content-Type": "application/json"}, body, keepalive: true}).catch(() => {});
   } catch (e) {}

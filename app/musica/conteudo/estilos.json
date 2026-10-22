@@ -1,39 +1,71 @@
 {
-  "_como_usar": "O site junta: estilo (base) + clima + voz. O resultado vai no campo 'style' do Suno. 'negativo' vai em 'Etiquetas negativas'. 'genero_vocal' vai no campo de gênero vocal.",
+  "_como_usar": "O campo 'style' do Suno é montado nesta ordem: estilo (o gênero vem primeiro e manda) + clima (só o sentimento, nunca um gênero: 'ballad' puxava tudo para balada) + voz. 'negativo' (geral) + 'negativo_estilo' do estilo vão em 'Etiquetas negativas'. Para mudar o som, mude aqui e gere as amostras de novo (musica.ferramentas.gerar_amostras).",
 
   "estilos": {
-    "sertanejo":  "sertanejo romântico, acoustic guitar, viola caipira, accordion, Brazilian Portuguese",
-    "gospel":     "Brazilian gospel worship, mid-tempo, piano, acoustic guitar, strings, soft choir, Brazilian Portuguese",
-    "mpb":        "MPB, nylon acoustic guitar, soft percussion, warm intimate vocals, Brazilian Portuguese",
-    "pop":        "Brazilian pop, catchy melody, modern production, Brazilian Portuguese",
-    "pagode":     "pagode romântico, cavaquinho, pandeiro, banjo, tantã, Brazilian Portuguese",
-    "forro":      "forró pé de serra, accordion, zabumba, triangle, Brazilian Portuguese",
-    "romantica":  "romantic ballad, piano, strings, Brazilian Portuguese",
-    "infantil":   "Brazilian children's party song, ukulele, xylophone, claps, kids choir backing, Brazilian Portuguese",
-    "rock":       "Brazilian pop rock, electric guitars, drums, Brazilian Portuguese",
-    "bossa":      "bossa nova, nylon guitar, soft brushes, upright bass, Brazilian Portuguese",
-    "sertanejo_universitario": "sertanejo universitário, upbeat, acoustic guitar, accordion, modern drums, party vibe, Brazilian Portuguese",
-    "sertanejo_raiz": "música sertaneja raiz, moda de viola, viola caipira, acoustic guitar, duo harmony, rustic, Brazilian Portuguese",
-    "samba":      "samba, cavaquinho, pandeiro, surdo, tamborim, Brazilian Portuguese",
-    "piseiro":    "piseiro, pisadinha, keyboard synth, electronic forró beat, Brazilian Portuguese",
-    "arrocha":    "arrocha, romantic Brazilian arrocha, synth, saxophone, electronic drums, Brazilian Portuguese",
-    "axe":        "axé music, Bahia carnival, percussion, brass section, Brazilian Portuguese",
-    "funk":       "Brazilian funk, funk carioca beat, catchy hook, clean family-friendly lyrics, Brazilian Portuguese",
-    "reggae":     "Brazilian reggae, offbeat guitar skank, deep bass, relaxed groove, Brazilian Portuguese",
-    "rap":        "Brazilian hip hop, rap verses, melodic sung hook, boom bap beat, Brazilian Portuguese",
-    "valsa":      "romantic waltz, 3/4 time, strings, piano, elegant, Brazilian Portuguese"
+    "sertanejo":  "Brazilian sertanejo romântico, acoustic guitar and viola caipira, soft accordion, steady mid-tempo groove, heartfelt country vocals, Brazilian Portuguese",
+    "sertanejo_universitario": "sertanejo universitário, upbeat party groove, acoustic guitar, accordion, punchy modern drums and bass, catchy sing-along chorus, Brazilian Portuguese",
+    "sertanejo_raiz": "música sertaneja raiz, moda de viola, viola caipira ponteada, acoustic guitar, rustic countryside feel, traditional duo harmony, Brazilian Portuguese",
+    "gospel":     "Brazilian contemporary worship music (louvor e adoração), atmospheric synth pads, ambient electric guitar swells with reverb, piano-led, big drum build-up to an anthemic chorus, worship leader vocals with congregation singing along, church choir, spiritual and uplifting, Brazilian Portuguese",
+    "pagode":     "pagode romântico, cavaquinho, pandeiro, banjo, tantã, rebolo, swinging samba groove, Brazilian Portuguese",
+    "samba":      "samba, cavaquinho, pandeiro, surdo, tamborim, cuíca, festive roda de samba groove, Brazilian Portuguese",
+    "forro":      "forró pé de serra, accordion (sanfona), zabumba, triangle, northeastern Brazilian dance groove, Brazilian Portuguese",
+    "piseiro":    "piseiro, pisadinha, keyboard synth leads, electronic forró beat, danceable, Brazilian Portuguese",
+    "arrocha":    "arrocha, romantic Bahian arrocha, synth pads, saxophone, electronic drums, sentimental vocals, Brazilian Portuguese",
+    "mpb":        "MPB, nylon-string acoustic guitar, soft percussion, sophisticated Brazilian harmony, warm intimate vocals, Brazilian Portuguese",
+    "pop":        "Brazilian pop, catchy melody, modern polished production, bright synths and drums, radio-friendly chorus, Brazilian Portuguese",
+    "romantica":  "romantic power ballad, piano and strings, slow tempo, lush arrangement, Brazilian Portuguese",
+    "bossa":      "bossa nova, nylon guitar with bossa rhythm, soft brushed drums, upright bass, gentle relaxed vocals, Brazilian Portuguese",
+    "rock":       "Brazilian rock, distorted electric guitars, driving drums, strong bass, energetic raw attitude, powerful slightly raspy vocals with sustained notes and dynamic shifts, guitar solo, Brazilian Portuguese",
+    "axe":        "axé music, Bahia carnival, heavy percussion (timbau, surdo), brass section, festive energy, Brazilian Portuguese",
+    "funk":       "Brazilian funk, funk carioca tamborzão beat, heavy bass, catchy repetitive hook, clean family-friendly lyrics, Brazilian Portuguese",
+    "reggae":     "Brazilian reggae, offbeat guitar skank, deep bass, one-drop drums, relaxed groove, Brazilian Portuguese",
+    "rap":        "Brazilian hip hop, rhythmic rap verses, melodic sung hook, boom bap beat, Brazilian Portuguese",
+    "valsa":      "romantic waltz, 3/4 time, strings and piano, elegant and classic, Brazilian Portuguese",
+    "infantil":   "Brazilian children's party song, ukulele, xylophone, claps, bright and playful, simple melody, kids choir backing, Brazilian Portuguese"
+  },
+
+  "negativo_estilo": {
+    "gospel":     "sertanejo, sertanejo romântico, country, folk, twang, accordion, viola caipira, acoustic guitar strumming",
+    "rock":       "ballad, acoustic, soft, slow, sertanejo",
+    "samba":      "sertanejo, country, rock",
+    "pagode":     "sertanejo, country, rock",
+    "forro":      "rock, ballad",
+    "piseiro":    "ballad, rock",
+    "funk":       "ballad, acoustic",
+    "rap":        "ballad, sertanejo",
+    "axe":        "ballad, sertanejo",
+    "reggae":     "sertanejo, rock",
+    "bossa":      "drums heavy, rock, sertanejo",
+    "mpb":        "sertanejo, electronic",
+    "pop":        "sertanejo, accordion",
+    "valsa":      "drums, electronic, sertanejo",
+    "infantil":   "sad, slow, ballad"
   },
 
   "clima": {
-    "emocionante": "emotional, heartfelt ballad",
-    "alegre":      "upbeat, joyful, warm",
-    "engracado":   "playful, fun, lighthearted"
+    "romantica":   "romantic, tender, loving",
+    "animada":     "upbeat, joyful, energetic, celebratory",
+    "alegre":      "upbeat, joyful, energetic, celebratory",
+    "emocionante": "emotional, heartfelt, moving",
+    "inspiradora": "inspiring, hopeful, uplifting, triumphant",
+    "engracado":   "playful, fun, humorous, lighthearted",
+    "reflexiva":   "reflective, gentle, nostalgic, calm"
   },
 
   "voz": {
-    "masculina": { "genero_vocal": "m", "texto": "warm male vocals" },
     "feminina":  { "genero_vocal": "f", "texto": "warm female vocals" },
-    "dupla":     { "genero_vocal": "m", "texto": "male duo with harmony in thirds" }
+    "masculina": { "genero_vocal": "m", "texto": "warm male vocals" },
+    "dupla":     { "genero_vocal": "m", "texto": "male sertanejo duo singing in harmony in thirds" },
+    "coral":     { "genero_vocal": "f", "texto": "female lead vocals with a full gospel choir" }
+  },
+
+  "voz_estilo": {
+    "_como_usar": "Texto da voz próprio de um estilo (substitui o de 'voz' para aquele estilo).",
+    "gospel": {
+      "feminina": "powerful female worship vocals",
+      "masculina": "powerful male worship leader vocals",
+      "coral": "powerful female worship vocals with a full gospel choir"
+    }
   },
 
   "negativo": "English, Spanish, European Portuguese accent, explicit lyrics",
