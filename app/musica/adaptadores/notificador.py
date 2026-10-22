@@ -1,8 +1,9 @@
-"""Notificador: e-mail pelo Gmail do sistema (fluxos/_email_gmail), WhatsApp preparado e desligado,
-e alerta para a equipe.
+"""Notificador: e-mail pelo Gmail do sistema (fluxos/_email_gmail), WhatsApp pelo número só de avisos da Música
+(API oficial da Meta, templates aprovados) e alerta para a equipe.
 
-Fora de produção NADA é enviado por e-mail (vai só para o log), como nos apps: o dev tem banco
-isolado, mas o envio pelo Gmail é real.
+Fora de produção NADA é enviado por e-mail (vai só para o log), como nos apps: o dev tem banco isolado, mas o envio
+pelo Gmail é real. O WhatsApp só envia com MUSICA_WHATSAPP_ATIVO=1; no dev, mesmo ligado, o endereço da Meta é o
+endereço morto do config.py (regra do projeto) e o envio falha.
 """
 import html
 import logging
@@ -12,17 +13,13 @@ import config
 
 logger = logging.getLogger(__name__)
 
-# Modelos de mensagem para cadastrar e aprovar na Meta quando o produto tiver número de WhatsApp.
-# {{1}}, {{2}}... são preenchidos na ordem da lista `variaveis`.
+# Templates aprovados na conta "Canção de Presente" (WABA 1060756910314417), conferidos na Meta em 22/10/2026.
+# Parâmetros posicionais ({{1}}, {{2}}...) na ordem da lista `variaveis`; idioma pt_BR; rodapé fixo.
 MODELOS_WHATSAPP = {
-    'musica_pronta': {'categoria': 'UTILITY',
-                      'texto': 'Oi, {{1}}! A música para {{2}} ficou pronta 🎵\nOuça, baixe e envie para quem você ama: {{3}}'},
-    'previa_esperando': {'categoria': 'MARKETING',
-                         'texto': 'Oi, {{1}}! A música que você criou para {{2}} está te esperando 🎶\n'
-                                  'Falta só liberar a versão completa: {{3}}'},
-    'presente_agendado': {'categoria': 'UTILITY',
-                          'texto': 'Oi, {{1}}! {{2}} preparou uma surpresa para você: uma música feita só sua 🎁🎵\n'
-                                   'Aperte o play: {{3}}'},
+    'musica_pronta': {'categoria': 'UTILITY', 'parametros': 3},       # quem comprou, para quem, link
+    'presente_surpresa': {'categoria': 'MARKETING', 'parametros': 2,  # quem ganha, quem mandou
+                          'botao': 'Ouvir minha música'},             # resposta rápida (payload = token da música)
+    'entrega_feita': {'categoria': 'MARKETING', 'parametros': 2},     # quem comprou, quem ganhou
 }
 
 
@@ -46,13 +43,34 @@ class Notificador:
                            cc=cc) or {}
         return resultado.get('threadId')
 
-    def whatsapp(self, telefone, modelo, variaveis):
-        # Sem número de WhatsApp para o produto ainda: preparado, mas só registra. Quando houver, enviar o
-        # modelo aprovado pela API oficial (config.WHATSAPP_API_URL) ou pelo gateway, como nos outros fluxos.
+    def _numero(self):
+        produto = self.repositorio.produto_musica()
+        numero = self.repositorio.numero_avisos(produto['id']) if produto else None
+        if not numero:
+            raise RuntimeError('Produto Música sem número só de avisos cadastrado (telefones_produto, responde_mensagens = 0)')
+        return numero
+
+    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None):
+        """Template aprovado; devolve o wamid. None = WhatsApp da Música desligado (MUSICA_WHATSAPP_ATIVO)."""
         if not self.whatsapp_ativo:
-            logger.info(f'[MUSICA] WhatsApp desligado: {modelo} para {telefone} não enviado')
-            return
-        logger.warning(f'[MUSICA] WhatsApp ligado mas o envio ainda não foi implementado ({modelo})')
+            logger.info(f'[MUSICA] WhatsApp desligado: {modelo} para ...{str(telefone)[-4:]} não enviado')
+            return None
+        info = MODELOS_WHATSAPP[modelo]
+        if len(variaveis) != info['parametros']:
+            raise ValueError(f'{modelo} pede {info["parametros"]} parâmetros, vieram {len(variaveis)}')
+        from whatsapp import enviar_template
+        # A Meta recusa parâmetro vazio ou com quebra de linha: garante texto curto de uma linha.
+        parametros = [(' '.join(str(v or '-').split()) or '-')[:300] for v in variaveis]
+        return enviar_template(self._numero(), telefone, modelo, parametros,
+                               payload_botao=payload_botao if info.get('botao') else None)
+
+    def whatsapp_texto(self, telefone, texto):
+        """Texto livre pelo número de avisos (vale dentro da janela de 24 h que a pessoa abriu ao tocar no botão)."""
+        if not self.whatsapp_ativo:
+            logger.info(f'[MUSICA] WhatsApp desligado: texto para ...{str(telefone)[-4:]} não enviado')
+            return None
+        from whatsapp import enviar_mensagem
+        return enviar_mensagem({'phone_number_id': self._numero(), 'contact_phone': telefone}, texto)
 
     def equipe(self, mensagem):
         logger.error(f'[MUSICA][ALERTA] {mensagem}')

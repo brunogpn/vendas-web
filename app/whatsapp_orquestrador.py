@@ -64,9 +64,35 @@ def extrair_dados_mensagem(mensagem_whatsapp):
 
 _NUMEROS_BLOQUEADOS = {'551721368696', '553299597398'}
 
+
+def _desviar_numeros_so_avisos(mensagem_whatsapp) -> bool:
+    """Número só de avisos (telefones_produto.responde_mensagens = 0, hoje só o da Música): o que chega dele —
+    mensagens, toque em botão e status de entrega — vai para a Música e NUNCA entra no fluxo de venda (sem lead, sem
+    IA). Percorre todos os entry/changes (a Meta manda status em lote). Devolve True se o primeiro change era de
+    número só de avisos (o resto do orquestrador só olha o primeiro)."""
+    from database import numero_so_avisos
+    primeiro_desviado = False
+    for i, entrada in enumerate(mensagem_whatsapp.get('entry') or []):
+        for j, mudanca in enumerate(entrada.get('changes') or []):
+            valor = mudanca.get('value') or {}
+            if not numero_so_avisos((valor.get('metadata') or {}).get('phone_number_id')):
+                continue
+            if i == 0 and j == 0:
+                primeiro_desviado = True
+            try:
+                from musica.integracao import webhook_whatsapp
+                webhook_whatsapp(valor)
+            except Exception as e:
+                logger.error(f"[ORQUESTRADOR-WEBHOOK] ❌ Erro ao entregar o webhook do número só de avisos à Música: {e}")
+    return primeiro_desviado
+
+
 def recebe_webhook(mensagem_whatsapp):
     try:
         logger.info(f"[ORQUESTRADOR-WEBHOOK] 📥 Recebendo webhook do WhatsApp: {mensagem_whatsapp}" )
+
+        if _desviar_numeros_so_avisos(mensagem_whatsapp):
+            return "número só de avisos: entregue à Música"
 
         try:
             numero = mensagem_whatsapp['entry'][0]['changes'][0]['value']['messages'][0]['from']

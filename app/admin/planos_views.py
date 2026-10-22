@@ -182,8 +182,9 @@ def _pendencias_venda_web(produto_id):
 
 
 def _tem_whatsapp(produto_id):
-    return bool(db.execute_query("SELECT 1 FROM telefones_produto WHERE produto_id = %s LIMIT 1",
-                                 (produto_id,), fetch_one=True))
+    """O produto vende pelo WhatsApp? Número só de avisos (responde_mensagens = 0, ex.: Música) não conta."""
+    return bool(db.execute_query("SELECT 1 FROM telefones_produto WHERE produto_id = %s AND responde_mensagens = 1 "
+                                 "LIMIT 1", (produto_id,), fetch_one=True))
 
 
 @admin_bp.route('/produto/<int:produto_id>/planos')

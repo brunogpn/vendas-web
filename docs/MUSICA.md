@@ -15,8 +15,8 @@ como o `app_slug` dos apps. Lista em `app/musica/dominio/recursos.py`:
 | `musica` | principal | as 2 versões completas (ouvir, baixar, letra) |
 | `videoclipe` | principal | fotos da cliente + música em vídeo vertical |
 | `qrcode` | order bump | cartão para imprimir com o QR da página do presente |
-| `entrega_email` | order bump | e-mail para quem recebe (agora ou na hora marcada), com cópia para quem comprou; **só o link** |
-| `entrega_whatsapp` | order bump | preparado, **não vendido** (sem número de WhatsApp) |
+| `entrega_email` | order bump | e-mail e/ou WhatsApp para quem recebe (agora ou na hora marcada), com aviso para quem comprou; **só o link** |
+| `entrega_whatsapp` | — | recurso antigo, **não vendido**: o WhatsApp entrou no bump `entrega_email` (migration 091) |
 
 Planos: **Música** (padrão) e **Música + Videoclipe**. Os preços são do plano e dos bumps (admin), nunca do código.
 O admin recusa recurso no papel errado e item de música no plano padrão de produto com WhatsApp.
@@ -25,7 +25,7 @@ O admin recusa recurso no papel errado e item de música no plano padrão de pro
 
 ```
 /musica/?ocasiao=mae  (landing; cria o rascunho 1004 com o GCLID)
-  → /musica/criar     (quiz; e-mail obrigatório, WhatsApp opcional)
+  → /musica/criar     (quiz; e-mail obrigatório; o WhatsApp é pedido só no checkout)
   → /musica/p/<token> (letra → ajustes → "criar a música" → espera → prévia → escolha do plano)
   → /pay/<produto>?plano=...&musica=<token>   (checkout de sempre, com os order bumps)
   → /musica/compra/<guid>   (quem comprou: ouvir/baixar, QR, presente por e-mail, fotos do videoclipe)
@@ -39,7 +39,7 @@ O admin recusa recurso no papel errado e item de música no plano padrão de pro
 - **Liberação:** `tasks.enviar_email_entrega` chama `musica.liberar_do_pedido` (ponto único, como os apps). Redes de
   segurança: a página da compra e `musica.manutencao` (beat, 5 min). Liberada = `musicas.liberada_em` + `pedido_id`.
 - **E-mail de entrega:** o mesmo do sistema, com o botão "🎵 Ouvir minha música" para a área da compra.
-- **Presente por e-mail:** sempre com cópia (cc) para quem comprou. Se não chegar (erro no envio, ou devolução do
+- **Presente por e-mail (e/ou WhatsApp, ver a seção WhatsApp):** o e-mail sempre com cópia (cc) para quem comprou. Se não chegar (erro no envio, ou devolução do
   servidor de quem recebe — quase sempre caixa lotada — que a leitura da caixa do `admin@` reconhece pelo thread do
   envio), tenta de novo: até **4 envios no mesmo dia**, esperando 1 h, 2 h e 4 h. Depois, quem comprou recebe o link
   para mandar por conta própria e a equipe é avisada. Devolução da cópia de quem comprou não gera reenvio.
@@ -49,6 +49,36 @@ O admin recusa recurso no papel errado e item de música no plano padrão de pro
 - **Analytics Web:** página `musica-v2` (o quiz antigo, de 12 telas, ficou como `musica`) — quiz 1–9 (a etapa leva o nome da tela), letra 20, prévia 30, clique em comprar 40.
 - **NF-e:** produto com `nfe_automatica = 0` (admin → dados básicos, só admin) fica fora da emissão diária, por PIX
   e cartão. **A Música precisa ficar assim** até a decisão fiscal (música não é livro).
+
+## WhatsApp (número "Canção de Presente", só avisos)
+
+- **Número:** +55 61 8269-6770, WABA `1060756910314417`, ID do número `1376511528883172`, token
+  `WHATSAPP_ACCESS_TOKEN_LC` (app "WPP Luiz"). Cadastrado em `telefones_produto` (migration 091) com
+  **`responde_mensagens = 0`**: fica fora do rodízio dos links de venda, do número gravado no pedido web e da regra
+  "produto que vende pelo WhatsApp" da tela de planos; o orquestrador (`whatsapp_orquestrador._desviar_numeros_so_avisos`)
+  entrega tudo o que chega dele à Música — nunca vira lead nem tem resposta da IA. Editável em Admin → Números.
+- **Templates aprovados** (pt_BR, parâmetros posicionais, rodapé "Canção de Presente"; conferidos em 22/10/2026):
+  - `musica_pronta` (Utilidade) — quem comprou, ao confirmar o pagamento (tarefa `musica.whatsapp_comprador`):
+    {{1}} primeiro nome de quem pagou, {{2}} para quem ("sua mãe Helena"), {{3}} link da área da compra. Vai para o
+    WhatsApp do **checkout** (o quiz não pede mais).
+  - `presente_surpresa` (Marketing) — quem ganha, no mesmo agendamento do e-mail (`musica.manutencao`, 5 em 5 min):
+    {{1}} quem ganha, {{2}} quem mandou; botão "Ouvir minha música" com a etiqueta (payload) = token da música.
+    Ao tocar, a Música responde com o link da página do presente (texto livre, no máximo 1 vez por hora).
+  - `entrega_feita` (Marketing) — quem comprou, quando a Meta avisa que o presente chegou ("entregue"/"lido", uma vez);
+    sem WhatsApp do comprador (ou se falhar), vai por e-mail.
+- **Não chegou** (erro no envio ou "failed" da Meta): quem comprou recebe e-mail com o botão
+  `/musica/compra/<guid>/enviar` (abre o WhatsApp dela na conversa de quem ganha, com mensagem e link prontos) e pode
+  corrigir o número na área da compra.
+- **Aviso da Meta antes do wamid gravado** (o "failed" pode vir logo após o envio): é lido de novo 1 min depois,
+  uma vez (tarefa `musica.reler_status_whatsapp`).
+- **Corrigir e tentar de novo:** só o canal que não chegou sai outra vez (o e-mail que chegou não é reenviado, nem o
+  WhatsApp que saiu).
+- **Order bump:** "Entrega para quem vai receber (e-mail e/ou WhatsApp)" — pelo menos um dos dois, com "Confirmo que
+  este WhatsApp é de quem vai receber".
+- **Liga/desliga:** `MUSICA_WHATSAPP_ATIVO` (desligado: o campo some da área da compra e nada é enviado). No dev, mesmo
+  ligado, o endereço da Meta é o endereço morto do `config.py` (regra do projeto): o envio cai no caminho de falha.
+- **Dev:** o hook `.claude/hooks/bloquear_api_meta_dev.sh` libera só consultas de leitura (templates, números,
+  debug_token, contas da empresa, objeto por ID) — nunca envio.
 
 ## O quiz (9 telas, `app/musica/dominio/quiz.py`)
 
@@ -140,7 +170,11 @@ e-mail seu. Testes: `pytest tests/musica`.
    `TURNSTILE_SECRET` (Cloudflare, grátis; sem eles o app avisa no log), `MUSICA_URL_PUBLICA` opcional
    (`https://<domínio>`: a Apiframe avisa quando termina; sem ela, consulta a cada 10 s).
 4. A Música abre em `/musica/` de **qualquer** domínio nosso. Para anunciar: planilha do Ads do produto por domínio.
-5. Uma compra real de ponta a ponta antes dos anúncios.
+5. **WhatsApp:** migration **091**; conferir (leitura) se a WABA `1060756910314417` está inscrita no app "WPP Luiz"
+   (`GET /{waba}/subscribed_apps`) — se não, inscrever uma vez (`POST`), senão botões e avisos de entrega não chegam;
+   `.env`: `MUSICA_WHATSAPP_ATIVO=1`. Teste real com números próprios: compra (`musica_pronta`), presente para outro
+   número seu (`presente_surpresa` → `entrega_feita`; tocar o botão → link).
+6. Uma compra real de ponta a ponta antes dos anúncios.
 
 ## Pendências (Leo e Bruno)
 

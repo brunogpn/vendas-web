@@ -38,6 +38,9 @@ class RepositorioMemoria:
             'presente_nome': None, 'presente_email': None, 'presente_mensagem': None, 'presente_em': None,
             'presente_enviado_em': None, 'presente_tentativas': 0, 'presente_thread_id': None,
             'presente_falhou_em': None, 'lembrete1_em': None, 'lembrete2_em': None,
+            'presente_whatsapp': None, 'presente_wa_msg_id': None, 'presente_wa_status': None,
+            'presente_wa_entregue_em': None, 'presente_wa_link_em': None, 'comprador_wa_msg_id': None,
+            'comprador_wa_em': None,
         }
         return dict(self.musicas[mid])
 
@@ -100,9 +103,30 @@ class RepositorioMemoria:
 
     def presentes_para_enviar(self):
         agora = datetime.now()
+        def falta(m):
+            return ((m['presente_email'] and not m['presente_thread_id'] and not m['presente_falhou_em'])
+                    or (m['presente_whatsapp'] and not m['presente_wa_msg_id'] and not m['presente_wa_status']))
         return [self.por_id(m['id']) for m in self.musicas.values()
-                if m['liberada_em'] and m['presente_email'] and not m['presente_enviado_em']
-                and not m['presente_falhou_em'] and (m['presente_em'] is None or m['presente_em'] <= agora)]
+                if m['liberada_em'] and not m['presente_enviado_em'] and falta(m)
+                and (m['presente_em'] is None or m['presente_em'] <= agora)]
+
+    def por_wamid_presente(self, wamid):
+        return next((self.por_id(m['id']) for m in self.musicas.values() if wamid and m['presente_wa_msg_id'] == wamid), None)
+
+    def marcar_presente_wa(self, musica_id, status):
+        m = self.musicas[musica_id]
+        if status == 'entregue':
+            if m['presente_wa_status'] != 'enviado':
+                return False
+            m['presente_wa_status'], m['presente_wa_entregue_em'] = 'entregue', datetime.now()
+            return True
+        if m['presente_wa_status'] not in (None, 'enviado'):
+            return False
+        m['presente_wa_status'] = 'falhou'
+        return True
+
+    def numero_avisos(self, produto_id):
+        return '1376511528883172'
 
     def marcar_presente_enviado(self, musica_id):
         if self.musicas[musica_id]['presente_enviado_em']:
@@ -152,6 +176,12 @@ class AgendaMemoria:
     def enviar_presentes(self):
         self.chamadas.append(('presentes',))
 
+    def whatsapp_comprador(self, musica_id):
+        self.chamadas.append(('whatsapp_comprador', musica_id))
+
+    def reler_status_whatsapp(self, statuses, depois_de_segundos):
+        self.chamadas.append(('reler_status_whatsapp', statuses, depois_de_segundos))
+
 
 class NotificadorMemoria:
     def __init__(self):
@@ -161,8 +191,13 @@ class NotificadorMemoria:
         self.emails.append({'produto_id': produto_id, 'destino': destino, 'assunto': assunto, 'html': html, 'cc': cc})
         return f'thread-{len(self.emails)}'
 
-    def whatsapp(self, telefone, modelo, variaveis):
-        self.whatsapps.append((telefone, modelo, variaveis))
+    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None):
+        self.whatsapps.append((telefone, modelo, variaveis, payload_botao))
+        return f'wamid-{len(self.whatsapps)}'
+
+    def whatsapp_texto(self, telefone, texto):
+        self.whatsapps.append((telefone, 'texto', [texto], None))
+        return f'wamid-{len(self.whatsapps)}'
 
     def equipe(self, mensagem):
         self.alertas.append(mensagem)

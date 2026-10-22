@@ -1081,7 +1081,7 @@ def listar_telefones_produto(produto_id):
     """
     query = """
         SELECT id, telefone, api_phone_number_id, token_env_key, provedor, created_at, contador_uso,
-               quality_rating, status_api, name_status_api, qualidade_atualizada_em, qualidade_erro
+               quality_rating, status_api, name_status_api, qualidade_atualizada_em, qualidade_erro, responde_mensagens
         FROM telefones_produto
         WHERE produto_id = %s
         ORDER BY created_at ASC
@@ -1089,14 +1089,18 @@ def listar_telefones_produto(produto_id):
     return db.execute_query(query, (produto_id,), fetch_all=True) or []
 
 
-def atualizar_telefone_produto(telefone_id, produto_id, telefone, api_phone_number_id, token_env_key, contador_uso=0, provedor='meta'):
+def atualizar_telefone_produto(telefone_id, produto_id, telefone, api_phone_number_id, token_env_key, contador_uso=0,
+                               provedor='meta', responde_mensagens=1):
+    """responde_mensagens = 0: número só de avisos (ex.: Música) — fora do rodízio de venda e do webhook de venda."""
     query = """
         UPDATE telefones_produto
-        SET telefone = %s, api_phone_number_id = %s, token_env_key = %s, contador_uso = %s, provedor = %s
+        SET telefone = %s, api_phone_number_id = %s, token_env_key = %s, contador_uso = %s, provedor = %s,
+            responde_mensagens = %s
         WHERE id = %s AND produto_id = %s
     """
     db.execute_query(query, (telefone, api_phone_number_id or None, token_env_key or 'WHATSAPP_ACCESS_TOKEN', contador_uso,
-                             _normalizar_provedor(provedor), telefone_id, produto_id))
+                             _normalizar_provedor(provedor), 1 if responde_mensagens else 0, telefone_id, produto_id))
+    _CACHE_SO_AVISOS['quando'] = 0.0   # o webhook passa a ver a mudança na próxima mensagem
     _whatsapp_provedor_cache.clear()
 
 
@@ -1117,6 +1121,7 @@ def selecionar_telefone_produto(produto_id):
               -- chip do gateway sem pareamento (status_api NULL) ou caído não recebe lead novo: o cliente
               -- abriria o wa.me de um número que não responde. Números da Meta seguem como sempre.
               AND (provedor = 'meta' OR status_api = 'CONNECTED')
+              AND responde_mensagens = 1   -- número só de avisos (ex.: Música) não recebe lead
             ORDER BY contador_uso ASC, created_at ASC
             LIMIT 1
         """, (produto_id,))
@@ -2468,6 +2473,29 @@ def phone_number_id_cadastrado(api_phone_number_id: str) -> bool:
         return False
 
 
+_CACHE_SO_AVISOS = {'quando': 0.0, 'ids': frozenset()}
+
+
+def numero_so_avisos(api_phone_number_id: str) -> bool:
+    """O número só envia avisos (responde_mensagens = 0)? O webhook entrega o que chega dele para o produto dono
+    (ex.: Música), sem lead nem IA. Cache de 60 s: roda a cada mensagem recebida. Falha no banco = False (segue o
+    caminho de sempre só se nunca leu; com leitura anterior, segue com ela — um erro passageiro não pode mandar o
+    número da Música para o fluxo de venda)."""
+    import time
+    if not api_phone_number_id:
+        return False
+    if time.time() - _CACHE_SO_AVISOS['quando'] > 60:
+        try:
+            linhas = db.execute_query("SELECT api_phone_number_id FROM telefones_produto WHERE responde_mensagens = 0 "
+                                      "AND api_phone_number_id IS NOT NULL", fetch_all=True) or []
+            _CACHE_SO_AVISOS['ids'] = frozenset(str(l['api_phone_number_id']) for l in linhas)
+            _CACHE_SO_AVISOS['quando'] = time.time()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"[WHATSAPP] Falha ao ler os números só de avisos: {e}")
+    return str(api_phone_number_id) in _CACHE_SO_AVISOS['ids']
+
+
 def buscar_status_numero_empresa(api_phone_number_id: str):
     """Telefone e status_api do chip cadastrado em telefones_produto pelo api_phone_number_id.
     None se api_phone_number_id vazio ou não cadastrado (excluído da base)."""
@@ -2494,9 +2522,11 @@ def numero_empresa_operacional(api_phone_number_id: str) -> bool:
 
 
 def get_phone_number_id_produto(produto_id: int):
-    """Retorna o api_phone_number_id (ID da API Meta) associado ao produto ou None."""
+    """Retorna o api_phone_number_id (ID da API Meta) associado ao produto ou None. Número só de avisos
+    (responde_mensagens = 0, ex.: Música) não conta: texto livre dos fluxos não pode sair por ele."""
     row = db.execute_query(
-        "SELECT api_phone_number_id FROM telefones_produto WHERE produto_id = %s AND api_phone_number_id IS NOT NULL LIMIT 1",
+        "SELECT api_phone_number_id FROM telefones_produto WHERE produto_id = %s AND api_phone_number_id IS NOT NULL "
+        "AND responde_mensagens = 1 LIMIT 1",
         (produto_id,), fetch_one=True
     )
     return row['api_phone_number_id'] if row else None

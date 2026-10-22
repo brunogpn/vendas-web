@@ -6,7 +6,7 @@ from musica.dominio.recursos import plano_vende_musica
 from musica.fabrica import servicos
 
 __all__ = ['Recusa', 'plano_vende_musica', 'conferir_para_checkout', 'vincular_ao_pedido', 'liberar_do_pedido',
-           'musica_do_pedido_pago', 'presente_devolvido', 'token_do_pedido', 'dados_para_checkout']
+           'musica_do_pedido_pago', 'presente_devolvido', 'token_do_pedido', 'dados_para_checkout', 'webhook_whatsapp']
 
 
 def conferir_para_checkout(token: str, produto_id: int) -> None:
@@ -14,8 +14,8 @@ def conferir_para_checkout(token: str, produto_id: int) -> None:
     casos_de_uso.musica_para_checkout(servicos(), token, produto_id)
 
 
-def vincular_ao_pedido(token: str, pedido_id: int, produto_id: int) -> None:
-    casos_de_uso.vincular_ao_pedido(servicos(), token, pedido_id, produto_id)
+def vincular_ao_pedido(token: str, pedido_id: int, produto_id: int, whatsapp: str = '', ddi: str = '55') -> None:
+    casos_de_uso.vincular_ao_pedido(servicos(), token, pedido_id, produto_id, whatsapp, ddi)
 
 
 def liberar_do_pedido(pedido_id: int) -> bool:
@@ -54,3 +54,9 @@ def dados_para_checkout(token: str) -> dict:
     quiz pede só o primeiro nome, e o checkout precisa do nome completo de quem paga."""
     musica = servicos().repositorio.por_token(token)
     return {'email': musica['email'] or ''} if musica else {}
+
+
+def webhook_whatsapp(valor: dict) -> None:
+    """Para o orquestrador: o `value` de um webhook da Meta vindo do número só de avisos da Música (status de
+    entrega, toque no botão, mensagens — que são ignoradas)."""
+    casos_de_uso.webhook_whatsapp(servicos(), valor)

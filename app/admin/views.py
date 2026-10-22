@@ -1213,7 +1213,7 @@ def editar_numero_whatsapp(produto_id, telefone_id):
         contador_uso = 0
     try:
         atualizar_telefone_produto(telefone_id, produto_id, telefone, api_phone_number_id, token_env_key, contador_uso,
-                                   provedor)
+                                   provedor, responde_mensagens=bool(request.form.get('responde_mensagens')))
         flash(f'Número {telefone} atualizado com sucesso!', 'success')
         logger.info(f"[ADMIN] ✅ Telefone #{telefone_id} atualizado por {current_user.email}")
     except Exception as e:

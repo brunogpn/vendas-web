@@ -49,3 +49,31 @@ def lembrete(numero, de, para, link):
         corpo = _p(f'{e(de)}, imagina a reação de <b>{e(para)}</b> ouvindo o próprio nome cantado 💛') + \
             _p('A música continua guardada. Ouça de novo:')
     return assunto, corpo + _botao('Ouvir a minha música', link)
+
+
+def presente_whatsapp_nao_chegou(nome_quem_recebe, link):
+    """Para quem comprou: o WhatsApp do presente não chegou (número errado, sem WhatsApp, bloqueio da Meta)."""
+    e = html.escape
+    corpo = _p(f'Não conseguimos entregar a música no WhatsApp de <b>{e(nome_quem_recebe)}</b>. Pode ser o número '
+               'ou alguma configuração do WhatsApp da pessoa.')
+    corpo += _p('Para a surpresa não se perder, toque no botão e mande pelo seu WhatsApp — a mensagem e o link já vão '
+                'prontos:')
+    corpo += _botao(f'Enviar para {nome_quem_recebe}', link)
+    return f'Envie a música para {nome_quem_recebe} pelo seu WhatsApp 🎁', corpo
+
+
+def presente_chegou(nome_quem_comprou, nome_quem_recebe):
+    """Para quem comprou e não deu WhatsApp: a música chegou no WhatsApp de quem ganhou."""
+    e = html.escape
+    corpo = _p(f'Pronto, {e(nome_quem_comprou)}! 🎁') + _p(f'A música chegou no WhatsApp de <b>{e(nome_quem_recebe)}</b> '
+                                                             'agora há pouco. Agora é só esperar a reação ❤️')
+    return f'A música chegou para {nome_quem_recebe} 🎁', corpo
+
+
+def link_do_presente(nome_quem_recebe, de, link):
+    """Texto livre (WhatsApp) quando quem ganhou toca em "Ouvir minha música"."""
+    linhas = [f'Aperte o play, {nome_quem_recebe} 🎵', link]
+    if de:
+        linhas += ['', f'Com carinho, {de}.']
+    return '\n'.join(linhas)
+

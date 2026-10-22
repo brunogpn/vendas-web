@@ -15,3 +15,9 @@ class AgendaCelery:
 
     def enviar_presentes(self):
         celery_app.send_task('musica.enviar_presentes')
+
+    def whatsapp_comprador(self, musica_id):
+        celery_app.send_task('musica.whatsapp_comprador', args=[musica_id])
+
+    def reler_status_whatsapp(self, statuses, depois_de_segundos):
+        celery_app.send_task('musica.reler_status_whatsapp', args=[statuses], countdown=depois_de_segundos)

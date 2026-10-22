@@ -60,3 +60,24 @@ def lembretes():
 def limpeza():
     from musica import casos_de_uso
     return casos_de_uso.limpar_antigas(_s())
+
+
+@shared_task(name='musica.whatsapp_comprador', bind=True, max_retries=3)
+def whatsapp_comprador(self, musica_id):
+    """Template musica_pronta para quem comprou. Erro passageiro da Meta: tenta de novo em 1, 2 e 4 min."""
+    from musica import casos_de_uso
+    from whatsapp import ErroTransienteWhatsApp
+    try:
+        casos_de_uso.whatsapp_comprador(_s(), musica_id)
+    except ErroTransienteWhatsApp as exc:
+        raise self.retry(exc=exc, countdown=60 * 2 ** self.request.retries)
+    except Exception:
+        logger.exception(f'[MUSICA] musica_pronta da música #{musica_id} não saiu')
+
+
+
+@shared_task(name='musica.reler_status_whatsapp')
+def reler_status_whatsapp(statuses):
+    """Segunda leitura dos avisos da Meta que chegaram antes de o wamid do presente ser gravado."""
+    from musica import casos_de_uso
+    casos_de_uso.webhook_whatsapp(_s(), {'statuses': statuses}, ultima_tentativa=True)

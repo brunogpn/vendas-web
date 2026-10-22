@@ -117,10 +117,13 @@ class RepositorioMysql:
         return [l['pedido_id'] for l in linhas]
 
     def presentes_para_enviar(self):
+        """Presentes cujo horário chegou e que ainda têm um canal por sair: o e-mail (sem thread = não saiu ou é nova
+        tentativa) e/ou o WhatsApp (sem wamid e sem status)."""
         linhas = db.execute_query(
-            """SELECT * FROM musicas WHERE liberada_em IS NOT NULL AND presente_email IS NOT NULL
-               AND presente_enviado_em IS NULL AND presente_falhou_em IS NULL
-               AND (presente_em IS NULL OR presente_em <= NOW())""",
+            """SELECT * FROM musicas WHERE liberada_em IS NOT NULL AND presente_enviado_em IS NULL
+               AND (presente_em IS NULL OR presente_em <= NOW())
+               AND ((presente_email IS NOT NULL AND presente_thread_id IS NULL AND presente_falhou_em IS NULL)
+                    OR (presente_whatsapp IS NOT NULL AND presente_wa_msg_id IS NULL AND presente_wa_status IS NULL))""",
             fetch_all=True) or []
         return [_musica(l) for l in linhas]
 
@@ -129,12 +132,38 @@ class RepositorioMysql:
                                 (musica_id,), return_rowcount=True) == 1
 
     def presentes_sem_confirmacao(self, minutos):
-        """Marcados como enviados há mais de `minutos` sem o thread do Gmail: o envio foi interrompido."""
+        """Marcados como enviados há mais de `minutos` com um canal sem confirmação (e-mail sem thread do Gmail,
+        WhatsApp sem wamid nem status): o envio foi interrompido."""
         linhas = db.execute_query(
             """SELECT * FROM musicas WHERE presente_enviado_em < NOW() - INTERVAL %s MINUTE
-               AND presente_thread_id IS NULL AND presente_falhou_em IS NULL AND presente_email IS NOT NULL
-               AND presente_enviado_em >= NOW() - INTERVAL 3 DAY LIMIT 50""", (minutos,), fetch_all=True) or []
+               AND presente_enviado_em >= NOW() - INTERVAL 3 DAY
+               AND ((presente_email IS NOT NULL AND presente_thread_id IS NULL AND presente_falhou_em IS NULL)
+                    OR (presente_whatsapp IS NOT NULL AND presente_wa_msg_id IS NULL AND presente_wa_status IS NULL))
+               LIMIT 50""", (minutos,), fetch_all=True) or []
         return [_musica(l) for l in linhas]
+
+    def por_wamid_presente(self, wamid):
+        """A música cujo presente_surpresa tem este id de mensagem da Meta (os status de entrega chegam por ele)."""
+        if not wamid:
+            return None
+        return _musica(db.execute_query("SELECT * FROM musicas WHERE presente_wa_msg_id = %s", (wamid,), fetch_one=True))
+
+    def marcar_presente_wa(self, musica_id, status):
+        """Entregue (só a partir de 'enviado') ou falhou (se ainda não chegou nem falhou). True se mudou agora —
+        é o que garante um aviso só, mesmo com a Meta mandando 'entregue' e 'lido'."""
+        if status == 'entregue':
+            return db.execute_query("UPDATE musicas SET presente_wa_status = 'entregue', presente_wa_entregue_em = NOW() "
+                                    "WHERE id = %s AND presente_wa_status = 'enviado'", (musica_id,), return_rowcount=True) == 1
+        return db.execute_query("UPDATE musicas SET presente_wa_status = 'falhou' WHERE id = %s "
+                                "AND (presente_wa_status IS NULL OR presente_wa_status = 'enviado')",
+                                (musica_id,), return_rowcount=True) == 1
+
+    def numero_avisos(self, produto_id):
+        """O api_phone_number_id do número só de avisos do produto (telefones_produto.responde_mensagens = 0)."""
+        linha = db.execute_query("SELECT api_phone_number_id FROM telefones_produto WHERE produto_id = %s "
+                                 "AND responde_mensagens = 0 AND api_phone_number_id IS NOT NULL ORDER BY id LIMIT 1",
+                                 (produto_id,), fetch_one=True)
+        return linha['api_phone_number_id'] if linha else None
 
     def presente_por_devolucao(self, thread_id, recusados):
         """A música cujo presente voltou: pelo thread do Gmail do envio ou, sem ele, pelo endereço exato de quem

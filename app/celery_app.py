@@ -227,6 +227,8 @@ celery_app.conf.update(
         "musica.escrever_letra":                         {"queue": "urgente"},
         "musica.consultar":                              {"queue": "normal"},
         "musica.enviar_presentes":                       {"queue": "normal"},
+        "musica.whatsapp_comprador":                     {"queue": "normal"},
+        "musica.reler_status_whatsapp":                  {"queue": "normal"},
         "musica.manutencao":                             {"queue": "normal"},
         "musica.lembretes":                              {"queue": "normal"},
         "musica.fazer_video":                            {"queue": "baixa"},

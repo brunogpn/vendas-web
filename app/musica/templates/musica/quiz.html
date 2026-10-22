@@ -86,7 +86,7 @@ const URL_CRIAR = "{{ url_for('musica.api_criar') }}";
 const GUARDAR = "musica_quiz_v2", GUARDAR_HORAS = 6;   // pouco tempo: o celular pode ser de outra pessoa da família
 
 let respostas = {}, pessoas = [{nome: "", apelido: "", pronuncia: ""}], lembrancas = ["", "", ""];
-let contato = {de: "", email: "", whatsapp: ""}, atual = PERGUNTAS[0].chave, tokenRobo = "";
+let contato = {de: "", email: ""}, atual = PERGUNTAS[0].chave, tokenRobo = "";
 let comPronuncia = false, ultimaEtapa = "";
 window.turnstileOk = t => tokenRobo = t;
 
@@ -164,13 +164,6 @@ const som = new Audio(); let botaoSom = null;
 function pararSom(){ som.pause(); if (botaoSom) { botaoSom.classList.remove("tocando"); botaoSom.innerHTML = '<i class="ti ti-player-play" aria-hidden="true"></i>'; } botaoSom = null; }
 som.addEventListener("ended", pararSom);
 
-function formatarTelefone(v){
-  const d = v.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 2) return d;
-  if (d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`;
-  return `(${d.slice(0,2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
-}
-
 // ------------------------------------------------------------- as telas ---
 function htmlOpcoes(p){
   const ok = permitidas(p.chave);
@@ -230,8 +223,6 @@ function htmlContato(){
       <p class="ajuda" style="font-size:.95rem;margin-top:6px">Vai na dedicatória da música 💛</p>`)
     + `<label for="email">Seu e-mail (é por ele que a música chega)</label>
       <input class="campo" id="email" type="email" inputmode="email" autocomplete="email" placeholder="seuemail@exemplo.com" value="${esc(contato.email)}">
-      <label for="whatsapp">WhatsApp com DDD (opcional)</label>
-      <input class="campo" id="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678" value="${esc(contato.whatsapp)}">
       <p class="privacidade"><i class="ti ti-lock" aria-hidden="true"></i><span>Usamos só para entregar a sua música. Nada de spam. Veja a <a href="{{ url_for('musica.privacidade') }}" target="_blank" rel="noopener">política de privacidade</a>.</span></p>
       <div class="acoes"><button class="botao" id="avancar" type="button">Criar a letra da música</button></div>`;
 }
@@ -294,7 +285,6 @@ function ligar(p, passo){
   passo.querySelectorAll(".lembranca textarea").forEach(t => t.addEventListener("input", () => { lembrancas[+t.dataset.i] = t.value; atualizarMedidor(); guardar(); }));
   atualizarMedidor();
   // contato
-  const tel = el("whatsapp"); if (tel) tel.addEventListener("input", () => { tel.value = formatarTelefone(tel.value); });
 
   const primeiro = passo.querySelector("input.campo, textarea.campo");
   if (primeiro && matchMedia("(min-width: 700px)").matches) primeiro.focus();
@@ -336,11 +326,9 @@ const proximo = () => irPara(1);
 el("voltar").onclick = () => irPara(-1);
 
 async function enviar(){
-  contato = {de: ehEu() ? "" : (el("de").value || "").trim(), whatsapp: el("whatsapp").value, email: el("email").value.trim()};
+  contato = {de: ehEu() ? "" : (el("de").value || "").trim(), email: el("email").value.trim()};
   if (!ehEu() && !contato.de) return mostrarErro("Coloque o seu nome.");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contato.email)) return mostrarErro("Confira o e-mail.");
-  const digitos = contato.whatsapp.replace(/\D/g, "");
-  if (digitos && digitos.length < 10) return mostrarErro("Coloque o WhatsApp com DDD (ou deixe em branco).");
   guardar();
   if (ocasiaoDaUrlVale()) respostas.ocasiao = ocasiaoUrl;
   const guias = guiasLembrancas();
@@ -352,7 +340,7 @@ async function enviar(){
   el("quiz").style.display = "none"; el("enviando").style.display = "block"; window.scrollTo({top: 0});
   try {
     const r = await fetch(URL_CRIAR, {method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({respostas: corpo, email: contato.email, whatsapp: contato.whatsapp, turnstile: tokenRobo})});
+      body: JSON.stringify({respostas: corpo, email: contato.email, turnstile: tokenRobo})});
     const dados = await r.json();
     if (!r.ok) throw new Error(dados.erro || "Algo deu errado.");
     esquecer();

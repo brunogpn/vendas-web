@@ -122,6 +122,9 @@ def test_falha_de_banco_com_cache_vencido_reaproveita(monkeypatch):
 def test_whatsapp_api_url_sempre_termina_em_barra(monkeypatch, valor, esperado):
     import config
     monkeypatch.setenv('WHATSAPP_API_URL', valor)
+    # O que se testa é a produção. Outro teste que importe o sistema carrega o .env do dev (AMBIENTE=desenvolvimento),
+    # e aí o config.py força o endereço morto da Meta — fixa o ambiente para não depender da ordem dos testes.
+    monkeypatch.setenv('AMBIENTE', 'producao')
     try:
         importlib.reload(config)
         assert config.WHATSAPP_API_URL == esperado

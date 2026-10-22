@@ -304,6 +304,42 @@ def enviar_mensagem(pedido: Pedido, mensagem: str):
         raise ErroTransienteWhatsApp(msg)
     raise ValueError(msg)
 
+
+def enviar_template(phone_number_id: str, destino: str, nome: str, parametros: list, payload_botao: str = None,
+                    idioma: str = 'pt_BR') -> str:
+    """Envia um template aprovado da Meta com parâmetros de texto no corpo (posicionais: {{1}}, {{2}}...) e, se houver,
+    a "etiqueta" (payload) do botão de resposta rápida 0 — a Meta a devolve no webhook quando a pessoa toca no botão.
+    Devolve o wamid. Mesmo endereço/token dos outros envios (no dev: endereço morto, nunca chega à Meta).
+    Template só existe na API oficial: número do gateway (wpp_web) é recusado. Falha de rede = erro transitório."""
+    if get_provedor_numero(phone_number_id) == 'wpp_web':
+        raise ValueError(f"[TEMPLATE-ENVIAR] {nome}: o número {phone_number_id} é do gateway (wpp_web), sem templates")
+    url = f"{get_whatsapp_api_url(phone_number_id)}{phone_number_id}/messages"
+    componentes = [{"type": "body", "parameters": [{"type": "text", "text": str(p)} for p in parametros]}]
+    if payload_botao:
+        componentes.append({"type": "button", "sub_type": "quick_reply", "index": "0",
+                            "parameters": [{"type": "payload", "payload": payload_botao}]})
+    dados = {
+        "messaging_product": "whatsapp", "recipient_type": "individual", "to": destino, "type": "template",
+        "template": {"name": nome, "language": {"code": idioma}, "components": componentes},
+    }
+    logger.info(f"[TEMPLATE-ENVIAR] {nome} para {destino} pelo número {phone_number_id}")
+    try:
+        response = requests.post(url, json=dados, timeout=_timeout_envio(phone_number_id), headers={
+            "Authorization": f"Bearer {get_whatsapp_token(phone_number_id)}",
+            "Content-Type": "application/json; charset=utf-8", "Accept": "application/json"})
+    except requests.exceptions.RequestException as e:
+        raise ErroTransienteWhatsApp(f"[TEMPLATE-ENVIAR] ❌ {nome}: falha de rede ({e})") from e
+    if response.status_code == 200:
+        return response.json().get('messages', [{}])[0].get('id')
+    msg = f"[TEMPLATE-ENVIAR] ❌ {nome}: status={response.status_code} body={response.text}"
+    try:
+        is_transient = response.json().get('error', {}).get('is_transient', False)
+    except Exception:
+        is_transient = False
+    if response.status_code >= 500 or is_transient:
+        raise ErroTransienteWhatsApp(msg)
+    raise ValueError(msg)
+
 def montar_link_estante(pedido: dict, caminho: str = '/pedido') -> str:
     """Monta o link absoluto da Estante (`<caminho>/<guid>`) usando o domínio do
     número que está enviando (resolvido via token_env_key cadastrado em

@@ -382,6 +382,7 @@ def test_depois_de_desistir_ela_pode_corrigir_o_email(s):
 def test_envio_interrompido_e_reenviado(s):
     musica = _presente_enviado(s)
     s.repositorio.musicas[musica['id']]['_envio_interrompido'] = True   # o worker caiu antes do Gmail
+    s.repositorio.musicas[musica['id']]['presente_thread_id'] = None      # (o e-mail não chegou a sair)
     assert uc.manutencao(s)['presentes'] == 1                            # a mesma rodada já reenvia
     assert [e['destino'] for e in s.notificador.emails] == ['lena@exemplo.com', 'lena@exemplo.com']
 

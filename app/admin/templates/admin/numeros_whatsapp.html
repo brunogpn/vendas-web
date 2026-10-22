@@ -77,6 +77,9 @@
                         {% if t.provedor == 'wpp_web' %}
                             <span class="badge badge-blue" title="Enviado pelo gateway WhatsApp Web (api-wpp-web), não pela API oficial da Meta">WhatsApp Web</span>
                         {% endif %}
+                        {% if t.responde_mensagens == 0 %}
+                            <span class="badge" title="Só envia avisos (templates): fora do rodízio de venda; mensagens recebidas não viram lead nem têm resposta da IA">Só avisos</span>
+                        {% endif %}
                     </td>
                     <td>
                         <span style="font-family: var(--mono); font-size: 14px;">{{ t.token_env_key or 'WHATSAPP_ACCESS_TOKEN' }}</span>
@@ -108,6 +111,7 @@
                                 data-token="{{ t.token_env_key or 'WHATSAPP_ACCESS_TOKEN' }}"
                                 data-usos="{{ t.contador_uso or 0 }}"
                                 data-provedor="{{ t.provedor or 'meta' }}"
+                                data-responde="{{ 0 if t.responde_mensagens == 0 else 1 }}"
                                 onclick="abrirModalEditar(this)">
                             Alterar
                         </button>
@@ -224,6 +228,12 @@
                 <label>Quantidade de usos</label>
                 <input type="number" name="contador_uso" id="edit-contador-uso" min="0" autocomplete="off">
             </div>
+            <div style="margin-top: 12px;">
+                <label style="display:flex;gap:8px;align-items:center">
+                    <input type="checkbox" name="responde_mensagens" value="1" id="edit-responde"> Responde mensagens (venda/IA)
+                </label>
+                <small class="form-text text-muted">Desmarque para um número que só envia avisos (ex.: Música): ele sai do rodízio dos links de venda e o que chega nele não vira lead nem recebe resposta da IA.</small>
+            </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
                 <button type="button" class="btn btn-ghost" onclick="fecharModal('modal-editar')">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Salvar</button>
@@ -243,6 +253,7 @@ function abrirModalEditar(btn) {
     document.getElementById('edit-token-env').value    = btn.dataset.token;
     document.getElementById('edit-contador-uso').value = btn.dataset.usos;
     document.getElementById('edit-provedor').value     = btn.dataset.provedor || 'meta';
+    document.getElementById('edit-responde').checked   = btn.dataset.responde !== '0';
     document.getElementById('form-editar').action      = BASE_URL + '/' + btn.dataset.id + '/editar';
     document.getElementById('modal-editar').classList.add('open');
 }

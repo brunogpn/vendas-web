@@ -78,23 +78,42 @@ video{width:100%;max-height:70vh;border-radius:16px;background:#000}
 
   {% if tem_presente %}
   <section class="extra-bloco" id="presente">
-    <h2>Entrega por e-mail</h2>
-    {% if musica.presente_enviado_em %}
-      <div class="agendado"><i class="ti ti-circle-check" aria-hidden="true"></i><span>A música foi enviada para <b>{{ musica.presente_nome }}</b> ({{ musica.presente_email }}), com cópia para você.</span></div>
-    {% else %}
-      <p>A gente manda a música por e-mail para quem vai receber, agora ou no dia e horário que você escolher (horário de Brasília). Você recebe uma cópia.</p>
+    <h2>Entrega para {{ musica.presente_nome or para }}</h2>
+    {% set wa_falhou = musica.presente_wa_status == 'falhou' %}
+    {% if musica.presente_enviado_em and not wa_falhou %}
       {% if musica.presente_email %}
+      <div class="agendado"><i class="ti ti-mail" aria-hidden="true"></i><span>E-mail enviado para <b>{{ musica.presente_nome }}</b> ({{ musica.presente_email }}), com cópia para você.</span></div>
+      {% endif %}
+      {% if musica.presente_whatsapp %}
+      <div class="agendado" style="margin-top:10px"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i><span>
+        {% if musica.presente_wa_status == 'entregue' %}A música <b>chegou no WhatsApp</b> de {{ musica.presente_nome }}. Agora é só esperar a reação ❤️
+        {% else %}Enviamos no WhatsApp de {{ musica.presente_nome }}. Assim que chegar, você recebe um aviso.{% endif %}</span></div>
+      {% endif %}
+    {% else %}
+      {% if wa_falhou %}
+      <div class="agendado" style="margin-bottom:16px"><i class="ti ti-alert-circle" aria-hidden="true" style="color:var(--cor)"></i><span>Não conseguimos entregar no WhatsApp de <b>{{ musica.presente_nome }}</b>. Pode ser o número ou alguma configuração do WhatsApp da pessoa. Mande pelo seu WhatsApp, a mensagem e o link já vão prontos — ou corrija o número abaixo.</span></div>
+      <a class="botao whats" href="{{ url_for('musica.enviar_pelo_whatsapp', guid=guid) }}"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar para {{ musica.presente_nome }} pelo meu WhatsApp</a>
+      {% else %}
+      <p>A gente manda a música para quem vai receber{% if whatsapp_ativo %} por e-mail e/ou WhatsApp{% else %} por e-mail{% endif %}, agora ou no dia e horário que você escolher (horário de Brasília). Você recebe um aviso.</p>
+      {% if musica.presente_email or musica.presente_whatsapp %}
       <div class="agendado" style="margin-bottom:16px"><i class="ti ti-calendar-check" aria-hidden="true"></i><span>Agendado para <b>{{ musica.presente_nome }}</b> em <b>{{ musica.presente_em.strftime('%d/%m às %H:%M') if musica.presente_em else 'agora' }}</b>. Você pode mudar abaixo.</span></div>
       {% endif %}
-      <div class="grade-agenda">
+      {% endif %}
+      <div class="grade-agenda" style="margin-top:14px">
         <div><label for="pr-nome">Nome de quem vai receber</label><input class="campo" id="pr-nome" maxlength="120" value="{{ musica.presente_nome or para }}"></div>
-        <div><label for="pr-email">E-mail dela ou dele</label><input class="campo" id="pr-email" type="email" inputmode="email" placeholder="email@exemplo.com" value="{{ musica.presente_email or '' }}"></div>
+        {% if whatsapp_ativo %}
+        <div><label for="pr-whats">WhatsApp de quem vai receber</label><input class="campo" id="pr-whats" type="tel" inputmode="tel" placeholder="(11) 91234-5678" value="{{ '+' ~ musica.presente_whatsapp if musica.presente_whatsapp else '' }}"></div>
+        {% endif %}
+        <div><label for="pr-email">E-mail de quem vai receber{% if whatsapp_ativo %} (opcional){% endif %}</label><input class="campo" id="pr-email" type="email" inputmode="email" placeholder="email@exemplo.com" value="{{ musica.presente_email or '' }}"></div>
         <div><label for="pr-dia">Dia</label><input class="campo" id="pr-dia" type="date" value="{{ musica.presente_em.strftime('%Y-%m-%d') if musica.presente_em else '' }}"></div>
         <div><label for="pr-hora">Horário</label><input class="campo" id="pr-hora" type="time" value="{{ musica.presente_em.strftime('%H:%M') if musica.presente_em else '09:00' }}"></div>
       </div>
-      <label for="pr-mensagem" style="font-weight:700;display:block;margin:12px 0 6px">Um recado (opcional)</label>
+      {% if whatsapp_ativo %}
+      <label class="confirmo" style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-weight:500;color:var(--suave)"><input type="checkbox" id="pr-confirmo" style="width:20px;height:20px;margin-top:3px;accent-color:var(--cor)"> <span>Confirmo que este WhatsApp é de quem vai receber. A pessoa recebe uma mensagem dizendo que você preparou uma surpresa, com um botão para ouvir.</span></label>
+      {% endif %}
+      <label for="pr-mensagem" style="font-weight:700;display:block;margin:12px 0 6px">Um recado no e-mail (opcional)</label>
       <textarea class="campo" id="pr-mensagem" maxlength="500" placeholder="Feliz aniversário, mãe! Te amo.">{{ musica.presente_mensagem or '' }}</textarea>
-      <p class="suave" style="font-size:.95rem;margin-top:10px"><i class="ti ti-info-circle" aria-hidden="true"></i> Peça para a pessoa olhar também a caixa de spam ou "Promoções".</p>
+      <p class="suave" style="font-size:.95rem;margin-top:10px"><i class="ti ti-info-circle" aria-hidden="true"></i> Se for por e-mail, peça para a pessoa olhar também a caixa de spam ou "Promoções".</p>
       <div class="erro" id="pr-erro" role="alert"></div>
       <div class="botoes" style="margin-top:14px">
         <button class="botao" id="pr-agendar" type="button"><i class="ti ti-calendar" aria-hidden="true"></i> Agendar o envio</button>
@@ -225,6 +244,8 @@ async function enviarPresente(agora){
   if (!agora && !(dia && hora)) { erro.textContent = "Escolha o dia e o horário, ou toque em Enviar agora."; erro.style.display = "block"; return; }
   const r = await fetch("{{ url_for('musica.api_presente', guid=guid) }}", {method: "POST", headers: {"Content-Type": "application/json"},
     body: JSON.stringify({nome: document.getElementById("pr-nome").value, email: document.getElementById("pr-email").value,
+                          whatsapp: (document.getElementById("pr-whats") || {}).value || "",
+                          confirmo: !!(document.getElementById("pr-confirmo") || {}).checked,
                           mensagem: document.getElementById("pr-mensagem").value, agora, quando: agora ? "" : `${dia}T${hora}:00`})});
   const d = await r.json().catch(() => ({}));
   if (!r.ok) { erro.textContent = d.erro || "Não deu certo. Tente de novo."; erro.style.display = "block"; return; }
@@ -235,7 +256,7 @@ if (agendar) {
   document.getElementById("pr-dia").min = new Date().toLocaleDateString("sv-SE");
   agendar.addEventListener("click", () => enviarPresente(false));
   document.getElementById("pr-agora").addEventListener("click", () => {
-    if (confirm("Enviar a música por e-mail agora?")) enviarPresente(true);
+    if (confirm("Enviar a música agora?")) enviarPresente(true);
   });
 }
 </script>

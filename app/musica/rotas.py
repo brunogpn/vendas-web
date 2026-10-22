@@ -264,7 +264,22 @@ def pagina_compra(guid):
                            link_presente=url_for('musica.pagina_presente', token=musica['token'], _external=True),
                            tem_qrcode=QRCODE in recursos, tem_presente=ENTREGA_EMAIL in recursos,
                            tem_video=VIDEOCLIPE in recursos, legenda_video=config.LEGENDA_VIDEO,
-                           max_fotos=servicos().video.max_fotos)
+                           max_fotos=servicos().video.max_fotos, whatsapp_ativo=config.WHATSAPP_ATIVO)
+
+
+@bp.get('/compra/<guid>/enviar')
+def enviar_pelo_whatsapp(guid):
+    """Botão "Enviar pelo seu WhatsApp": abre o WhatsApp de quem comprou já na conversa de quem ganha (se ela
+    informou o número) com a mensagem e o link do presente prontos."""
+    try:
+        _, musica, _ = uc.compra(servicos(), guid)
+    except Recusa:
+        return _nao_encontrada()
+    from urllib.parse import quote
+    nome = musica['presente_nome'] or regras.para_quem(musica['respostas'])
+    link = url_for('musica.pagina_presente', token=musica['token'], _external=True)
+    texto = f'Oi, {nome}! Fiz uma música só pra você 🎵 {link}'
+    return redirect(f"https://wa.me/{musica['presente_whatsapp'] or ''}?text={quote(texto)}")
 
 
 @bp.get('/compra/<guid>/cartao')
@@ -387,7 +402,7 @@ def api_outra_versao(token):
 
 @bp.post('/api/compra/<guid>/presente')
 def api_presente(guid):
-    """Entrega por e-mail para quem recebe: agora ou na data/hora escolhida (horário de Brasília)."""
+    """Entrega para quem recebe (e-mail e/ou WhatsApp): agora ou na data/hora escolhida (horário de Brasília)."""
     if not _origem_confiavel():
         return jsonify(erro='Recarregue a página e tente de novo.'), 403
     from datetime import datetime
@@ -402,7 +417,8 @@ def api_presente(guid):
         if quando.tzinfo:   # com fuso: converte para o horário de Brasília, como o resto do sistema (sem fuso)
             quando = quando.astimezone(ZoneInfo('America/Sao_Paulo')).replace(tzinfo=None)
     try:
-        uc.agendar_presente(servicos(), guid, dados.get('nome'), dados.get('email'), dados.get('mensagem'), quando)
+        uc.agendar_presente(servicos(), guid, dados.get('nome'), dados.get('email'), dados.get('mensagem'), quando,
+                            whatsapp=dados.get('whatsapp'), confirmo=bool(dados.get('confirmo')))
     except Recusa as r:
         return _recusa(r)
     return jsonify(ok=True, agora=quando is None)

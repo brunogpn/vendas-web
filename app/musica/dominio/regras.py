@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 
 from musica.dominio.modelos import PedidoGeracao
-from musica.dominio.quiz import PARA_MIM, vozes_para
+from musica.dominio.quiz import MAIS_DE_UMA, PARA_MIM, RELACOES, vozes_para
 
 
 def montar_geracao(respostas: dict, titulo: str, letra_suno: str, tabela_estilos: dict) -> PedidoGeracao:
@@ -89,12 +89,49 @@ def travou(gerando_desde: datetime | None, agora: datetime, minutos: int) -> boo
     return bool(gerando_desde) and agora - gerando_desde > timedelta(minutes=minutos)
 
 
-def validar_presente(nome: str, email: str, quando: datetime | None, agora: datetime) -> str | None:
-    """Erro (texto para a cliente) da entrega por e-mail, ou None. `quando` None = enviar agora."""
+def validar_presente(nome: str, email: str, quando: datetime | None, agora: datetime,
+                     whatsapp: str = '') -> str | None:
+    """Erro (texto para a cliente) da entrega para quem recebe (e-mail e/ou WhatsApp), ou None.
+    `quando` None = enviar agora. `whatsapp` já normalizado por telefone_whatsapp ('' = não informado ou inválido)."""
     if not nome:
         return 'Coloque o nome de quem vai receber.'
-    if not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email or ''):
+    if not email and not whatsapp:
+        return 'Coloque o e-mail ou o WhatsApp (com DDD) de quem vai receber.'
+    if email and not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email):
         return 'Confira o e-mail de quem vai receber.'
     if quando and (quando < agora - timedelta(minutes=5) or quando > agora + timedelta(days=90)):
         return 'Escolha um horário a partir de agora, em até 90 dias.'
     return None
+
+
+def telefone_whatsapp(texto: str, ddi: str = '55') -> str:
+    """Número no formato que a Meta aceita (só dígitos, com o DDI). '' se não parecer um celular com DDD."""
+    digitos = re.sub(r'\D', '', texto or '')
+    ddi = re.sub(r'\D', '', ddi or '') or '55'
+    if len(digitos) in (10, 11):
+        digitos = ddi + digitos
+    return digitos if 12 <= len(digitos) <= 15 else ''
+
+
+def mesmo_telefone(a: str, b: str) -> bool:
+    """Mesmo celular? A Meta às vezes devolve o número sem o 9 da frente (55 61 8269-6770 x 55 61 98269-6770):
+    compara DDI+DDD e os 8 últimos dígitos."""
+    a, b = re.sub(r'\D', '', a or ''), re.sub(r'\D', '', b or '')
+    return len(a) >= 12 and len(b) >= 12 and a[:4] == b[:4] and a[-8:] == b[-8:]
+
+
+def para_quem_com_relacao(respostas: dict) -> str:
+    """{{2}} do template musica_pronta ("a música para ___ ficou pronta"): "sua mãe Helena", "seu amigo Celo",
+    "Ana, Bia e Carla" (grupo), "você" (Para mim), só o nome (Outra pessoa)."""
+    respostas = respostas or {}
+    relacao, nome = respostas.get('para_quem') or '', para_quem(respostas)
+    if relacao == PARA_MIM:
+        return 'você'
+    if relacao == MAIS_DE_UMA:
+        return nome
+    genero = next((r['genero'] for r in RELACOES if r['valor'] == relacao), 'x')
+    if genero == 'f':
+        return f'sua {relacao.lower()} {nome}'
+    if genero == 'm':
+        return f'seu {relacao.lower()} {nome}'
+    return nome
