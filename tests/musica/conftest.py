@@ -105,13 +105,18 @@ class RepositorioMemoria:
         agora = datetime.now()
         def falta(m):
             return ((m['presente_email'] and not m['presente_thread_id'] and not m['presente_falhou_em'])
-                    or (m['presente_whatsapp'] and not m['presente_wa_msg_id'] and not m['presente_wa_status']))
+                    or (m['presente_whatsapp'] and not m['presente_wa_msg_id']
+                        and (m['presente_wa_status'] or '') in ('', 'erro1', 'erro2')))
         return [self.por_id(m['id']) for m in self.musicas.values()
                 if m['liberada_em'] and not m['presente_enviado_em'] and falta(m)
                 and (m['presente_em'] is None or m['presente_em'] <= agora)]
 
     def por_wamid_presente(self, wamid):
         return next((self.por_id(m['id']) for m in self.musicas.values() if wamid and m['presente_wa_msg_id'] == wamid), None)
+
+    def presente_wa_sem_wamid(self, telefone):
+        return any(m['presente_whatsapp'] and not m['presente_wa_msg_id'] and m['presente_enviado_em']
+                   and len(telefone) >= 8 and m['presente_whatsapp'][-8:] == telefone[-8:] for m in self.musicas.values())
 
     def marcar_presente_wa(self, musica_id, status):
         m = self.musicas[musica_id]
@@ -120,7 +125,7 @@ class RepositorioMemoria:
                 return False
             m['presente_wa_status'], m['presente_wa_entregue_em'] = 'entregue', datetime.now()
             return True
-        if m['presente_wa_status'] not in (None, 'enviado'):
+        if m['presente_wa_status'] not in (None, 'enviado', 'erro1', 'erro2'):
             return False
         m['presente_wa_status'] = 'falhou'
         return True
@@ -191,11 +196,11 @@ class NotificadorMemoria:
         self.emails.append({'produto_id': produto_id, 'destino': destino, 'assunto': assunto, 'html': html, 'cc': cc})
         return f'thread-{len(self.emails)}'
 
-    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None):
+    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None, produto_id=None):
         self.whatsapps.append((telefone, modelo, variaveis, payload_botao))
         return f'wamid-{len(self.whatsapps)}'
 
-    def whatsapp_texto(self, telefone, texto):
+    def whatsapp_texto(self, telefone, texto, produto_id=None):
         self.whatsapps.append((telefone, 'texto', [texto], None))
         return f'wamid-{len(self.whatsapps)}'
 

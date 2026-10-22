@@ -1100,7 +1100,7 @@ def atualizar_telefone_produto(telefone_id, produto_id, telefone, api_phone_numb
     """
     db.execute_query(query, (telefone, api_phone_number_id or None, token_env_key or 'WHATSAPP_ACCESS_TOKEN', contador_uso,
                              _normalizar_provedor(provedor), 1 if responde_mensagens else 0, telefone_id, produto_id))
-    _CACHE_SO_AVISOS['quando'] = 0.0   # o webhook passa a ver a mudança na próxima mensagem
+    _CACHE_SO_AVISOS['quando'] = 0.0   # neste processo; nos workers (webhook) a mudança vale em até 60 s
     _whatsapp_provedor_cache.clear()
 
 

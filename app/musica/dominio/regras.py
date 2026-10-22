@@ -105,12 +105,26 @@ def validar_presente(nome: str, email: str, quando: datetime | None, agora: date
 
 
 def telefone_whatsapp(texto: str, ddi: str = '55') -> str:
-    """Número no formato que a Meta aceita (só dígitos, com o DDI). '' se não parecer um celular com DDD."""
+    """Número no formato que a Meta aceita (só dígitos, com o DDI). '' se não parecer um celular com DDD.
+    Brasil: 10/11 dígitos ganham o 55. Outro DDI (o checkout manda): entra se o número ainda não começa com ele."""
     digitos = re.sub(r'\D', '', texto or '')
     ddi = re.sub(r'\D', '', ddi or '') or '55'
-    if len(digitos) in (10, 11):
+    if ddi == '55':
+        if len(digitos) in (10, 11):
+            digitos = ddi + digitos
+        return digitos if 12 <= len(digitos) <= 15 else ''
+    if digitos and not digitos.startswith(ddi):
         digitos = ddi + digitos
-    return digitos if 12 <= len(digitos) <= 15 else ''
+    return digitos if len(ddi) + 6 <= len(digitos) <= 15 else ''
+
+
+def primeiro_nome(*nomes: str) -> str:
+    """O primeiro nome que pareça nome (sem @ nem dígitos), com inicial maiúscula; '' se nenhum servir."""
+    for nome in nomes:
+        palavra = (nome or '').strip().split(' ')[0]
+        if palavra and '@' not in palavra and not any(c.isdigit() for c in palavra):
+            return palavra.capitalize()
+    return ''
 
 
 def mesmo_telefone(a: str, b: str) -> bool:

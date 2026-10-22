@@ -71,6 +71,9 @@ O admin recusa recurso no papel errado e item de música no plano padrão de pro
   corrigir o número na área da compra.
 - **Aviso da Meta antes do wamid gravado** (o "failed" pode vir logo após o envio): é lido de novo 1 min depois,
   uma vez (tarefa `musica.reler_status_whatsapp`).
+- **Erro passageiro da Meta** (rede, 5xx) no `presente_surpresa`: tenta de novo nas próximas rodadas (até 3 vezes,
+  `presente_wa_status` = `erro1`/`erro2`); depois, vale o caminho do "não chegou". O `musica_pronta` tenta de novo
+  na própria tarefa. O remetente é sempre o número de avisos do produto da música (mesmo pausado).
 - **Corrigir e tentar de novo:** só o canal que não chegou sai outra vez (o e-mail que chegou não é reenviado, nem o
   WhatsApp que saiu).
 - **Order bump:** "Entrega para quem vai receber (e-mail e/ou WhatsApp)" — pelo menos um dos dois, com "Confirmo que

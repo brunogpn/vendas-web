@@ -27,8 +27,8 @@ def _comprada(s, recursos=('musica', 'entrega_email'), whatsapp='(61) 98111-2222
     return s.repositorio.por_id(musica['id'])
 
 
-def _status(wamid, status, erros=None):
-    st = {'id': wamid, 'status': status}
+def _status(wamid, status, erros=None, para='5561982223333'):
+    st = {'id': wamid, 'status': status, 'recipient_id': para}
     if erros:
         st['errors'] = erros
     return {'metadata': {'phone_number_id': '1376511528883172'}, 'statuses': [st]}
@@ -49,6 +49,12 @@ def _botao(de, payload, tipo='button'):
                                            ('+55 61 98111-2222', '5561981112222'), ('123', ''), ('', '')])
 def test_telefone_no_formato_da_meta(entrada, saida):
     assert regras.telefone_whatsapp(entrada) == saida
+
+
+@pytest.mark.parametrize('entrada,ddi,saida', [('912 345 678', '351', '351912345678'), ('2025550123', '1', '12025550123'),
+                                               ('351912345678', '351', '351912345678'), ('12', '351', '')])
+def test_telefone_com_ddi_de_fora(entrada, ddi, saida):
+    assert regras.telefone_whatsapp(entrada, ddi) == saida
 
 
 def test_mesmo_telefone_com_e_sem_o_nove():
@@ -214,6 +220,43 @@ def test_aviso_da_meta_antes_do_wamid_gravado_e_lido_de_novo(s):
     assert s.repositorio.por_id(musica['id'])['presente_wa_status'] == 'falhou'
     uc.webhook_whatsapp(s, _status('wamid-de-outra-coisa', 'sent'), ultima_tentativa=True)
     assert len([c for c in s.agenda.chamadas if c[0] == 'reler_status_whatsapp']) == 1
+
+
+def test_erro_passageiro_tenta_de_novo_e_depois_avisa(s):
+    from musica.portas import ErroPassageiro
+    musica = _comprada(s)
+    uc.agendar_presente(s, 'g-500', 'Lena', '', '', None, whatsapp='61 98222-3333', confirmo=True)
+
+    def fora(*a, **k):
+        raise ErroPassageiro('503')
+    s.notificador.whatsapp = fora
+    assert uc.enviar_presentes(s) == 0
+    assert s.repositorio.por_id(musica['id'])['presente_wa_status'] == 'erro1'
+    assert not any('pelo seu WhatsApp' in e['assunto'] for e in s.notificador.emails)
+    uc.enviar_presentes(s)                                                   # 2ª rodada
+    uc.enviar_presentes(s)                                                   # 3ª: desiste e avisa
+    assert s.repositorio.por_id(musica['id'])['presente_wa_status'] == 'falhou'
+    assert len([e for e in s.notificador.emails if 'pelo seu WhatsApp' in e['assunto']]) == 1
+
+
+def test_corrigir_o_email_nao_reenvia_o_whatsapp_que_chegou(s):
+    musica = _comprada(s)
+    uc.agendar_presente(s, 'g-500', 'Lena', 'lena@errado.com', '', None, whatsapp='61 98222-3333', confirmo=True)
+    uc.enviar_presentes(s)
+    m = s.repositorio.por_id(musica['id'])
+    uc.webhook_whatsapp(s, _status(m['presente_wa_msg_id'], 'delivered'))
+    uc.presente_devolvido(s, m['presente_thread_id'], ['lena@errado.com'])   # volta: nova tentativa, enviado_em limpo
+    uc.agendar_presente(s, 'g-500', 'Lena', 'lena@certo.com', '', None, whatsapp='61 98222-3333', confirmo=True)
+    uc.enviar_presentes(s)
+    assert len([w for w in s.notificador.whatsapps if w[1] == 'presente_surpresa']) == 1
+    assert s.notificador.emails[-1]['destino'] == 'lena@certo.com'
+
+
+def test_status_de_outras_mensagens_nao_e_relido(s):
+    musica = _comprada(s)
+    uc.whatsapp_comprador(s, musica['id'])
+    uc.webhook_whatsapp(s, _status('wamid-do-musica-pronta', 'delivered', para='5561981112222'))
+    assert not any(c[0] == 'reler_status_whatsapp' for c in s.agenda.chamadas)
 
 
 def test_whatsapp_antigo_sem_ddi_e_normalizado(s):

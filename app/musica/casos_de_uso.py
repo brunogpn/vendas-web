@@ -9,9 +9,8 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 
-from fluxos.email_respostas import primeiro_nome
-
 from musica import config, links, mensagens
+from musica.portas import ErroPassageiro
 from musica.dominio import legenda, regras
 from musica.dominio import modelos as m_
 from musica.dominio.recursos import ENTREGA_EMAIL, MUSICA, QRCODE, VIDEOCLIPE
@@ -282,10 +281,11 @@ def whatsapp_comprador(s, musica_id):
     if not musica or not musica['liberada_em'] or not telefone or musica['comprador_wa_msg_id']:
         return
     pedido = s.repositorio.pedido_pago(musica['pedido_id']) or {}
-    nome = primeiro_nome(pedido.get('contact_name'), musica['respostas'].get('de')) or 'tudo bem'
+    nome = regras.primeiro_nome(pedido.get('contact_name'), musica['respostas'].get('de')) or 'tudo bem'
     link = links.compra(pedido.get('guid'), pedido.get('dns_origem') or musica['dominio'])
     wamid = s.notificador.whatsapp(telefone, 'musica_pronta',
-                                   [nome, regras.para_quem_com_relacao(musica['respostas']), link])
+                                   [nome, regras.para_quem_com_relacao(musica['respostas']), link],
+                                   produto_id=musica['produto_id'])
     if wamid:
         s.repositorio.atualizar(musica_id, comprador_wa_msg_id=wamid, comprador_wa_em=_agora())
 
@@ -338,12 +338,12 @@ def agendar_presente(s, guid, nome, email, mensagem, quando, whatsapp=None, conf
         raise Recusa('Confirme que o WhatsApp é de quem vai receber.')
     campos = dict(presente_nome=nome, presente_mensagem=(mensagem or '').strip()[:500] or None, presente_em=quando,
                   presente_enviado_em=None)
-    # Depois de um canal não chegar, ela corrige e tenta de novo: o canal que já chegou não sai outra vez
-    ja_saiu = musica['presente_enviado_em']
-    if not (ja_saiu and musica['presente_thread_id'] and not musica['presente_falhou_em']):
+    # Depois de um canal não chegar, ela corrige e tenta de novo: o canal que já saiu não sai outra vez
+    # (_nao_chegou limpa o thread do e-mail devolvido; o WhatsApp só fica 'enviado'/'entregue' depois de sair)
+    if not (musica['presente_thread_id'] and not musica['presente_falhou_em']):
         campos.update(presente_email=email or None, presente_tentativas=0, presente_thread_id=None,
                       presente_falhou_em=None)
-    if not (ja_saiu and musica['presente_wa_status'] in ('enviado', 'entregue')):
+    if musica['presente_wa_status'] not in ('enviado', 'entregue'):
         campos.update(presente_whatsapp=whatsapp or None, presente_wa_msg_id=None, presente_wa_status=None,
                       presente_wa_entregue_em=None, presente_wa_link_em=None)
     s.repositorio.atualizar(musica['id'], **campos)
@@ -364,7 +364,7 @@ def enviar_presentes(s) -> int:
     for musica in s.repositorio.presentes_para_enviar():
         if not s.repositorio.marcar_presente_enviado(musica['id']):
             continue   # outra execução pegou este
-        if musica['presente_whatsapp'] and not musica['presente_wa_msg_id'] and not musica['presente_wa_status']:
+        if musica['presente_whatsapp'] and not musica['presente_wa_msg_id'] and _wa_por_sair(musica):
             enviados += _presente_whatsapp(s, musica)
         if not musica['presente_email'] or musica['presente_thread_id'] or musica['presente_falhou_em']:
             continue
@@ -385,6 +385,15 @@ def enviar_presentes(s) -> int:
     return enviados
 
 
+def _wa_por_sair(musica):
+    """WhatsApp do presente ainda por sair: nunca tentado ou com erro passageiro ('erro1'..'erro3')."""
+    status = musica['presente_wa_status'] or ''
+    return not status or status.startswith('erro')
+
+
+WA_TENTATIVAS = 3   # erro passageiro da Meta no presente_surpresa: tenta de novo nas próximas rodadas (5 em 5 min)
+
+
 def _presente_whatsapp(s, musica) -> int:
     """Template `presente_surpresa` para quem ganha: {{1}} quem ganha, {{2}} quem mandou, e no botão "Ouvir minha
     música" a etiqueta (payload) = token da música — é por ela que o toque no botão acha a música certa.
@@ -392,7 +401,16 @@ def _presente_whatsapp(s, musica) -> int:
     try:
         wamid = s.notificador.whatsapp(musica['presente_whatsapp'], 'presente_surpresa',
                                        [musica['presente_nome'], musica['respostas'].get('de') or 'Alguém especial'],
-                                       payload_botao=musica['token'])
+                                       payload_botao=musica['token'], produto_id=musica['produto_id'])
+    except ErroPassageiro as erro:
+        feitas = int((musica['presente_wa_status'] or 'erro0')[4:] or 0) + 1
+        if feitas < WA_TENTATIVAS:
+            logger.warning(f"[MUSICA] WhatsApp do presente da música #{musica['id']}: erro passageiro ({erro}); "
+                           f"tentativa {feitas + 1} de {WA_TENTATIVAS} na próxima rodada")
+            s.repositorio.atualizar(musica['id'], presente_wa_status=f'erro{feitas}', presente_enviado_em=None)
+            return 0
+        _presente_whatsapp_falhou(s, musica, f'erro passageiro {feitas} vezes: {erro}')
+        return 0
     except Exception as erro:
         logger.exception(f"[MUSICA] WhatsApp do presente da música #{musica['id']} não saiu")
         _presente_whatsapp_falhou(s, musica, f'erro no envio: {erro}')
@@ -423,11 +441,11 @@ def _presente_whatsapp_chegou(s, musica):
         return   # já avisado (a Meta manda "entregue" e depois "lido")
     de, para = musica['respostas'].get('de') or '', musica['presente_nome'] or ''
     pedido = s.repositorio.pedido_pago(musica['pedido_id']) if musica['pedido_id'] else None
-    nome = primeiro_nome((pedido or {}).get('contact_name'), de) or de
+    nome = regras.primeiro_nome((pedido or {}).get('contact_name'), de) or de
     telefone = regras.telefone_whatsapp(musica['whatsapp'])
     if telefone:
         try:
-            if s.notificador.whatsapp(telefone, 'entrega_feita', [nome, para]):
+            if s.notificador.whatsapp(telefone, 'entrega_feita', [nome, para], produto_id=musica['produto_id']):
                 return
         except Exception:
             logger.exception(f"[MUSICA] entrega_feita da música #{musica['id']} não saiu; vai por e-mail")
@@ -449,7 +467,8 @@ def webhook_whatsapp(s, valor, ultima_tentativa=False) -> None:
     for st in valor.get('statuses') or []:
         musica = s.repositorio.por_wamid_presente(st.get('id') or '')
         if not musica:
-            if not ultima_tentativa and st.get('status') in ('delivered', 'read', 'failed'):
+            if (not ultima_tentativa and st.get('status') in ('delivered', 'read', 'failed')
+                    and s.repositorio.presente_wa_sem_wamid(st.get('recipient_id') or '')):
                 reler.append(st)
             continue
         if st.get('status') in ('delivered', 'read'):
@@ -472,7 +491,8 @@ def webhook_whatsapp(s, valor, ultima_tentativa=False) -> None:
             continue
         try:
             s.notificador.whatsapp_texto(de, mensagens.link_do_presente(
-                musica['presente_nome'], musica['respostas'].get('de') or '', links.presente(musica)))
+                musica['presente_nome'], musica['respostas'].get('de') or '', links.presente(musica)),
+                produto_id=musica['produto_id'])
             s.repositorio.atualizar(musica['id'], presente_wa_link_em=_agora())
         except Exception:
             logger.exception(f"[MUSICA] Falha ao mandar o link do presente da música #{musica['id']}")

@@ -9,6 +9,11 @@ from typing import Protocol
 from musica.dominio.modelos import Letra, PedidoGeracao, ResultadoGeracao
 
 
+class ErroPassageiro(Exception):
+    """Falha que vale tentar de novo (rede, 5xx ou erro transitório do provedor). Os adaptadores traduzem a do
+    provedor para esta, e os casos de uso decidem a nova tentativa sem conhecer o provedor."""
+
+
 class GeradorMusica(Protocol):
     nome: str   # gravado em musicas.provedor
 
@@ -77,6 +82,8 @@ class Repositorio(Protocol):
     def por_wamid_presente(self, wamid: str) -> dict | None: ...
     def marcar_presente_wa(self, musica_id: int, status: str) -> bool: ...
     def numero_avisos(self, produto_id: int) -> str | None: ...
+    def presente_wa_sem_wamid(self, telefone: str) -> bool:
+        """Há presente_surpresa saindo agora (há poucos minutos) para este número, ainda sem wamid gravado?"""
     def para_lembrete(self, numero: int) -> list[dict]: ...
     def paradas(self, status: str, minutos: int) -> list[int]: ...
     def nao_pagas_antigas(self, dias: int) -> list[dict]: ...
@@ -103,10 +110,12 @@ class Notificador(Protocol):
     def email(self, produto_id: int, destino: str, assunto: str, html: str, cc: str | None = None) -> str | None:
         """Envia; devolve o thread do Gmail (None no dev, que não envia)."""
 
-    def whatsapp(self, telefone: str, modelo: str, variaveis: list[str], payload_botao: str | None = None) -> str | None:
-        """Template aprovado pelo número só de avisos do produto; devolve o wamid (None = WhatsApp desligado)."""
+    def whatsapp(self, telefone: str, modelo: str, variaveis: list[str], payload_botao: str | None = None,
+                 produto_id: int | None = None) -> str | None:
+        """Template aprovado pelo número só de avisos do produto da música; devolve o wamid (None = WhatsApp
+        desligado). Erro que vale tentar de novo: ErroPassageiro."""
 
-    def whatsapp_texto(self, telefone: str, texto: str) -> str | None:
+    def whatsapp_texto(self, telefone: str, texto: str, produto_id: int | None = None) -> str | None:
         """Texto livre (só dentro da janela de 24 h aberta pela pessoa, ex.: depois de tocar num botão)."""
 
     def equipe(self, mensagem: str) -> None: ...

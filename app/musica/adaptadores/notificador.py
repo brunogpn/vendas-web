@@ -10,6 +10,7 @@ import logging
 import os
 
 import config
+from musica.portas import ErroPassageiro
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +44,16 @@ class Notificador:
                            cc=cc) or {}
         return resultado.get('threadId')
 
-    def _numero(self):
-        produto = self.repositorio.produto_musica()
-        numero = self.repositorio.numero_avisos(produto['id']) if produto else None
+    def _numero(self, produto_id=None):
+        """O número de avisos do produto da música (pausado ou não); sem produto, o da Música à venda."""
+        if not produto_id:
+            produto_id = (self.repositorio.produto_musica() or {}).get('id')
+        numero = self.repositorio.numero_avisos(produto_id) if produto_id else None
         if not numero:
             raise RuntimeError('Produto Música sem número só de avisos cadastrado (telefones_produto, responde_mensagens = 0)')
         return numero
 
-    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None):
+    def whatsapp(self, telefone, modelo, variaveis, payload_botao=None, produto_id=None):
         """Template aprovado; devolve o wamid. None = WhatsApp da Música desligado (MUSICA_WHATSAPP_ATIVO)."""
         if not self.whatsapp_ativo:
             logger.info(f'[MUSICA] WhatsApp desligado: {modelo} para ...{str(telefone)[-4:]} não enviado')
@@ -58,19 +61,22 @@ class Notificador:
         info = MODELOS_WHATSAPP[modelo]
         if len(variaveis) != info['parametros']:
             raise ValueError(f'{modelo} pede {info["parametros"]} parâmetros, vieram {len(variaveis)}')
-        from whatsapp import enviar_template
+        from whatsapp import ErroTransienteWhatsApp, enviar_template
         # A Meta recusa parâmetro vazio ou com quebra de linha: garante texto curto de uma linha.
         parametros = [(' '.join(str(v or '-').split()) or '-')[:300] for v in variaveis]
-        return enviar_template(self._numero(), telefone, modelo, parametros,
-                               payload_botao=payload_botao if info.get('botao') else None)
+        try:
+            return enviar_template(self._numero(produto_id), telefone, modelo, parametros,
+                                   payload_botao=payload_botao if info.get('botao') else None)
+        except ErroTransienteWhatsApp as e:
+            raise ErroPassageiro(str(e)) from e
 
-    def whatsapp_texto(self, telefone, texto):
+    def whatsapp_texto(self, telefone, texto, produto_id=None):
         """Texto livre pelo número de avisos (vale dentro da janela de 24 h que a pessoa abriu ao tocar no botão)."""
         if not self.whatsapp_ativo:
             logger.info(f'[MUSICA] WhatsApp desligado: texto para ...{str(telefone)[-4:]} não enviado')
             return None
         from whatsapp import enviar_mensagem
-        return enviar_mensagem({'phone_number_id': self._numero(), 'contact_phone': telefone}, texto)
+        return enviar_mensagem({'phone_number_id': self._numero(produto_id), 'contact_phone': telefone}, texto)
 
     def equipe(self, mensagem):
         logger.error(f'[MUSICA][ALERTA] {mensagem}')

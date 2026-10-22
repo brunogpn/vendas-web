@@ -80,7 +80,8 @@ video{width:100%;max-height:70vh;border-radius:16px;background:#000}
   <section class="extra-bloco" id="presente">
     <h2>Entrega para {{ musica.presente_nome or para }}</h2>
     {% set wa_falhou = musica.presente_wa_status == 'falhou' %}
-    {% if musica.presente_enviado_em and not wa_falhou %}
+    {% set email_falhou = musica.presente_falhou_em %}
+    {% if musica.presente_enviado_em and not wa_falhou and not email_falhou %}
       {% if musica.presente_email %}
       <div class="agendado"><i class="ti ti-mail" aria-hidden="true"></i><span>E-mail enviado para <b>{{ musica.presente_nome }}</b> ({{ musica.presente_email }}), com cópia para você.</span></div>
       {% endif %}
@@ -90,6 +91,9 @@ video{width:100%;max-height:70vh;border-radius:16px;background:#000}
         {% else %}Enviamos no WhatsApp de {{ musica.presente_nome }}. Assim que chegar, você recebe um aviso.{% endif %}</span></div>
       {% endif %}
     {% else %}
+      {% if email_falhou %}
+      <div class="agendado" style="margin-bottom:16px"><i class="ti ti-alert-circle" aria-hidden="true" style="color:var(--cor)"></i><span>O e-mail para <b>{{ musica.presente_nome }}</b> ({{ musica.presente_email }}) não chegou. Confira o endereço abaixo e tente de novo.</span></div>
+      {% endif %}
       {% if wa_falhou %}
       <div class="agendado" style="margin-bottom:16px"><i class="ti ti-alert-circle" aria-hidden="true" style="color:var(--cor)"></i><span>Não conseguimos entregar no WhatsApp de <b>{{ musica.presente_nome }}</b>. Pode ser o número ou alguma configuração do WhatsApp da pessoa. Mande pelo seu WhatsApp, a mensagem e o link já vão prontos — ou corrija o número abaixo.</span></div>
       <a class="botao whats" href="{{ url_for('musica.enviar_pelo_whatsapp', guid=guid) }}"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar para {{ musica.presente_nome }} pelo meu WhatsApp</a>

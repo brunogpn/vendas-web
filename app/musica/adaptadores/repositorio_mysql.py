@@ -118,12 +118,13 @@ class RepositorioMysql:
 
     def presentes_para_enviar(self):
         """Presentes cujo horário chegou e que ainda têm um canal por sair: o e-mail (sem thread = não saiu ou é nova
-        tentativa) e/ou o WhatsApp (sem wamid e sem status)."""
+        tentativa) e/ou o WhatsApp (sem wamid; sem status ou com erro passageiro 'erroN')."""
         linhas = db.execute_query(
             """SELECT * FROM musicas WHERE liberada_em IS NOT NULL AND presente_enviado_em IS NULL
                AND (presente_em IS NULL OR presente_em <= NOW())
                AND ((presente_email IS NOT NULL AND presente_thread_id IS NULL AND presente_falhou_em IS NULL)
-                    OR (presente_whatsapp IS NOT NULL AND presente_wa_msg_id IS NULL AND presente_wa_status IS NULL))""",
+                    OR (presente_whatsapp IS NOT NULL AND presente_wa_msg_id IS NULL
+                        AND (presente_wa_status IS NULL OR presente_wa_status LIKE 'erro%%')))""",
             fetch_all=True) or []
         return [_musica(l) for l in linhas]
 
@@ -155,8 +156,19 @@ class RepositorioMysql:
             return db.execute_query("UPDATE musicas SET presente_wa_status = 'entregue', presente_wa_entregue_em = NOW() "
                                     "WHERE id = %s AND presente_wa_status = 'enviado'", (musica_id,), return_rowcount=True) == 1
         return db.execute_query("UPDATE musicas SET presente_wa_status = 'falhou' WHERE id = %s "
-                                "AND (presente_wa_status IS NULL OR presente_wa_status = 'enviado')",
+                                "AND (presente_wa_status IS NULL OR presente_wa_status = 'enviado' "
+                                "OR presente_wa_status LIKE 'erro%%')",
                                 (musica_id,), return_rowcount=True) == 1
+
+    def presente_wa_sem_wamid(self, telefone):
+        """Presente_surpresa saindo agora para este número (marcado há até 10 min, wamid ainda não gravado).
+        Compara os 8 últimos dígitos: a Meta às vezes devolve o celular sem o 9."""
+        if len(telefone or '') < 8:
+            return False
+        return bool(db.execute_query(
+            """SELECT 1 FROM musicas WHERE presente_whatsapp IS NOT NULL AND presente_wa_msg_id IS NULL
+               AND presente_enviado_em >= NOW() - INTERVAL 10 MINUTE AND RIGHT(presente_whatsapp, 8) = RIGHT(%s, 8)
+               LIMIT 1""", (telefone,), fetch_one=True))
 
     def numero_avisos(self, produto_id):
         """O api_phone_number_id do número só de avisos do produto (telefones_produto.responde_mensagens = 0)."""

@@ -66,10 +66,10 @@ def limpeza():
 def whatsapp_comprador(self, musica_id):
     """Template musica_pronta para quem comprou. Erro passageiro da Meta: tenta de novo em 1, 2 e 4 min."""
     from musica import casos_de_uso
-    from whatsapp import ErroTransienteWhatsApp
+    from musica.portas import ErroPassageiro
     try:
         casos_de_uso.whatsapp_comprador(_s(), musica_id)
-    except ErroTransienteWhatsApp as exc:
+    except ErroPassageiro as exc:
         raise self.retry(exc=exc, countdown=60 * 2 ** self.request.retries)
     except Exception:
         logger.exception(f'[MUSICA] musica_pronta da música #{musica_id} não saiu')

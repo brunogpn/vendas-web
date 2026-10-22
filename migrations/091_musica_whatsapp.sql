@@ -33,6 +33,12 @@ SET @sql = IF(@tem = 0, 'ALTER TABLE musicas
     ADD KEY idx_musicas_comprador_wa (comprador_wa_msg_id)', 'SELECT 1');
 PREPARE p FROM @sql; EXECUTE p; DEALLOCATE PREPARE p;
 
+-- Presentes que esperavam nova tentativa do e-mail antes desta versão ficaram com o thread do envio devolvido: a
+-- nova regra de "falta enviar" (thread vazio) não os pegaria nunca mais.
+UPDATE musicas SET presente_thread_id = NULL
+WHERE presente_enviado_em IS NULL AND presente_thread_id IS NOT NULL AND presente_falhou_em IS NULL
+  AND presente_email IS NOT NULL;
+
 -- 3) O order bump da entrega vale para e-mail e/ou WhatsApp.
 UPDATE entregaveis
 SET nome_venda = 'Entrega para quem vai receber (e-mail e/ou WhatsApp)',
