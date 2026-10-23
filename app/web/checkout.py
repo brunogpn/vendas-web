@@ -39,19 +39,29 @@ def rastrear_visita_funil(request_obj, produto_id: int, estado_novo: int, cookie
 
     Retorna o pedido_id. Quem chamar deve gravar/renovar o cookie na resposta com esse valor.
     """
-    from database import get_pedido_nao_finalizado, avancar_pedido_web, criar_pedido_web_inicial
+    from database import (get_pedido_nao_finalizado, avancar_pedido_web, criar_pedido_web_inicial,
+                          atualizar_campanha_rascunho)
 
     cookie_nome = f'{cookie_prefixo}_{produto_id}'
     pedido_id_cookie = request_obj.cookies.get(cookie_nome, '')
+    args = request_obj.args
 
     if pedido_id_cookie.isdigit():
         pedido = get_pedido_nao_finalizado(int(pedido_id_cookie), produto_id)
         if pedido:
             if pedido['estado_id'] == 1004 and estado_novo == 1003:
                 avancar_pedido_web(pedido['id'], 1003)
+            # Voltou por outro anúncio (gclid novo): vale o último clique. Sem gclid na URL (ex.: navegou
+            # da landing para o checkout), mantém a campanha que já está no pedido.
+            gclid = args.get('gclid', '')
+            if gclid and gclid != (pedido.get('gclid') or ''):
+                atualizar_campanha_rascunho(
+                    pedido['id'], gclid=gclid, campaignid=args.get('gad_campaignid', ''),
+                    adgroupid=args.get('adgroupid', ''), creative=args.get('creative', ''),
+                    matchtype=args.get('matchtype', ''), device=args.get('device', ''),
+                    placement=args.get('placement', ''), video_id=args.get('video_id', ''))
             return pedido['id']
 
-    args = request_obj.args
     dns_origem = (request_obj.headers.get('X-Forwarded-Host') or request_obj.host or '').split(':')[0].lower()
     return criar_pedido_web_inicial(
         produto_id, estado_novo, dns_origem=dns_origem,

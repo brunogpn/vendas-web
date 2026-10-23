@@ -2231,16 +2231,20 @@ def registrar_visualizacao_estante(pedido_id: int, variante: str) -> None:
 
 
 def registrar_progresso_quiz(pedido_id: int, pagina: str, etapa: int, etapa_nome: str) -> None:
-    """Guarda a etapa mais avançada que a visita alcançou no quiz (tabela quiz_progresso).
-    Nunca regride: voltar uma pergunta (botão Voltar) ou um beacon atrasado não apaga o avanço.
-    etapa_nome é atualizado ANTES de etapa no ON DUPLICATE KEY — o MySQL avalia as atribuições
-    da esquerda pra direita, então a comparação usa o valor antigo de etapa."""
+    """Guarda a etapa mais avançada que a visita alcançou no quiz (tabela quiz_progresso, uma linha por
+    pedido). Na mesma página nunca regride: voltar uma pergunta (botão Voltar) ou um beacon atrasado não
+    apaga o avanço. Se a visita abriu OUTRA página do mesmo produto (ex.: teste A/B /fatia-e x /fatia1-e,
+    mesmo cookie e mesmo pedido), vale a última página: a linha passa para ela e as etapas recomeçam —
+    como o gclid do último clique (rastrear_visita_funil), a venda conta para a página de onde ela comprou.
+    O MySQL avalia as atribuições da esquerda pra direita: etapa_nome e etapa comparam com a pagina
+    antiga, que só é trocada por último."""
     db.execute_query(
         """INSERT INTO quiz_progresso (pedido_id, pagina, etapa, etapa_nome)
            VALUES (%s, %s, %s, %s)
            ON DUPLICATE KEY UPDATE
-             etapa_nome = IF(VALUES(etapa) >= etapa, VALUES(etapa_nome), etapa_nome),
-             etapa      = GREATEST(etapa, VALUES(etapa))""",
+             etapa_nome = IF(pagina <> VALUES(pagina) OR VALUES(etapa) >= etapa, VALUES(etapa_nome), etapa_nome),
+             etapa      = IF(pagina <> VALUES(pagina), VALUES(etapa), GREATEST(etapa, VALUES(etapa))),
+             pagina     = VALUES(pagina)""",
         (pedido_id, pagina, etapa, etapa_nome)
     )
 
@@ -2557,6 +2561,20 @@ def criar_pedido_web_inicial(produto_id: int, estado_id: int, dns_origem: str = 
          dns_origem or '', campaignid or '', adgroupid or '', creative or '',
          matchtype or '', device or '', placement or '', video_id or '')
     )
+
+
+def atualizar_campanha_rascunho(pedido_id: int, gclid: str = '', campaignid: str = '', adgroupid: str = '',
+                                creative: str = '', matchtype: str = '', device: str = '', placement: str = '',
+                                video_id: str = '') -> None:
+    """Visita nova de anúncio num pedido rascunho já existente (1004/1003, mesmo cookie): passa a valer a
+    campanha do último clique — é o gclid que volta para o Google Ads na venda (padrão do Ads; sem isso,
+    quem volta por outro anúncio teria a venda creditada ao primeiro)."""
+    db.execute_query(
+        """UPDATE pedidos SET gclid = %s, campaignid = %s, adgroupid = %s, creative = %s, matchtype = %s,
+                  device = %s, placement = %s, video_id = %s
+           WHERE id = %s AND estado_id IN (1004, 1003)""",
+        (gclid, campaignid or '', adgroupid or '', creative or '', matchtype or '', device or '',
+         placement or '', video_id or '', pedido_id))
 
 
 def get_pedido_nao_finalizado(pedido_id: int, produto_id: int):

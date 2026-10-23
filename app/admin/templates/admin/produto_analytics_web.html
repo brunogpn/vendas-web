@@ -249,9 +249,54 @@
 
 </div>
 
+<!-- ── Teste A/B das landings (mesmo produto, páginas diferentes) ─────────────────── -->
+{% if ab_landings|length > 1 %}
+{% set nomes_landing = {'fatia2-e': 'Quiz — /fatia-e', 'fatia1-e': 'Site anterior — /fatia1-e'} %}
+<div class="section-title">Teste A/B das landings</div>
+<div class="section-subtitle" style="margin-top:-8px; margin-bottom:16px; color:#888; font-size:13px; line-height:1.6;">
+    Visitas que abriram cada página{% if ab_desde %} desde {{ ab_desde.strftime('%d/%m/%Y %H:%M') }}, quando todas passaram a ter visitas no período{% endif %},
+    e o que viraram (quem abriu mais de uma conta para a última). O tráfego é dividido pelo Google Ads; compare a
+    <strong>conversão</strong> (pagos ÷ visitas) e a <strong>receita por visita</strong>. Com poucas vendas, a diferença ainda pode ser acaso.
+</div>
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Página</th>
+                    <th style="text-align:right;">Visitas</th>
+                    <th style="text-align:right;">Foram ao checkout</th>
+                    <th style="text-align:right;">Pagos</th>
+                    <th style="text-align:right;">Conversão</th>
+                    <th style="text-align:right;">Receita</th>
+                    <th style="text-align:right;">Receita por visita</th>
+                    <th style="text-align:right;">Ticket médio</th>
+                    <th>Pagos por plano</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in ab_landings %}
+                <tr>
+                    <td>{{ nomes_landing.get(l.pagina, l.pagina) }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ l.visitas }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ l.checkout }}{% if l.visitas %} <span style="color:var(--muted)">({{ '%.1f'|format(100 * l.checkout / l.visitas) }}%)</span>{% endif %}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ l.pagos }}</td>
+                    <td style="text-align:right;font-family:var(--mono);"><strong>{{ '%.2f'|format(l.conversao) }}%</strong></td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ l.receita|brl }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ (l.receita / l.visitas)|brl if l.visitas else '—' }}</td>
+                    <td style="text-align:right;font-family:var(--mono);">{{ l.ticket|brl if l.pagos else '—' }}</td>
+                    <td style="font-size:13px;">{% for nome, qtd in l.planos %}{{ nome }}: {{ qtd }}{% if not loop.last %} · {% endif %}{% else %}—{% endfor %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <!-- ── Quiz: até onde as visitas chegaram ─────────────────── -->
 {% for quiz in quizzes %}
-<div class="section-title">Quiz da página de vendas ({{ quiz.pagina }}) — funil por pergunta</div>
+<div class="section-title">Página de vendas ({{ quiz.pagina }}) — até onde as visitas chegaram</div>
 <div class="section-subtitle" style="margin-top:-8px; margin-bottom:16px; color:#888; font-size:13px; line-height:1.6;">
     {{ quiz.total }} visita{{ 's' if quiz.total != 1 else '' }} abri{{ 'ram' if quiz.total != 1 else 'u' }} a página no período. Leia de cima para baixo: a barra mostra quantas pessoas ainda estavam no quiz em cada etapa.
     <strong>Desistiram aqui</strong> = viram esta etapa e não foram adiante; a linha em destaque é onde mais gente desiste.

@@ -485,9 +485,12 @@ def _planos_app_fatia(produto_basico_id):
     return preco_basico, guiado, desconto
 
 
-@app.get("/fatia-e")
-def fatia_e():
+def _landing_fatia(template):
+    """Landing dos anúncios do Fatia (produto 12) com o Básico e o plano com o App Fatias (+ popup de desconto).
+    Duas versões em teste A/B pelo Google Ads (Analytics Web → "Teste A/B das landings"): /fatia-e (quiz,
+    fatia2-e.html) e /fatia1-e (site anterior, fatia-e.html). Mesmo funil, mesmo checkout, mesmo cookie."""
     from web.checkout import rastrear_visita_funil, COOKIE_MAX_AGE_FUNIL
+    from web.links import link_checkout
     from apps import app_config
     produto_id = 12
     pedido_id = rastrear_visita_funil(request, produto_id, estado_novo=1004)
@@ -495,9 +498,20 @@ def fatia_e():
     cfg = app_config('fatia')
     if not (cfg and cfg.publico):  # app em piloto: a landing dos anúncios fica só com o Básico
         guiado = desconto = None
-    resp = make_response(render_template('fatia2-e.html', guiado=guiado, desconto=desconto, preco_basico=preco_basico))
+    resp = make_response(render_template(template, guiado=guiado, desconto=desconto, preco_basico=preco_basico,
+                                         basico_href=link_checkout(produto_id)))
     resp.set_cookie(f'pedido_web_{produto_id}', str(pedido_id), max_age=COOKIE_MAX_AGE_FUNIL)
     return resp
+
+
+@app.get("/fatia-e")
+def fatia_e():
+    return _landing_fatia('fatia2-e.html')
+
+
+@app.get("/fatia1-e")
+def fatia1_e():
+    return _landing_fatia('fatia-e.html')
 
 
 @app.get("/fatia-e-piloto")
@@ -505,9 +519,10 @@ def fatia_e_piloto():
     """Piloto do App Fatias (homologação): a mesma landing com Básico + Plano Guiado, enquanto o app
     não é público. Fora do funil (não cria pedido rascunho nem conta no Analytics Web) e fora dos
     buscadores."""
+    from web.links import link_checkout
     preco_basico, guiado, desconto = _planos_app_fatia(12)
     resp = make_response(render_template('fatia2-e.html', guiado=guiado, desconto=desconto,
-                                         preco_basico=preco_basico, piloto=True))
+                                         preco_basico=preco_basico, basico_href=link_checkout(12), piloto=True))
     resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
     return resp
 

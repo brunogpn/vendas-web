@@ -367,7 +367,7 @@
           <li>Bônus: guia de vendas na feira</li>
           <li>Material em PDF</li>
         </ul>
-        <a class="cta alt" id="checkoutBasic" href="/pay/12">QUERO O PLANO DE {{ preco_basico|brl|replace(',00', '') }} →</a>
+        <a class="cta alt" id="checkoutBasic" href="{{ basico_href }}">QUERO O PLANO DE {{ preco_basico|brl|replace(',00', '') }} →</a>
       </div>
       <div class="plan recommended">
         <div class="badge">MAIS COMPLETO</div>
@@ -400,7 +400,7 @@
           <p>O e-book + os 2 bônus por</p>
           <div class="plan-price">{{ preco_basico|brl }}</div>
           <p>Pagamento único · Acesso imediato após o pagamento.</p>
-          <a class="cta" id="checkoutBasic" href="/pay/12">QUERO MINHAS RECEITAS + 2 BÔNUS →</a>
+          <a class="cta" id="checkoutBasic" href="{{ basico_href }}">QUERO MINHAS RECEITAS + 2 BÔNUS →</a>
           <div class="micro">🔒 Compra segura · Material digital em PDF para celular, tablet ou computador.</div>
         </div>
       </div>
@@ -444,9 +444,9 @@
 
 <div class="confetti" id="confetti"></div>
 
+<script src="/static/js/landing-planos.js?v=1"></script>
 <script>
 const TOTAL=14;
-const CHECKOUT_URL="/pay/12";
 const state={
   situation:"",situationText:"",dream:"",days:0,past:"",objection:"",objectionText:"",
   experience:"",flavor:"",unitCost:0,qty:0,place:"",placeSpecific:"",movement:"",
@@ -615,31 +615,11 @@ function confetti(){
   const box=$("confetti"),colors=["#d7473c","#d5a35f","#fff3e7","#67a77d"];
   for(let i=0;i<54;i++){const el=document.createElement("i");el.style.left=Math.random()*100+"vw";el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.animationDelay=Math.random()*.6+"s";box.appendChild(el);setTimeout(()=>el.remove(),2400)}
 }
-// Checkout do sistema (produto 12), repassando a querystring (gclid/campanha) como no fatia-e.html.
-$("checkoutBasic").href=CHECKOUT_URL+window.location.search.replace(/([?&])oferta=[^&]*&?/,"$1").replace(/[?&]$/,"");
-$("checkoutBasic").addEventListener("click",()=>track(17,"Clicou em comprar"));
-// Plano Guiado (produto do tipo app) e popup de desconto — só existem se houver produto de app à venda.
-// Cada link repassa a querystring (gclid/campanha) como o do Básico. Roda no DOMContentLoaded porque
-// o popup fica depois deste script no HTML.
-document.addEventListener("DOMContentLoaded",()=>{
-// Junta a querystring da landing (gclid/campanha) com a do link (ex.: ?oferta=) sem duplicar o "?".
-const comCampanha=href=>{const u=new URL(href,location.origin);new URLSearchParams(location.search).forEach((v,k)=>{if(k!=="oferta"&&!u.searchParams.has(k))u.searchParams.set(k,v)});return u.pathname+u.search};
-const guiado=document.getElementById("checkoutGuided");
-if(guiado){guiado.href=comCampanha(guiado.getAttribute("href"));guiado.addEventListener("click",()=>track(17,"Clicou em comprar"))}
-const comDesconto=document.getElementById("checkoutGuidedDiscount");
-if(comDesconto){comDesconto.href=comCampanha(comDesconto.getAttribute("href"));comDesconto.addEventListener("click",()=>track(20,"Aceitou o app com desconto"))}
-(function(){
-  const overlay=document.getElementById("upsellOverlay");if(!overlay)return;
-  const basico=$("checkoutBasic");let mostrou=false;
-  const fechar=()=>{overlay.classList.remove("show");document.body.style.overflow=""};
-  basico.addEventListener("click",e=>{if(mostrou)return;e.preventDefault();mostrou=true;
-    overlay.classList.add("show");document.body.style.overflow="hidden";track(18,"Viu o popup do app")});
-  document.getElementById("upsellFechar").addEventListener("click",fechar);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)fechar()});
-  window.addEventListener("keydown",e=>{if(e.key==="Escape")fechar()});
-  document.getElementById("upsellSoBasico").addEventListener("click",()=>{track(19,"Recusou o popup e foi para o Básico");fechar();window.location.href=basico.href});
-})();
-});
+// Planos, popup e links com a campanha (gclid): o mesmo código do site anterior em teste A/B
+// (/static/js/landing-planos.js). Roda no DOMContentLoaded porque o popup fica depois deste script no HTML.
+document.addEventListener("DOMContentLoaded",()=>ligarPlanosLanding({track,etapas:{
+  clicou:[17,"Clicou em comprar"],popup:[18,"Viu o popup do app"],recusou:[19,"Recusou o popup e foi para o Básico"],
+  aceitou:[20,"Aceitou o app com desconto"],depoisPopup:[21,"Foi ao checkout depois do popup"]}}));
 track(0,"Abriu a página");
 </script>
 

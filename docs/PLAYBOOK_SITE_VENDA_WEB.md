@@ -163,6 +163,21 @@ offer-sec (preço) → guar-sec (garantia 7 dias) → faq-sec → final CTA → 
 7. Testar: `curl` simples pra status 200 + rodar a suíte Playwright (seção 6) pra desktop e
    mobile antes de considerar pronto.
 
+### Teste A/B de landings do mesmo produto
+
+Exemplo em uso desde 22/10/2026: Fatia (12) com `/fatia-e` (quiz, `fatia2-e.html`) x `/fatia1-e` (site
+anterior, `fatia-e.html`), as duas pelo helper `_landing_fatia` de `app/app.py` (mesmo funil, mesmos planos).
+- **Divisão do tráfego pelo Google Ads** (experimento ou anúncios com URLs finais diferentes) — sem sorteio no
+  servidor; a conversão é a mesma (mesmo produto, mesma planilha).
+- **Cada landing grava a sua página** no `track()` (`/api/v1/quiz/progresso`, `pagina: "<nome>"`) e tem as
+  etapas em `_ETAPAS_QUIZ` / `_ETAPAS_CHECKOUT_QUIZ` (`app/admin/views.py`). O Analytics Web do produto mostra
+  o card **"Teste A/B das landings"** (visitas, checkout, pagos, conversão, receita por visita, pagos por plano)
+  e o funil de cada página.
+- **Links dos planos levam a querystring da landing** (`comCampanha` no JS): sem isso o `gclid` se perde e a
+  venda não volta para o Ads.
+- O pedido pago é o mesmo id do rascunho criado na landing (cookie `pedido_web_<produto>`), por isso a página
+  fica ligada à venda.
+
 ### Script de conversão de imagem (PNG/JPG → WebP)
 ```python
 from PIL import Image

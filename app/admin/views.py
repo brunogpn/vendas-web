@@ -1950,13 +1950,67 @@ _ETAPAS_QUIZ = {
         'Escolha da fatia', 'Primeiro teste', 'Onde vender', 'Movimento do local', 'Preço',
         'Sua simulação', 'O que falta?', 'Viu o resultado', 'Viu a oferta', 'Clicou em comprar',
         'Viu o popup do app (saiu sem escolher)', 'Recusou o popup e foi para o Básico',
-        'Aceitou o app com desconto',
+        'Aceitou o app com desconto', 'Foi ao checkout depois do popup',
+    ],
+    # Site anterior (fatia-e.html em /fatia1-e), em teste A/B com o quiz desde 22/10/2026.
+    'fatia1-e': [
+        'Abriu a página', 'Viu a oferta', 'Clicou em comprar', 'Viu o popup do app (saiu sem escolher)',
+        'Recusou o popup e foi para o Básico', 'Aceitou o app com desconto', 'Foi ao checkout depois do popup',
     ],
 }
 # Etapas em que "parar" = foi para o checkout (não é desistência; não entra na "maior desistência").
 # O quiz guarda só a etapa MAIS AVANÇADA: 17 = clicou em comprar sem popup (Guiado, ou Básico sem
-# oferta); 18 = viu o popup e saiu (abandono real); 19 = recusou e foi ao Básico; 20 = aceitou.
-_ETAPAS_CHECKOUT_QUIZ = {'fatia2-e': {17, 19, 20}}
+# oferta); 18 = viu o popup e saiu (abandono real); 19 = recusou e foi ao Básico; 20 = aceitou;
+# 21 = fechou o popup e depois foi ao checkout (Guiado ou Básico). No site anterior (fatia1-e): 2, 4, 5, 6.
+_ETAPAS_CHECKOUT_QUIZ = {'fatia2-e': {17, 19, 20, 21}, 'fatia1-e': {2, 4, 5, 6}}
+
+# Teste A/B das landings: por página, visitas, quem foi ao checkout, pagos e receita, com os pagos
+# separados por plano (pedido sem plano = de antes dos planos = plano padrão).
+_SQL_AB_LANDINGS = """
+    SELECT q.pagina, q.etapa, pp.nome AS plano, pp.padrao,
+           COUNT(*) AS visitas, SUM(p.estado_id = 1000) AS pagos,
+           SUM(IF(p.estado_id = 1000, p.valor_pago, 0)) AS receita
+    FROM quiz_progresso q
+    JOIN pedidos p ON p.id = q.pedido_id
+    LEFT JOIN produto_planos pp ON pp.id = COALESCE(p.plano_id,
+         (SELECT pad.id FROM produto_planos pad WHERE pad.produto_id = %s AND pad.padrao = 1))
+    WHERE p.produto_id = %s
+      AND p.data_contato_site BETWEEN %s AND %s
+    GROUP BY q.pagina, q.etapa, pp.id, pp.nome, pp.padrao
+"""
+# Primeira visita de cada página no período: o A/B só compara a partir de quando TODAS têm visitas
+# (senão, por exemplo, 30 dias do quiz seriam comparados com 2 dias do site novo).
+_SQL_AB_INICIO = """
+    SELECT q.pagina, MIN(p.data_contato_site) AS primeira
+    FROM quiz_progresso q JOIN pedidos p ON p.id = q.pedido_id
+    WHERE p.produto_id = %s AND p.data_contato_site BETWEEN %s AND %s
+    GROUP BY q.pagina
+"""
+
+
+def _montar_ab_landings(linhas):
+    """Uma linha por página: visitas, foram ao checkout (etapa de compra), pagos, conversão, receita,
+    ticket e pagos por plano (lista [(nome, qtd)], o padrão primeiro). Só faz sentido com 2+ páginas."""
+    paginas = {}
+    for row in linhas or []:
+        pg = paginas.setdefault(row['pagina'], {'pagina': row['pagina'], 'visitas': 0, 'checkout': 0, 'pagos': 0,
+                                                'receita': 0.0, 'planos': {}})
+        visitas, pagos = int(row['visitas'] or 0), int(row['pagos'] or 0)
+        pg['visitas'] += visitas
+        if int(row['etapa']) in _ETAPAS_CHECKOUT_QUIZ.get(row['pagina'], set()):
+            pg['checkout'] += visitas
+        pg['pagos'] += pagos
+        pg['receita'] += float(row['receita'] or 0)
+        if pagos:
+            chave = (0 if row['padrao'] else 1, row['plano'] or '—')
+            pg['planos'][chave] = pg['planos'].get(chave, 0) + pagos
+    resultado = []
+    for pg in sorted(paginas.values(), key=lambda x: x['pagina']):
+        pg['conversao'] = round(100 * pg['pagos'] / pg['visitas'], 2) if pg['visitas'] else 0.0
+        pg['ticket'] = round(pg['receita'] / pg['pagos'], 2) if pg['pagos'] else 0.0
+        pg['planos'] = [(nome, qtd) for (_, nome), qtd in sorted(pg['planos'].items())]
+        resultado.append(pg)
+    return resultado
 
 
 def _montar_etapas_quiz(linhas):
@@ -2546,6 +2600,18 @@ def analytics_web_produto(produto_id):
         logger.error(f"[ADMIN] ❌ Erro no quiz do analytics web produto #{produto_id}: {e}")
         quizzes = []
 
+    # Teste A/B das landings (separado: um erro aqui não pode apagar os funis acima).
+    ab_landings, ab_desde = [], None
+    try:
+        inicios = db.execute_query(_SQL_AB_INICIO, (produto_id, data_ini, data_fim), fetch_all=True) or []
+        if len(inicios) > 1:
+            ab_desde = max(r['primeira'] for r in inicios)
+            ab_landings = _montar_ab_landings(
+                db.execute_query(_SQL_AB_LANDINGS, (produto_id, produto_id, ab_desde, data_fim), fetch_all=True))
+    except Exception as e:
+        logger.error(f"[ADMIN] ❌ Erro no teste A/B das landings produto #{produto_id}: {e}")
+        ab_landings, ab_desde = [], None
+
     conv_pedidos_pagos = 0.0
     conv_landing_checkout = 0.0
     conv_checkout_pedido = 0.0
@@ -2570,6 +2636,8 @@ def analytics_web_produto(produto_id):
         receita               = receita,
         campanhas             = campanhas,
         quizzes               = quizzes,
+        ab_landings           = ab_landings,
+        ab_desde              = ab_desde,
         cliques_google_ads    = cliques_google_ads,
         conv_landing_checkout = conv_landing_checkout,
         conv_checkout_pedido  = conv_checkout_pedido,
