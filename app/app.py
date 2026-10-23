@@ -463,7 +463,7 @@ def _planos_app_fatia(produto_basico_id):
     preco_basico, guiado, desconto = 10.0, None, None
     try:
         from database import listar_planos_com_app, get_plano_venda
-        from web.oferta import desconto_do_plano, gerar_token
+        from web.oferta import oferta_do_plano
         from web.links import link_checkout
         basico = get_plano_venda(produto_basico_id)
         if basico:
@@ -473,13 +473,7 @@ def _planos_app_fatia(produto_basico_id):
         if ofertas:
             guiado = dict(ofertas[-1])
             guiado['href'] = link_checkout(guiado['produto_id'], guiado)
-            preco = float(guiado['preco_promocional'])
-            valor_desconto = desconto_do_plano(guiado, preco)
-            if valor_desconto > 0:
-                desconto = {'preco_cheio': preco, 'preco_promocional': round(preco - valor_desconto, 2),
-                            'economia': valor_desconto,
-                            'href': link_checkout(guiado['produto_id'], guiado,
-                                                  oferta=gerar_token(guiado['produto_id'], guiado['id']))}
+            desconto = oferta_do_plano(guiado, float(guiado['preco_promocional']))
     except Exception as e:
         logger.error(f"[FATIA-E] Erro ao buscar os planos do app: {e}")
     return preco_basico, guiado, desconto

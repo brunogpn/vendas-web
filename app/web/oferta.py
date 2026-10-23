@@ -72,6 +72,18 @@ def desconto_do_plano(plano: dict, preco: float, avisar: bool = False) -> float:
     return desconto_valido(plano.get('desconto_oferta'), preco, plano.get('produto_id'), avisar)
 
 
+def oferta_do_plano(plano: dict, preco: float, **link) -> dict | None:
+    """A oferta pronta para mostrar (popup "última chance" das landings e da prévia da Música): preço cheio,
+    preço com desconto, economia e o link do checkout com o token. `link` = parâmetros extras de
+    link_checkout (ex.: musica=<token>). None = o plano não tem desconto válido."""
+    from web.links import link_checkout
+    desconto = desconto_do_plano(plano, preco)
+    if desconto <= 0:
+        return None
+    return {'preco_cheio': preco, 'preco_promocional': round(preco - desconto, 2), 'economia': desconto,
+            'href': link_checkout(plano['produto_id'], plano, oferta=gerar_token(plano['produto_id'], plano['id']), **link)}
+
+
 def desconto_da_oferta(token, plano: dict, preco: float) -> float:
     """O desconto a aplicar neste checkout: o do plano, se o token da oferta for válido para ele; senão 0."""
     if not token or not validar_token(token, plano['produto_id'], plano['id'], plano_padrao=bool(plano.get('padrao'))):

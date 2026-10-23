@@ -116,6 +116,26 @@ def _planos_a_venda():
     return sorted(planos, key=lambda x: x['preco'])
 
 
+def _oferta_ultima_chance(planos, token):
+    """O popup "última chance" da prévia: quando ela escolhe o plano padrão (só a música), oferece uma vez o
+    plano mais caro que tenha desconto de oferta (admin → plano → "Desconto de oferta"), desde que o preço com
+    desconto continue acima do padrão. O desconto vai num link assinado (web/oferta.py) que o checkout revalida.
+    None = sem oferta (o clique vai direto ao checkout); um erro aqui nunca derruba a prévia."""
+    try:
+        from web.oferta import oferta_do_plano
+        padrao = next((p for p in planos if p['plano'].get('padrao')), None)
+        if not padrao:
+            return None
+        for alvo in reversed([p for p in planos if not p['plano'].get('padrao')]):   # do mais caro ao mais barato
+            o = oferta_do_plano(alvo['plano'], alvo['preco'], musica=token)
+            if o and o['preco_promocional'] > padrao['preco']:
+                return {'nome': alvo['nome'], 'videoclipe': alvo['videoclipe'], 'preco_cheio': reais(o['preco_cheio']),
+                        'preco': reais(o['preco_promocional']), 'economia': reais(o['economia']), 'link': o['href']}
+    except Exception:
+        logger.exception('[MUSICA] Falha ao montar a oferta da prévia')
+    return None
+
+
 @bp.context_processor
 def _variaveis_das_paginas():
     produto = _produto()
@@ -360,10 +380,12 @@ def api_ver(token):
     elif musica['status'] == 'previa_pronta':
         from web.links import link_checkout
         resposta['previas'] = [url_for('musica.previa', token=token, numero=f['numero']) for f in musica['faixas'] or []]
+        planos = _planos_a_venda()
         resposta['planos'] = [{'nome': p['nome'], 'descricao': p['descricao'], 'preco': reais(p['preco']),
-                               'videoclipe': p['videoclipe'],
+                               'videoclipe': p['videoclipe'], 'padrao': bool(p['plano'].get('padrao')),
                                'link': link_checkout(_pid(), p['plano'], musica=token)}
-                              for p in _planos_a_venda()]
+                              for p in planos]
+        resposta['oferta'] = _oferta_ultima_chance(planos, token)
     return jsonify(resposta)
 
 
