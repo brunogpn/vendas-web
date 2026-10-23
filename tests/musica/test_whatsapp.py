@@ -391,4 +391,3 @@ def test_numero_so_avisos_usa_a_leitura_anterior_se_o_banco_falhar(monkeypatch):
     monkeypatch.setitem(database._CACHE_SO_AVISOS, 'ids', frozenset({'1376511528883172'}))
     monkeypatch.setitem(database._CACHE_SO_AVISOS, 'quando', 0)
     assert database.numero_so_avisos('1376511528883172')
-

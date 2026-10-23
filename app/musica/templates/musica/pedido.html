@@ -33,10 +33,9 @@
 .previa-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:26px 0}
 .oferta{background:var(--cartao);border:1px solid var(--linha);border-radius:var(--raio);padding:30px 26px;box-shadow:var(--sombra);text-align:center}
 .ultima{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px}
-.ultima .oferta{max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;border-color:var(--cor)}
+.ultima .oferta{position:relative;max-width:440px;width:100%;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;border-color:var(--cor)}
 .ultima .selo{display:inline-block;background:var(--cor-clara);color:var(--cor-forte);font-weight:700;border-radius:999px;padding:6px 14px;margin-bottom:12px}
 .ultima s{color:var(--suave)}
-.ultima .oferta{position:relative}
 .ultima .fechar{position:absolute;top:10px;right:10px;width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:var(--suave);font-size:1.4rem;cursor:pointer}
 .preco{font-family:var(--titulo);font-weight:800;font-size:3rem;letter-spacing:-.03em;line-height:1;margin:6px 0}
 .inclui{list-style:none;padding:0;margin:20px 0 24px;text-align:left;display:grid;gap:10px}
@@ -181,12 +180,14 @@ function desenhar(p){
       <details class="letra-dobra"><summary>Ver a letra</summary><div class="versos" style="margin-top:14px">${versos(p.letra)}</div></details>
       ${p.outras_versoes_restantes ? `<button class="link-simples" id="outra">Não gostei. Criar outra versão</button>` : ""}`;
     window.Player && Player.montar(tela);
-    tela.querySelectorAll(".oferta a.botao").forEach(a => a.addEventListener("click", () => etapaFunil(40, "comprar")));
-    const ofertaEm = Date.now();   // o link da oferta vale 24 h: aba aberta por mais de 20 h não mostra o popup
-    if (p.oferta) tela.querySelectorAll(".oferta a.botao[data-padrao]").forEach(a => a.addEventListener("click", ev => {
-      if (ultimaChanceVista() || Date.now() - ofertaEm > 20 * 3600 * 1000) return;   // segue direto ao checkout
-      ev.preventDefault();
-      ultimaChance(p.oferta, a.href);
+    tela.querySelectorAll(".oferta a.botao").forEach(a => a.addEventListener("click", ev => {
+      // Só a música + oferta ainda não vista e com o link valendo (pelo menos 1 h antes de vencer): abre o popup
+      if (p.oferta && a.dataset.padrao !== undefined && !ultimaChanceVista() && Date.now() / 1000 < p.oferta.expira - 3600) {
+        ev.preventDefault();
+        ultimaChance(p.oferta, a.href, a);
+        return;
+      }
+      etapaFunil(40, "comprar");
     }));
     if (el("outra")) el("outra").onclick = e => { if (!confirm("Criar outra versão da música? As duas atuais serão substituídas.")) return; e.target.disabled = true; inicioGeracao = Date.now(); acao("/outra-versao"); };
 
@@ -210,7 +211,7 @@ function desenhar(p){
 // só com a música), aceitou 43.
 const CHAVE_ULTIMA = "musica_ultima_chance_" + BASE;
 function ultimaChanceVista(){ try { return sessionStorage.getItem(CHAVE_ULTIMA) === "1"; } catch (e) { return false; } }
-function ultimaChance(o, linkSoMusica){
+function ultimaChance(o, linkSoMusica, origem){
   try { sessionStorage.setItem(CHAVE_ULTIMA, "1"); } catch (e) {}
   etapaFunil(41, "ultima_chance");
   const titulo = o.videoclipe ? "Leve também o videoclipe" : `Leve o plano ${esc(o.nome)}`;
@@ -230,8 +231,15 @@ function ultimaChance(o, linkSoMusica){
     <a class="botao" id="ultimaSim" href="${o.link}">${botao}</a>
     <a class="botao secundario" id="ultimaNao" style="margin-top:12px" href="${linkSoMusica}">Não, quero só a música</a>
   </div>`;
-  const fechar = () => { caixa.remove(); document.body.style.overflow = ""; window.removeEventListener("keydown", aoTeclar); };
-  const aoTeclar = ev => { if (ev.key === "Escape") fechar(); };
+  const fechar = () => { caixa.remove(); document.body.style.overflow = ""; window.removeEventListener("keydown", aoTeclar);
+                         origem && origem.focus(); };
+  const aoTeclar = ev => {
+    if (ev.key === "Escape") return fechar();
+    if (ev.key !== "Tab") return;   // o foco fica dentro do popup
+    const itens = [...caixa.querySelectorAll("a, button")], primeiro = itens[0], ultimo = itens[itens.length - 1];
+    if (ev.shiftKey && document.activeElement === primeiro) { ev.preventDefault(); ultimo.focus(); }
+    else if (!ev.shiftKey && document.activeElement === ultimo) { ev.preventDefault(); primeiro.focus(); }
+  };
   caixa.addEventListener("click", ev => { if (ev.target === caixa) fechar(); });
   caixa.querySelector(".fechar").addEventListener("click", fechar);
   window.addEventListener("keydown", aoTeclar);
@@ -241,6 +249,13 @@ function ultimaChance(o, linkSoMusica){
   caixa.querySelector("#ultimaNao").addEventListener("click", () => etapaFunil(42, "ultima_recusou"));
   caixa.querySelector("#ultimaSim").focus();
 }
+
+// Voltar do checkout pelo botão do navegador (bfcache) não pode trazer o popup aberto nem a página travada.
+window.addEventListener("pageshow", ev => {
+  if (!ev.persisted) return;
+  document.querySelectorAll(".ultima").forEach(c => c.remove());
+  document.body.style.overflow = "";
+});
 
 async function atualizar(){
   clearTimeout(timer);

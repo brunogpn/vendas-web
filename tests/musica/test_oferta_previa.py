@@ -33,4 +33,12 @@ def test_desconto_que_deixa_abaixo_do_padrao_nao_vira_oferta():
 
 
 def test_erro_ao_montar_nao_derruba_a_previa():
-    assert rotas._oferta_ultima_chance([MUSICA, {'plano': {}, 'preco': 'x'}], 't') is None
+    sem_id = _plano(19, 'videoclipe', 0, 49.9, desconto=10, video=True)
+    del sem_id['plano']['id']                                     # com desconto: gerar o link levanta KeyError
+    assert rotas._oferta_ultima_chance([MUSICA, sem_id], 't') is None
+
+
+def test_oferta_diz_quando_o_link_vence():
+    import time
+    o = rotas._oferta_ultima_chance([MUSICA, _plano(19, 'videoclipe', 0, 49.9, desconto=10, video=True)], 't')
+    assert abs(o['expira'] - (time.time() + oferta.VALIDADE_SEGUNDOS)) < 5

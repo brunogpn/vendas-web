@@ -80,8 +80,10 @@ def oferta_do_plano(plano: dict, preco: float, **link) -> dict | None:
     desconto = desconto_do_plano(plano, preco)
     if desconto <= 0:
         return None
+    token = gerar_token(plano['produto_id'], plano['id'])
     return {'preco_cheio': preco, 'preco_promocional': round(preco - desconto, 2), 'economia': desconto,
-            'href': link_checkout(plano['produto_id'], plano, oferta=gerar_token(plano['produto_id'], plano['id']), **link)}
+            'href': link_checkout(plano['produto_id'], plano, oferta=token, **link),
+            'expira': int(token.split('.', 1)[0])}   # quando o link deixa de dar o desconto (epoch, segundos)
 
 
 def desconto_da_oferta(token, plano: dict, preco: float) -> float:

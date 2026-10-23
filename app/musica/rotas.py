@@ -130,7 +130,8 @@ def _oferta_ultima_chance(planos, token):
             o = oferta_do_plano(alvo['plano'], alvo['preco'], musica=token)
             if o and o['preco_promocional'] > padrao['preco']:
                 return {'nome': alvo['nome'], 'videoclipe': alvo['videoclipe'], 'preco_cheio': reais(o['preco_cheio']),
-                        'preco': reais(o['preco_promocional']), 'economia': reais(o['economia']), 'link': o['href']}
+                        'preco': reais(o['preco_promocional']), 'economia': reais(o['economia']), 'link': o['href'],
+                        'expira': o['expira']}
     except Exception:
         logger.exception('[MUSICA] Falha ao montar a oferta da prévia')
     return None
