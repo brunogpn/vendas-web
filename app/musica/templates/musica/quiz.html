@@ -107,8 +107,7 @@ function personalizar(texto){
   const fem = genero === "f", masc = genero === "m", grupo = ehGrupo();
   const trocas = {
     nome: nomeQuemRecebe() || (grupo ? "vocês" : "essa pessoa"), de: contato.de || "",
-    // "Minha ex" → "da sua ex"; "Meu ex" → "do seu ex"
-    da_sua_pessoa: fem ? "da sua " + rel.replace(/^Minha /, "").toLowerCase() : masc ? "do seu " + rel.replace(/^Meu /, "").toLowerCase() : "de quem vai receber",
+    da_sua_pessoa: fem ? "da sua " + (REGRAS.rotulo[rel] || rel.toLowerCase()) : masc ? "do seu " + (REGRAS.rotulo[rel] || rel.toLowerCase()) : "de quem vai receber",
     // Grupo: o sistema não sabe se são homens ou mulheres (3 irmãs ≠ 3 irmãos) — as frases do grupo evitam pronome.
     ela: grupo ? "cada pessoa" : fem ? "ela" : masc ? "ele" : "essa pessoa",
     dela: grupo ? "de cada pessoa" : fem ? "dela" : masc ? "dele" : "dessa pessoa",
@@ -235,7 +234,7 @@ function desenhar(){
   if (ultimaEtapa !== p.chave) { etapaFunil(Math.min(15, posicao), p.chave); ultimaEtapa = p.chave; }   // 1 vez por tela
   el("barra").style.width = ((posicao - 1) / lista.length * 100) + "%";
   // Em vez de "1 de 9" (assusta), uma frase leve: começo, meio e reta final.
-  el("contador").textContent = posicao <= 2 ? "Leva só 2 minutos ⏱" : posicao >= lista.length - 2 ? "Falta pouco! 💛" : "";
+  el("contador").textContent = posicao <= 2 ? "Leva só 2 minutos ⏱" : posicao >= lista.length - 2 ? "Falta pouco! 💛" : "Você está indo bem ✨";
   el("voltar").style.visibility = posicao > 1 ? "visible" : "hidden";
   mostrarErro("");
 
@@ -356,8 +355,12 @@ async function enviar(){
 recuperar();
 // Vindo dos botões "Pra quem é a música?" do topo da página inicial (?para_quem=...): a 1ª pergunta já vem
 // respondida e o quiz abre na 2ª ("Voltar" ainda deixa trocar). Rascunho de outra relação é descartado.
-const quemUrl = new URLSearchParams(location.search).get("para_quem");
+// O parâmetro sai do endereço logo depois de usado: recarregar a página (o celular faz isso sozinho) não pode
+// trocar o que ela escolheu depois nem apagar o que já preencheu, e a 1ª tela só conta uma vez no funil.
+const enderecoQuiz = new URL(location.href), quemUrl = enderecoQuiz.searchParams.get("para_quem");
 if (quemUrl && pergunta("para_quem").opcoes.includes(quemUrl)) {
+  enderecoQuiz.searchParams.delete("para_quem");
+  try { history.replaceState(history.state, "", enderecoQuiz.pathname + enderecoQuiz.search + enderecoQuiz.hash); } catch (e) {}
   if (respostas.para_quem !== quemUrl) {
     respostas = {}; pessoas = [{nome: "", apelido: "", pronuncia: ""}]; lembrancas = ["", "", ""]; atual = "para_quem";
   }

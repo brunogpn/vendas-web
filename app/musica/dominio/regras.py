@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 
 from musica.dominio.modelos import PedidoGeracao
-from musica.dominio.quiz import MAIS_DE_UMA, PARA_MIM, RELACOES, vozes_para
+from musica.dominio.quiz import MAIS_DE_UMA, PARA_MIM, RELACOES, rotulo, vozes_para
 
 
 def montar_geracao(respostas: dict, titulo: str, letra_suno: str, tabela_estilos: dict) -> PedidoGeracao:
@@ -144,9 +144,8 @@ def para_quem_com_relacao(respostas: dict) -> str:
     if relacao == MAIS_DE_UMA:
         return nome
     genero = next((r['genero'] for r in RELACOES if r['valor'] == relacao), 'x')
-    relacao = relacao.removeprefix('Minha ').removeprefix('Meu ').lower()   # "Minha ex" → "sua ex"
     if genero == 'f':
-        return f'sua {relacao} {nome}'
+        return f'sua {rotulo(relacao)} {nome}'
     if genero == 'm':
-        return f'seu {relacao} {nome}'
+        return f'seu {rotulo(relacao)} {nome}'
     return nome

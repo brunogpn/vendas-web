@@ -154,19 +154,25 @@ footer .largura{display:flex;justify-content:space-between;gap:16px;flex-wrap:wr
           <p class="comecar-titulo">Pra quem é a música?</p>
           <div class="comecar-opcoes">
             {% set principais = pg.quem or ["Mãe", "Pai", "Esposa", "Marido", "Filho", "Filha", "Namorada", "Namorado"] %}
+            {# Página de uma ocasião: só quem combina com ela (no quiz, "Pai" + "Dia das Mães" não existe) #}
+            {% set combinam = relacoes_por_ocasiao.get(pg.quiz, []) if pg.quiz else opcoes_quem %}
+            {% set principais = principais | select("in", combinam) | list %}
+            {% set mais = combinam | reject("in", principais) | list %}
             {% for quem in principais %}
             <a class="comecar-opcao" href="{{ url_for('musica.criar', para_quem=quem, ocasiao=pg.quiz or None) }}">{{ quem }}</a>
             {% endfor %}
           </div>
-          {# O resto da lista abre aqui mesmo, sem sair da página. #}
+          {# O resto da lista abre aqui mesmo, sem sair da página (some quando todas já estão no topo). #}
+          {% if mais %}
           <details class="mais-opcoes">
             <summary>Mais opções <i class="ti ti-chevron-down" aria-hidden="true"></i></summary>
             <div class="comecar-opcoes">
-              {% for quem in opcoes_quem if quem not in principais %}
+              {% for quem in mais %}
               <a class="comecar-opcao secundaria" href="{{ url_for('musica.criar', para_quem=quem, ocasiao=pg.quiz or None) }}">{{ quem }}</a>
               {% endfor %}
             </div>
           </details>
+          {% endif %}
           <p class="comecar-nota"><i class="ti ti-clock" aria-hidden="true"></i> Leva só 2 minutos · você ouve antes e só paga se gostar</p>
         </div>
         <a class="link-exemplos" href="#exemplos"><i class="ti ti-player-play" aria-hidden="true"></i> Ouvir exemplos antes</a>
