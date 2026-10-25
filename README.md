@@ -308,3 +308,4 @@ Celery Worker
     WhatsApp API (envia followup)
 
 **Última Atualização:** 23/02/2026
+
