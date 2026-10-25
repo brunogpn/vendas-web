@@ -144,8 +144,9 @@ def para_quem_com_relacao(respostas: dict) -> str:
     if relacao == MAIS_DE_UMA:
         return nome
     genero = next((r['genero'] for r in RELACOES if r['valor'] == relacao), 'x')
+    relacao = relacao.removeprefix('Minha ').removeprefix('Meu ').lower()   # "Minha ex" → "sua ex"
     if genero == 'f':
-        return f'sua {relacao.lower()} {nome}'
+        return f'sua {relacao} {nome}'
     if genero == 'm':
-        return f'seu {relacao.lower()} {nome}'
+        return f'seu {relacao} {nome}'
     return nome

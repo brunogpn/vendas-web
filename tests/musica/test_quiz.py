@@ -43,6 +43,14 @@ def test_toda_ocasiao_e_tom_aparecem_para_alguem():
         assert any(t['valor'] in quiz.tons_para(r, 'Aniversário') for r in relacoes), t['valor']
 
 
+def test_botoes_do_topo_da_landing_sao_relacoes_do_quiz():
+    """Os botões "Pra quem é a música?" do topo levam ?para_quem=...; valor fora do quiz abriria a 1ª tela."""
+    relacoes = {r['valor'] for r in quiz.RELACOES}
+    for lista in re.findall(r'"quem": \[([^\]]+)\]', LANDING) + re.findall(r'pg\.quem or \[([^\]]+)\]', LANDING):
+        for quem in re.findall(r'"([^"]+)"', lista):
+            assert quem in relacoes, quem
+
+
 def test_ocasioes_das_paginas_da_landing_existem():
     valores = {o['valor'] for o in quiz.OCASIOES}
     for usada in set(re.findall(r'"quiz": "([^"]+)"', LANDING)) | set(re.findall(r'"slug": "([^"]+)"', LANDING)):
@@ -58,6 +66,8 @@ def test_ocasioes_das_paginas_da_landing_existem():
     ('Namorado', ['Pedido de casamento', 'Dia dos Namorados'], ['Dia das Mães']),
     ('Para mim', ['Celebrar a minha história', 'Celebrar uma conquista'], ['Pedido de desculpas', 'Homenagem a quem já partiu']),
     ('Mais de uma pessoa', ['Dia das Mães', 'Aniversário de casamento ou namoro'], ['Pedido de casamento']),
+    ('Minha ex', ['Pedido de desculpas', 'Matar a saudade', 'Dia dos Namorados'], ['Casamento', 'Chá revelação', 'Dia das Mães']),
+    ('Meu ex', ['Pedido de desculpas', 'Matar a saudade'], ['Casamento', 'Chá revelação', 'Dia dos Pais']),
 ])
 def test_ocasioes_pela_relacao(relacao, aparece, nao_aparece):
     ocasioes = quiz.ocasioes_para(relacao)
