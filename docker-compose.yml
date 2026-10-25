@@ -1,8 +1,17 @@
+# Rotação dos logs do Docker (json-file): sem isso o log cresce sem limite
+# (o do nginx chegou a 1,2 GB). Vale ao (re)criar cada container.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 services:
 
   db:
     image: mysql:8.4
     container_name: vendas-mysql
+    logging: *logging
     restart: unless-stopped
     ports:
       - "127.0.0.1:3306:3306"  # Acesso via SSH tunnel (não expõe para internet)
@@ -20,6 +29,7 @@ services:
       --long-query-time=1
       --wait-timeout=300
       --interactive-timeout=300
+      --innodb-buffer-pool-size=${MYSQL_BUFFER_POOL:-512M}
     volumes:
       # Persistência dos dados no Ubuntu (ajuste o caminho conforme necessário)
       - /var/lib/mysql-vendas:/var/lib/mysql
@@ -36,6 +46,7 @@ services:
   redis:
       image: redis:7.2-alpine
       container_name: vendas-redis
+      logging: *logging
       restart: unless-stopped
       environment:
         - TZ=America/Sao_Paulo
@@ -53,6 +64,7 @@ services:
   app:
     build: .
     container_name: vendas-web-app
+    logging: *logging
     restart: unless-stopped
     depends_on:
       db:
@@ -182,6 +194,7 @@ services:
   worker-urgente:
     build: .
     container_name: vendas-worker-urgente
+    logging: *logging
     restart: unless-stopped
     command: celery -A celery_app worker --loglevel=warning --concurrency=8 --queues=urgente --hostname=urgente@%h
     depends_on:
@@ -293,6 +306,7 @@ services:
   worker-normal:
     build: .
     container_name: vendas-worker-normal
+    logging: *logging
     restart: unless-stopped
     command: celery -A celery_app worker --loglevel=warning --concurrency=4 --queues=normal --hostname=normal@%h
     depends_on:
@@ -407,6 +421,7 @@ services:
   worker-baixa:
     build: .
     container_name: vendas-worker-baixa
+    logging: *logging
     restart: unless-stopped
     command: celery -A celery_app worker --loglevel=warning --concurrency=2 --queues=baixa --hostname=baixa@%h
     depends_on:
@@ -526,6 +541,7 @@ services:
   flower:
     image: mher/flower:2.0
     container_name: vendas-flower
+    logging: *logging
     restart: unless-stopped
     command: celery flower --port=5555
     environment:
@@ -542,6 +558,7 @@ services:
   beat:
     build: .
     container_name: vendas-beat
+    logging: *logging
     restart: unless-stopped
     command: celery -A celery_app beat --loglevel=info
     environment:
@@ -578,6 +595,7 @@ services:
   nginx:
     image: nginx:1.27-alpine
     container_name: vendas-web-nginx
+    logging: *logging
     depends_on:
       app:
         condition: service_healthy
@@ -599,6 +617,7 @@ services:
   certbot:
     image: certbot/certbot:latest
     container_name: vendas-certbot
+    logging: *logging
     volumes:
       - ./infra/certbot/www:/var/www/certbot
       - ./infra/certbot/conf:/etc/letsencrypt
